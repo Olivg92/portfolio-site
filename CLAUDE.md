@@ -19,6 +19,7 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 - Anglais à la racine, français sous `/fr/`.
 - Système de design : couleurs, polices, tailles et espacements sont des variables dans `src/styles/tokens.css`. Les composants de `src/components/` y prennent toutes leurs couleurs (une nuance passe par `color-mix()`), jamais de valeur à eux. Polices Geist et Geist Mono servies par le site lui-même.
 - Contact : LinkedIn et GitHub (`src/links.ts`), jamais d'adresse mail.
+- Les projets et leur stack sont dans `src/projects.ts` ; chaque techno a son logo à côté de son nom quand il existe (`src/logos.ts` : Simple Icons, icônes d'architecture AWS, External Secrets).
 - Adresse : https://olivg92.github.io/portfolio-site/ pour l'instant, à remplacer plus tard par un nom de domaine (`site` et `base` dans `astro.config.mjs`).
 
 ## Façon de travailler
