@@ -1,7 +1,8 @@
 ---
-// One project: where it stands, what it is, what it is built with, and its
-// code once there is some to read. Anything passed inside, such as a
-// terminal, shows below as proof.
+// One project: where it stands, what it is, what it is built with, its
+// guided tour if it has one, and its code once there is some to read.
+// Anything passed inside, such as a terminal, shows below as proof.
+import { getRelativeLocaleUrl } from 'astro:i18n';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
 import Panel from './Panel.astro';
@@ -34,7 +35,18 @@ const id = `project-${project.name}`;
         ))
       }
     </ul>
-    {project.code && <Button href={project.code}>{t.readCode}</Button>}
+    {
+      (project.tour || project.code) && (
+        <div class="cluster actions">
+          {project.tour && <Button href={getRelativeLocaleUrl(lang, project.tour)}>{t.takeTour}</Button>}
+          {project.code && (
+            <Button href={project.code} variant={project.tour ? 'ghost' : 'primary'}>
+              {t.readCode}
+            </Button>
+          )}
+        </div>
+      )
+    }
   </div>
   <slot />
 </Panel>
@@ -60,5 +72,9 @@ const id = `project-${project.name}`;
 
   .summary {
     color: var(--ink-2);
+  }
+
+  .actions {
+    gap: var(--space-3);
   }
 </style>

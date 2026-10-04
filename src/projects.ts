@@ -12,6 +12,8 @@ export type Project = {
   stack: { name: string; logo?: LogoName }[];
   /** The repository, once there is code to read in it. */
   code?: string;
+  /** The page of its guided tour, without the language prefix. */
+  tour?: string;
 };
 
 export const projects: Project[] = [
@@ -37,13 +39,14 @@ export const projects: Project[] = [
       { name: 'GitHub Actions', logo: 'githubactions' },
     ],
     code: links.platform,
+    tour: 'platform-eks-gitops/',
   },
   {
     name: 'portfolio-site',
     status: 'building',
     summary: {
-      en: 'This site. Static pages in two languages and no JavaScript, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
-      fr: "Ce site. Des pages statiques en deux langues et sans JavaScript, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
+      en: 'This site. Static pages in two languages, with script only on the guided tour, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
+      fr: "Ce site. Des pages statiques en deux langues, du script seulement sur la visite guidée, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
     },
     stack: [
       { name: 'Astro', logo: 'astro' },
