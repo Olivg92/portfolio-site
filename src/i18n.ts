@@ -40,7 +40,7 @@ export const ui: Record<Lang, Strings> = {
     contact: 'Contact',
     kicker: 'DevOps · SRE · Platform engineering',
     positioning:
-      'DevOps and SRE engineer, I run critical infrastructure at scale: more than 400 Linux servers on-prem, Kubernetes clusters, and the on-call that goes with them. On this site, the platforms I build on my own time, end to end: from Terraform to GitOps, SLOs and runbooks.',
+      'DevOps and SRE engineer, I run critical infrastructure at scale: more than 400 Linux servers on-prem and Kubernetes clusters. On this site, the platforms I build on my own time, end to end: from Terraform to GitOps, SLOs and runbooks.',
     seeProjects: 'See the projects',
     sceneLabel:
       'platform-eks-gitops on AWS, in isometric view: in a VPC, two Spot nodes run the pods Argo CD installs from GitHub; a load balancer brings the traffic in from the internet; secrets come from AWS Secrets Manager; the cluster is managed by EKS, its Terraform state kept in S3.',
@@ -66,7 +66,7 @@ export const ui: Record<Lang, Strings> = {
     contact: 'Contact',
     kicker: 'DevOps · SRE · Platform engineering',
     positioning:
-      "Ingénieur DevOps et SRE, je fais tourner une infrastructure critique à grande échelle\u00a0: plus de 400 serveurs Linux on-prem, des clusters Kubernetes, et l'astreinte qui va avec. Sur ce site, les plateformes que je construis sur mon temps libre, de bout en bout\u00a0: de Terraform au GitOps, aux SLO et aux runbooks.",
+      "Ingénieur DevOps et SRE, je fais tourner une infrastructure critique à grande échelle\u00a0: plus de 400 serveurs Linux on-prem et des clusters Kubernetes. Sur ce site, les plateformes que je construis sur mon temps libre, de bout en bout\u00a0: de Terraform au GitOps, aux SLO et aux runbooks.",
     seeProjects: 'Voir les projets',
     sceneLabel:
       "platform-eks-gitops sur AWS, en vue isométrique\u00a0: dans un VPC, deux nœuds Spot font tourner les pods qu'Argo CD installe depuis GitHub\u00a0; un load balancer fait entrer le trafic d'internet\u00a0; les secrets viennent d'AWS Secrets Manager\u00a0; le cluster est géré par EKS, et son état Terraform est gardé dans S3.",
