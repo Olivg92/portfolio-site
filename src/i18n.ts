@@ -28,6 +28,7 @@ type Strings = {
   source: string;
   builtWith: string;
   takeTour: string;
+  previewAlt: { home: string; tour: string };
   tour: {
     title: string;
     description: string;
@@ -77,6 +78,10 @@ export const ui: Record<Lang, Strings> = {
     source: 'Source of this site',
     builtWith: 'Built with Astro, hosted on GitHub Pages',
     takeTour: 'Take the guided tour',
+    previewAlt: {
+      home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
+      tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
+    },
     tour: {
       title: 'platform-eks-gitops, command by command · Olivier Guandalini',
       description:
@@ -125,6 +130,10 @@ export const ui: Record<Lang, Strings> = {
     source: 'Code source de ce site',
     builtWith: 'Construit avec Astro, hébergé sur GitHub Pages',
     takeTour: 'Faire la visite guidée',
+    previewAlt: {
+      home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
+      tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
+    },
     tour: {
       title: 'platform-eks-gitops, commande par commande · Olivier Guandalini',
       description:
