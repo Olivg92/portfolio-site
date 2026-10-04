@@ -1,0 +1,23 @@
+version: 2
+
+# Pinning by commit only works if something bumps the pins. That something is
+# this file: one pull request per update, reviewed like any other change.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore"
+    ignore:
+      # @astrojs/check supports TypeScript 5 and 6 only. A major bump would
+      # break the type check rather than improve it.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
