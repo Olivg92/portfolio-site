@@ -1,0 +1,11 @@
+$ make demo-break
+setting error_rate=0.3 latency_ms=0 on every pod
+  demo-api-6bbd6667c-8wf8j: {"error_rate":0.3,"latency_ms":0}
+  demo-api-6bbd6667c-knkhd: {"error_rate":0.3,"latency_ms":0}
+$ make demo-load
+sending ~5 req/s to https://demo.platform.local:8443/ (127.0.0.1) for 60s
+sent 245 requests, 74 of them failed
+$ make demo-fix
+setting error_rate=0 latency_ms=0 on every pod
+  demo-api-6bbd6667c-8wf8j: {"error_rate":0.0,"latency_ms":0}
+  demo-api-6bbd6667c-knkhd: {"error_rate":0.0,"latency_ms":0}

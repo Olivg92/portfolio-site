@@ -1,0 +1,16 @@
+$ make local-up
+  k3d cluster                                        22s  ok
+  Demo API image, built and imported                  8s  ok
+  Argo CD                                            49s  ok
+  Root application                                    0s  ok
+  Platform, synced by Argo CD                      3m37s  ok  13/13 ready
+
+The platform is up, in 4m56s. Log: logs/local-up-20261004-215503.log
+
+Argo CD:  make argocd-ui   then http://localhost:8081 (user: admin)
+Password: make argocd-password
+Check:    make local-verify
+Grafana:  https://grafana.platform.local:8443 (user: admin, make grafana-password)
+          or make grafana-ui   then http://localhost:3000, no /etc/hosts needed
+Demo API: https://demo.platform.local:8443
+          both names resolve to 127.0.0.1 once added to /etc/hosts, see the README
