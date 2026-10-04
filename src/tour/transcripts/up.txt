@@ -1,0 +1,17 @@
+# placeholder: replaced by the output of a real session before the merge
+$ make up
+  Terraform init                                      ?s  ok
+  Terraform plan                                      ?s  ok
+
+Terraform plan:
+  to create: 28
+The Kubernetes API will answer to <your IP>/32 only.
+This costs about $0.18 an hour, until `make down`.
+Apply it? Only 'yes' will be accepted: yes
+  Terraform apply                                  ?m??s  ok  28 of 28 resources
+  Credentials for the new cluster                     ?s  ok
+  Argo CD                                             ?s  ok
+  Root application                                    ?s  ok
+  Platform, synced by Argo CD                      ?m??s  ok  12/12 ready
+
+The platform is up, in ??m??s. Log: logs/up-????????-??????.log

@@ -1,0 +1,11 @@
+# placeholder: replaced by the output of a real session before the merge
+$ make aws-setup
+AWS setup of the demo environment:
+  profile            perso
+  session            opened ?h?? ago, about ??h?? left
+  account            <account id>
+  region             eu-north-1, the only region this account allows
+  terraform.tfvars   written, zones eu-north-1a eu-north-1b
+  backend.hcl        kept, bucket platform-eks-gitops-tfstate-?????? found
+
+Ready. Next: make plan to see what would be created, or make up to create it.

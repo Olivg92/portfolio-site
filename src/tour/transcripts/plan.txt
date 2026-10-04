@@ -1,0 +1,4 @@
+# placeholder: replaced by the output of a real session before the merge
+$ make plan
+# the detail of each resource, then:
+Plan: 28 to add, 0 to change, 0 to destroy.

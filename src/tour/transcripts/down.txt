@@ -1,0 +1,18 @@
+# placeholder: replaced by the output of a real session before the merge
+$ make down
+  Terraform init                                      ?s  ok
+  Terraform plan of the destroy                       ?s  ok
+
+Terraform plan:
+  to destroy: 28
+Destroy it? Only 'yes' will be accepted: yes
+  Stopping Argo CD, so it stops recreating            ?s  ok
+  Removing the load balancer Kubernetes made          ?s  ok
+  Terraform destroy                                ?m??s  ok  28 of 28 resources
+checking nothing is left behind:
+  ok    load balancers         none
+  ok    elastic IPs            none
+  ok    EBS volumes            none
+  ok    EKS clusters           none
+
+Everything is gone, in ??m??s. The state bucket is the only resource left, and it costs cents.
