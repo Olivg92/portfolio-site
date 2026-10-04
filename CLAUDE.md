@@ -17,6 +17,8 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 ## Choix validés
 - Tout le site en sombre, dans le style « salle de contrôle ». Accueil : une grande image isométrique de la plateforme, en version nuit. Page platform-eks-gitops : la visite guidée en 18 étapes.
 - Anglais à la racine, français sous `/fr/`.
+- Système de design : couleurs, polices, tailles et espacements sont des variables dans `src/styles/tokens.css`. Les composants de `src/components/` y prennent toutes leurs couleurs (une nuance passe par `color-mix()`), jamais de valeur à eux. Polices Geist et Geist Mono servies par le site lui-même.
+- Contact : LinkedIn et GitHub (`src/links.ts`), jamais d'adresse mail.
 - Adresse : https://olivg92.github.io/portfolio-site/ pour l'instant, à remplacer plus tard par un nom de domaine (`site` et `base` dans `astro.config.mjs`).
 
 ## Façon de travailler

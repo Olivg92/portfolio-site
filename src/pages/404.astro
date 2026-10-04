@@ -3,13 +3,28 @@
 // which language the visitor reads, so it speaks both.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Chip from '../components/Chip.astro';
 ---
 
 <Base lang="en" title="Page not found · Olivier Guandalini" description="This page does not exist, or not anymore." indexable={false}>
-  <section class="hero">
-    <p class="kicker">404</p>
-    <h1>Page not found</h1>
-    <p class="lede"><a href={getRelativeLocaleUrl('en')}>Back to the home page</a></p>
-    <p class="lede" lang="fr">Page introuvable. <a href={getRelativeLocaleUrl('fr')}>Retour à l'accueil</a></p>
+  <section class="lost wrap" aria-labelledby="lost-title">
+    <Chip tone="red" dot>HTTP 404</Chip>
+    <h1 id="lost-title">Page not found</h1>
+    <p class="lede">This page does not exist, or not anymore.</p>
+    <p class="lede" lang="fr">Page introuvable&nbsp;: elle n'existe pas, ou plus.</p>
+    <div class="cluster">
+      <Button href={getRelativeLocaleUrl('en')}>Back to the home page</Button>
+      <Button href={getRelativeLocaleUrl('fr')} variant="ghost" lang="fr">Retour à l'accueil</Button>
+    </div>
   </section>
 </Base>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+    padding-block: clamp(var(--space-7), 14vh, var(--space-9));
+  }
+</style>

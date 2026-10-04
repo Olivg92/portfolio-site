@@ -1,0 +1,30 @@
+---
+// The few icons the site draws, as lines in the current text colour. They
+// sit next to words that already say the same thing, so screen readers skip
+// them.
+interface Props {
+  name: 'arrow-down' | 'arrow-up-right';
+}
+
+const paths = {
+  'arrow-down': 'M12 5v14M6 13l6 6 6-6',
+  'arrow-up-right': 'M7 17 17 7M8 7h9v9',
+};
+
+const { name } = Astro.props;
+---
+
+<svg class="icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+  <path d={paths[name]}></path>
+</svg>
+
+<style>
+  .icon {
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+// The top of every page: the name, which leads home, the way to the contact
+// links, and the switch to the same page in the other language.
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { languages, ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  /** The page's path without the language prefix, '' for the home page. */
+  path: string;
+}
+
+const { lang, path } = Astro.props;
+const t = ui[lang];
+const codes = Object.keys(languages) as Lang[];
+---
+
+<header class="top wrap">
+  <a class="brand" href={getRelativeLocaleUrl(lang)}>
+    <svg class="mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false">
+      <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" stroke-width="5"></circle>
+      <circle class="core" cx="32" cy="32" r="6.5"></circle>
+    </svg>
+    Olivier Guandalini
+  </a>
+  <div class="cluster tools">
+    <a class="link" href="#contact">{t.contact}</a>
+    <nav class="langs" aria-label={t.language}>
+      {
+        codes.map((code) =>
+          code === lang ? (
+            <span class="lang" aria-current="true">{code.toUpperCase()}</span>
+          ) : (
+            <a class="lang" href={getRelativeLocaleUrl(code, path)} hreflang={code} lang={code}>
+              {code.toUpperCase()}
+            </a>
+          ),
+        )
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 44px;
+    color: var(--ink);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .mark {
+    color: var(--cyan);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cyan) 50%, transparent));
+  }
+
+  .core {
+    fill: var(--green);
+  }
+
+  .tools {
+    gap: var(--space-5);
+  }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-2);
+    font-size: var(--text-s);
+    text-decoration: none;
+  }
+
+  .link:hover {
+    color: var(--ink);
+  }
+
+  /* On a phone the name and both switches would not fit on one line; the
+     contact links are still at the bottom of the page. */
+  @media (max-width: 479px) {
+    .link {
+      display: none;
+    }
+  }
+
+  /* Two halves of one pill: the current language lit, the other a link. */
+  .langs {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-pill);
+    background: var(--glass);
+  }
+
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 36px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font: 500 var(--label) / 1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  a.lang:hover {
+    color: var(--ink);
+  }
+
+  .lang[aria-current] {
+    background: color-mix(in srgb, var(--cyan) 16%, transparent);
+    color: var(--cyan);
+  }
+</style>
