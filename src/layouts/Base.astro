@@ -1,0 +1,56 @@
+---
+// The frame of every page: language, metadata, the link to the other
+// language, and the links search engines use to pair the two versions.
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { ui, type Lang } from '../i18n';
+import '../styles/global.css';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** The page's path without the language prefix, '' for the home page. */
+  path?: string;
+  /** False for pages search engines should leave out, such as the 404. */
+  indexable?: boolean;
+}
+
+const { lang, title, description, path = '', indexable = true } = Astro.props;
+const other: Lang = lang === 'en' ? 'fr' : 'en';
+const absolute = (l: Lang) => new URL(getRelativeLocaleUrl(l, path), Astro.site).href;
+const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#070c16" />
+    {
+      indexable ? (
+        <>
+          <link rel="canonical" href={absolute(lang)} />
+          <link rel="alternate" hreflang="en" href={absolute('en')} />
+          <link rel="alternate" hreflang="fr" href={absolute('fr')} />
+          <link rel="alternate" hreflang="x-default" href={absolute('en')} />
+        </>
+      ) : (
+        <meta name="robots" content="noindex" />
+      )
+    }
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href={getRelativeLocaleUrl(lang)}>Olivier Guandalini</a>
+      <a class="lang" href={getRelativeLocaleUrl(other, path)} hreflang={other} lang={other}>{ui[lang].switchTo}</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+// The home page, the same in both languages apart from its words. A
+// placeholder until the real home page arrives: honest about it, and already
+// pointing at the first finished project.
+import Base from '../layouts/Base.astro';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+---
+
+<Base lang={lang} title={t.title} description={t.description}>
+  <section class="hero">
+    <p class="kicker">{t.kicker}</p>
+    <h1>Olivier Guandalini</h1>
+    <p class="lede">{t.lede}</p>
+    <ul class="links">
+      <li><a href="https://github.com/Olivg92/platform-eks-gitops">{t.project}</a></li>
+      <li><a href="https://github.com/Olivg92">{t.github}</a></li>
+    </ul>
+  </section>
+</Base>

@@ -1,0 +1,90 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push to the same branch cancels the previous run: no point spending
+# minutes on a commit nobody will look at.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Actions are pinned by commit rather than by tag. A tag can be moved to point
+# at different code; a commit cannot. Dependabot raises the pull requests that
+# bump them, so pinning does not mean going stale.
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: lint and secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install pre-commit
+        run: pip install --no-cache-dir pre-commit==4.6.2
+
+      # The same hooks as on a developer machine, from the same file. A check
+      # that only runs in CI is a check nobody can reproduce before pushing.
+      - name: Run every pre-commit hook
+        run: pre-commit run --all-files --show-diff-on-failure --color always
+
+  site:
+    name: build, links and Lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      # The built site, served under the same path as on GitHub Pages, for the
+      # two checks below. It keeps running until the job ends.
+      - name: Serve the build
+        run: |
+          npm run preview -- --port 4321 > /tmp/preview.log 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -fs -o /dev/null http://localhost:4321/portfolio-site/ && exit 0
+            sleep 1
+          done
+          cat /tmp/preview.log
+          exit 1
+
+      # The canonical and language links point at the published site, which
+      # shows the previous version until this one is merged: the pages they
+      # name are the ones crawled here, so they are skipped.
+      - name: Dead links
+        run: >-
+          npx linkinator http://localhost:4321/portfolio-site/ --recurse --retry --verbosity error
+          --skip '^https://olivg92\.github\.io/portfolio-site/'
+
+      # Performance, accessibility, best practices and SEO: 90 or more on
+      # each, in both languages, or the pull request fails.
+      - name: Lighthouse
+        run: npx lhci autorun
+
+      - name: Keep the Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          if-no-files-found: ignore

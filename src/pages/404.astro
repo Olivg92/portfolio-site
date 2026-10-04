@@ -1,0 +1,15 @@
+---
+// GitHub Pages answers every unknown address with this page. It cannot know
+// which language the visitor reads, so it speaks both.
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import Base from '../layouts/Base.astro';
+---
+
+<Base lang="en" title="Page not found · Olivier Guandalini" description="This page does not exist, or not anymore." indexable={false}>
+  <section class="hero">
+    <p class="kicker">404</p>
+    <h1>Page not found</h1>
+    <p class="lede"><a href={getRelativeLocaleUrl('en')}>Back to the home page</a></p>
+    <p class="lede" lang="fr">Page introuvable. <a href={getRelativeLocaleUrl('fr')}>Retour à l'accueil</a></p>
+  </section>
+</Base>
