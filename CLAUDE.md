@@ -4,7 +4,7 @@ Ce repo est le site vitrine de mon portfolio public DevOps / SRE / Platform Engi
 Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du repo, commun aux trois projets) : le lire avant toute tâche et cocher les cases terminées.
 
 ## Mon profil
-- Ingénieur DevOps/SRE, expérience principale : infra Linux on-prem à grande échelle, astreinte
+- Ingénieur DevOps/SRE, expérience principale : infra Linux on-prem à grande échelle
 - Stack maîtrisée : Kubernetes (RKE2/Rancher), Terraform, Ansible, ArgoCD, Vault + External Secrets, Prometheus/Grafana, ELK
 - Me parler en français ; code, commentaires, commits et docs du repo en anglais ; le contenu du site en anglais et en français
 
