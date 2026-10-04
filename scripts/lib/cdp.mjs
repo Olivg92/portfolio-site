@@ -15,22 +15,27 @@ export async function browser() {
   let endpoint = process.env.CDP_URL;
   let child;
   let profile;
+  let failed;
   if (!endpoint) {
+    const bin = process.env.CHROME_PATH || 'google-chrome';
     const port = 9300 + Math.floor(Math.random() * 600);
     profile = mkdtempSync(join(tmpdir(), 'chrome-'));
     child = spawn(
-      process.env.CHROME_PATH || 'google-chrome',
+      bin,
       ['--headless=new', '--no-sandbox', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, 'about:blank'],
       { stdio: 'ignore' },
     );
+    child.on('error', (error) => (failed = new Error(`could not start ${bin}: ${error.message}`)));
+    child.on('exit', (code) => (failed ??= new Error(`${bin} stopped, with code ${code}`)));
     endpoint = `http://127.0.0.1:${port}`;
   }
   for (let i = 0; ; i++) {
+    if (failed) throw failed;
     try {
       await fetch(`${endpoint}/json/version`);
       break;
     } catch (error) {
-      if (i === 50) throw new Error(`no Chrome answers at ${endpoint}: ${error.message}`);
+      if (i === 75) throw new Error(`no Chrome answers at ${endpoint}: ${error.message}`);
       await sleep(200);
     }
   }

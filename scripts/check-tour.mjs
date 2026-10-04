@@ -11,9 +11,23 @@ import { browser, sleep } from './lib/cdp.mjs';
 
 const base = (process.argv[2] ?? 'http://localhost:4321/portfolio-site/').replace(/\/?$/, '/');
 const failures = [];
+// In GitHub Actions, a failure is also an annotation, shown on the pull request.
+const report = (what) => console.log(process.env.GITHUB_ACTIONS ? `::error title=Guided tour::${what}` : `FAIL  ${what}`);
 const expect = (ok, what) => {
-  if (!ok) failures.push(what);
-  console.log(`${ok ? 'ok  ' : 'FAIL'}  ${what}`);
+  if (ok) console.log(`ok    ${what}`);
+  else {
+    failures.push(what);
+    report(what);
+  }
+};
+
+// Waits for a condition in the page rather than for a fixed time: a runner
+// in CI can be much slower than a laptop.
+const until = async (page, expression, ms = 5000) => {
+  for (const end = Date.now() + ms; Date.now() < end; await sleep(100)) {
+    if (await page.eval(expression)) return true;
+  }
+  return false;
 };
 
 // The step the drawing shows, and the step whose words show.
@@ -32,9 +46,10 @@ const press = async (page, selector) => {
     return { x, y, reached: document.elementFromPoint(x, y)?.closest(${JSON.stringify(selector)}) !== null };
   })()`);
   await page.click(at.x, at.y);
-  await sleep(500);
   return at.reached;
 };
+
+const stepIs = (n) => `Number(document.getElementById('tour-scene').dataset.step) === ${n} && document.querySelector('.seg.is-active')?.dataset.step === '${n}'`;
 
 // Everything the current step shows on a phone, but the band at the top and
 // the grounds, must sit inside the drawing's box on the screen.
@@ -50,7 +65,10 @@ const FRAMED = `(() => {
   return out.length;
 })()`;
 
-const chrome = await browser();
+const chrome = await browser().catch((error) => {
+  report(`Chrome did not start: ${error.message}`);
+  process.exit(1);
+});
 try {
   for (const lang of ['en', 'fr']) {
     const url = `${base}${lang === 'en' ? '' : 'fr/'}platform-eks-gitops/`;
@@ -60,13 +78,15 @@ try {
     ]) {
       const label = `${lang}, ${device}:`;
       const page = await chrome.page({ ...size, reducedMotion: true });
-      await page.goto(url);
+      await page.goto(url, 500);
+      expect(await until(page, `document.querySelector('.tour.ready') !== null`, 15000), `${label} the tour's script starts`);
+      await page.eval('document.fonts.ready.then(() => true)');
 
       let state = await page.eval(STATE);
       expect(!state.live, `${label} the drawing is empty on arrival`);
 
       await page.eval(`window.scrollTo(0, document.querySelector('.stage').getBoundingClientRect().top + scrollY + 40)`);
-      await sleep(600);
+      await until(page, stepIs(1));
       state = await page.eval(STATE);
       expect(state.live && state.step === 1, `${label} the first step shows once the tour is reached`);
 
@@ -77,6 +97,7 @@ try {
         ['#tour-prev', 11],
       ]) {
         const reached = await press(page, selector);
+        await until(page, stepIs(want));
         state = await page.eval(STATE);
         expect(reached, `${label} nothing covers ${selector}`);
         expect(state.step === want && state.words === want, `${label} ${selector} goes to step ${want} (got ${state.step})`);
@@ -84,6 +105,7 @@ try {
 
       if (device === 'phone') {
         await press(page, '.chap[data-go="1"]');
+        await until(page, stepIs(1));
         const cut = [];
         for (let n = 1; n <= 18; n++) {
           state = await page.eval(STATE);
@@ -93,12 +115,15 @@ try {
           }
           const outside = await page.eval(FRAMED);
           if (outside) cut.push(`step ${n}: ${outside} element(s) cut`);
-          if (n < 18) await press(page, '#tour-next');
+          if (n < 18) {
+            await press(page, '#tour-next');
+            await until(page, stepIs(n + 1));
+          }
         }
         expect(cut.length === 0, `${label} each of the 18 steps is framed whole${cut.length ? ` (${cut.join('; ')})` : ''}`);
       } else {
         await page.eval('window.scrollTo(0, document.documentElement.scrollHeight)');
-        await sleep(600);
+        await sleep(1000);
         const overlap = await page.eval(`(() => {
           const words = document.querySelector('.seg.is-active .cap');
           return words ? words.getBoundingClientRect().bottom > document.querySelector('.outro').getBoundingClientRect().top + 1 : false;
@@ -108,6 +133,9 @@ try {
       await page.close();
     }
   }
+} catch (error) {
+  report(`the check stopped: ${error.message}`);
+  failures.push(error.message);
 } finally {
   chrome.close();
 }
