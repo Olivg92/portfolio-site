@@ -52,5 +52,5 @@ try {
     }
   }
 } finally {
-  chrome.close();
+  await chrome.close();
 }

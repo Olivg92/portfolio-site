@@ -41,9 +41,21 @@ export async function browser() {
   }
   return {
     page: (options) => page(endpoint, options),
-    close() {
-      child?.kill();
-      if (profile) rmSync(profile, { recursive: true, force: true });
+    // Chrome writes to its profile while it shuts down: wait for it to be
+    // gone before removing the profile, a temporary folder in any case.
+    async close() {
+      if (child && child.exitCode === null) {
+        const exited = new Promise((resolve) => child.once('exit', resolve));
+        child.kill();
+        await Promise.race([exited, sleep(5000)]);
+      }
+      if (profile) {
+        try {
+          rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+        } catch {
+          // Left to the system, which clears its temporary folder.
+        }
+      }
     },
   };
 }

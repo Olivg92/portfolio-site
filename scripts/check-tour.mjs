@@ -137,7 +137,7 @@ try {
   report(`the check stopped: ${error.message}`);
   failures.push(error.message);
 } finally {
-  chrome.close();
+  await chrome.close();
 }
 
 if (failures.length) {
