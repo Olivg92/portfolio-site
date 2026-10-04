@@ -17,7 +17,6 @@ import Button from './Button.astro';
 import Terminal from './Terminal.astro';
 import TourScene from './TourScene.astro';
 import { chapters, steps } from '../tour/steps';
-import { focus } from '../tour/scene';
 import { links } from '../links';
 import { ui, type Lang } from '../i18n';
 
@@ -75,7 +74,7 @@ const inline = (text: string) => text.split('`');
     <div class="segments">
       {
         steps.map((step, i) => (
-          <article class="seg" id={step.id} data-step={i + 1} data-focus={focus[i + 1].join(' ')} aria-labelledby={`${step.id}-title`}>
+          <article class="seg" id={step.id} data-step={i + 1} aria-labelledby={`${step.id}-title`}>
             <div class="cap">
               <p class="num">
                 {chapterOf(step.chapter)?.name[lang]} · {t.tour.step} {pad(i + 1)}/{total}
@@ -136,10 +135,43 @@ const inline = (text: string) => text.split('`');
     let active = -1;
     let reading = false;
 
-    // On a phone, the viewBox glides to the part of the drawing the step is
-    // about; on a wide screen, the whole drawing stays in view.
+    // On a phone, the camera frames what the step shows: its elements, but
+    // not the band at the top nor the frames around the platform, which most
+    // steps show, nor what the step dims. A step that shows nothing else
+    // frames those. The frame is never smaller than a phone can read, and
+    // never leaves the drawing.
+    const boxes = new Map<number, number[]>();
+    const union = (els: SVGGraphicsElement[]) => {
+      let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
+      for (const el of els) {
+        const b = el.getBBox();
+        if (!b.width && !b.height) continue;
+        [x0, y0, x1, y1] = [Math.min(x0, b.x), Math.min(y0, b.y), Math.max(x1, b.x + b.width), Math.max(y1, b.y + b.height)];
+      }
+      return x0 < x1 ? [x0, y0, x1, y1] : null;
+    };
+    const focusOf = (n: number) => {
+      const known = boxes.get(n);
+      if (known) return known;
+      const shown = [...scene.querySelectorAll<SVGGraphicsElement>(`.s${n}`)].filter((el) => !el.classList.contains(`d${n}`));
+      const without = (...names: string[]) => shown.filter((el) => !names.some((name) => el.classList.contains(name)));
+      const [x0, y0, x1, y1] = union(without('band', 'frame')) ?? union(without('band')) ?? union(shown) ?? [0, 0, full[2], full[3]];
+      const w = Math.min(full[2], Math.max(360, x1 - x0 + 28));
+      const h = Math.min(full[3], Math.max(300, y1 - y0 + 28));
+      const box = [
+        Math.max(0, Math.min(full[2] - w, (x0 + x1 - w) / 2)),
+        Math.max(0, Math.min(full[3] - h, (y0 + y1 - h) / 2)),
+        w,
+        h,
+      ];
+      boxes.set(n, box);
+      return box;
+    };
+
+    // The viewBox glides from one frame to the next; on a wide screen, the
+    // whole drawing stays in view.
     const frame = (n: number) => {
-      const target = narrow.matches && n > 0 ? (segs[n - 1].dataset.focus ?? '').split(' ').map(Number) : full;
+      const target = narrow.matches && n > 0 ? focusOf(n) : full;
       cancelAnimationFrame(frameId);
       if (reduce.matches) {
         view = target;
@@ -524,28 +556,43 @@ const inline = (text: string) => text.split('`');
   }
 
   /* A phone: the drawing stays pinned at the top, framed on the step, and
-     the words scroll below it like a page, without fading. The Previous and
-     Next buttons give way to the scroll itself. */
+     the words scroll below it like a page, without fading. The chapters take
+     the first row; where you are and the buttons, the second. */
   @media (max-width: 899px) {
     .hud {
+      gap: var(--space-1) var(--space-3);
       padding-top: var(--space-2);
     }
 
-    .where,
-    .nav {
-      display: none;
+    .chapters {
+      flex: 1 0 100%;
+    }
+
+    .where {
+      flex: 1;
+      margin-left: 0;
+      overflow: hidden;
+      font-size: 0.65625rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .step-btn {
+      min-height: 32px;
+      padding: 0 var(--space-3);
+      font-size: 0.8125rem;
     }
 
     :global(.js) .stage {
       z-index: 3;
-      height: calc(56px + 40svh);
+      height: calc(100px + 40svh);
       border-bottom: 1px solid var(--line-faint);
       background: var(--night);
       box-shadow: 0 16px 32px -16px var(--night);
     }
 
     :global(.js) .scene-box {
-      top: 52px;
+      top: 96px;
       left: var(--space-2);
       right: var(--space-2);
       bottom: var(--space-2);

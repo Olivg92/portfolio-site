@@ -17,28 +17,9 @@ const LOCAL_PLATFORM: [number, number] = [7, 10];
 const AWS: [number, number] = [12, 16];
 const AWS_PLATFORM: [number, number] = [15, 16];
 
-// What the camera frames on a narrow screen, step by step: the part of the
-// drawing the step is about, so that its labels stay readable on a phone.
-export const focus: Record<number, [number, number, number, number]> = {
-  1: [200, 6, 290, 116],
-  2: [28, 170, 410, 250],
-  3: [20, 146, 330, 104],
-  4: [30, 496, 312, 92],
-  5: [236, 180, 212, 84],
-  6: [228, 100, 262, 160],
-  7: [30, 254, 572, 246],
-  8: [30, 254, 572, 246],
-  9: [30, 590, 620, 62],
-  10: [30, 494, 620, 198],
-  11: [150, 312, 380, 120],
-  12: [104, 270, 472, 176],
-  13: [104, 240, 472, 202],
-  14: [104, 240, 472, 202],
-  15: [24, 150, 632, 450],
-  16: [24, 150, 632, 500],
-  17: [150, 312, 380, 120],
-  18: [52, 162, 576, 346],
-};
+// On a phone, the tour's script frames what each step shows. Two classes
+// tell it what not to count: `band`, the row at the top that every step
+// shows, and `frame`, the grounds around the platform with their labels.
 
 export const SCENE_WIDTH = 680;
 export const SCENE_HEIGHT = 716;
@@ -99,20 +80,20 @@ export function tourScene(lang: Lang) {
   };
 
   // The grounds: the machine, then the AWS account.
-  g(`${S(LOCAL)} t8`, R(24, 150, 632, 548, 'frame-local', 16), logo('k3d', 40, 166, 50, 19), T(104, 182, L('ON THE MACHINE, IN DOCKER', 'SUR LA MACHINE, DANS DOCKER'), 'tag'));
-  g(`${S(LOCAL)} t8 h3`, R(40, 200, 196, 30, 'mini-r', 7), T(52, 220, L('a kubeconfig of its own', 'un kubeconfig à part'), 'mini-t'));
-  g(`${S(AWS)} g12 g13 t8`, R(24, 150, 632, 548, 'frame-aws', 16), logo('awscloud', 40, 162, 28));
-  g('s12', T(80, 182, L('AWS ACCOUNT · EU-NORTH-1', 'COMPTE AWS · EU-NORTH-1'), 'tag'));
-  g('s13', T(80, 182, L('TO CREATE · VPC 10.20.0.0/16 · EKS 1.36', 'À CRÉER · VPC 10.20.0.0/16 · EKS 1.36'), 'tag'));
-  g(`${S([14, 16])} t8`, T(80, 182, 'EU-NORTH-1 · VPC 10.20.0.0/16', 'tag'), logo('eks', 536, 161, 26), T(640, 182, 'EKS 1.36', 'tag', 'end'));
+  g(`${S(LOCAL)} t8 frame`, R(24, 150, 632, 548, 'frame-local', 16), logo('k3d', 40, 166, 50, 19), T(104, 182, L('ON THE MACHINE, IN DOCKER', 'SUR LA MACHINE, DANS DOCKER'), 'tag'));
+  g(`${S(LOCAL)} t8 h3 frame`, R(40, 200, 196, 30, 'mini-r', 7), T(52, 220, L('a kubeconfig of its own', 'un kubeconfig à part'), 'mini-t'));
+  g(`${S(AWS)} g12 g13 t8 frame`, R(24, 150, 632, 548, 'frame-aws', 16), logo('awscloud', 40, 162, 28));
+  g('s12 frame', T(80, 182, L('AWS ACCOUNT · EU-NORTH-1', 'COMPTE AWS · EU-NORTH-1'), 'tag'));
+  g('s13 frame', T(80, 182, L('TO CREATE · VPC 10.20.0.0/16 · EKS 1.36', 'À CRÉER · VPC 10.20.0.0/16 · EKS 1.36'), 'tag'));
+  g(`${S([14, 16])} t8 frame`, T(80, 182, 'EU-NORTH-1 · VPC 10.20.0.0/16', 'tag'), logo('eks', 536, 161, 26), T(640, 182, 'EKS 1.36', 'tag', 'end'));
 
   // The top band: the state bucket, the repository, and the number of each step.
-  g(`${S([12, 18])} h12 hok17`, R(24, 16, 172, 96), logo('s3', 36, 30, 34), T(80, 54, L('State bucket', "Bucket d'état"), 'ttl'), T(80, 76, L('native locking', 'verrou natif'), 'small opt'));
-  g(`${S([1, 18])} d10 h1 h18`, R(210, 16, 270, 96), logo('github', 222, 28, 26), T(258, 48, 'platform-eks-gitops', 'ttl'),
+  g(`${S([12, 18])} h12 hok17 band`, R(24, 16, 172, 96), logo('s3', 36, 30, 34), T(80, 54, L('State bucket', "Bucket d'état"), 'ttl'), T(80, 76, L('native locking', 'verrou natif'), 'small opt'));
+  g(`${S([1, 18])} d10 h1 h18 band`, R(210, 16, 270, 96), logo('github', 222, 28, 26), T(258, 48, 'platform-eks-gitops', 'ttl'),
     R(222, 64, 110, 28, 'mini-r', 6), logo('terraform', 230, 70, 16), T(252, 83, 'terraform/', 'mini-t'),
     R(340, 64, 70, 28, 'mini-r', 6), T(375, 83, 'gitops/', 'mini-t', 'middle'),
     R(418, 64, 54, 28, 'mini-r', 6), T(445, 83, 'apps/', 'mini-t', 'middle'));
-  g(S([1, 18]), R(494, 16, 162, 96), T(520, 38, L('IN NUMBERS', 'EN CHIFFRES'), 'tag'), '<circle class="live" cx="510" cy="34" r="3.5"/>');
+  g(`${S([1, 18])} band`, R(494, 16, 162, 96), T(520, 38, L('IN NUMBERS', 'EN CHIFFRES'), 'tag'), '<circle class="live" cx="510" cy="34" r="3.5"/>');
   steps.forEach((step, i) => {
     const n = i + 1;
     // The box holds ten characters of number and 21 of caption, in Geist Mono.
@@ -120,7 +101,7 @@ export function tourScene(lang: Lang) {
       throw new Error(`tour step ${n} (${lang}): its number or caption is too long for the box`);
     }
     const cls = ['metric', n === 10 ? 'metric-alert' : '', n === 11 || n === 17 ? 'metric-ok' : ''].filter(Boolean).join(' ');
-    g(`s${n}${n === 17 ? ' late17' : ''}`, T(508, 72, step.metric.value[lang], cls), T(508, 98, step.metric.caption[lang], 'small'));
+    g(`s${n} band${n === 17 ? ' late17' : ''}`, T(508, 72, step.metric.value[lang], cls), T(508, 98, step.metric.caption[lang], 'small'));
   });
 
   // Step 2: what make check-tools looks for.
