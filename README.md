@@ -33,6 +33,10 @@ request at a time.
   address is masked. Its drawing is computed at build time
   ([`src/tour/scene.ts`](src/tour/scene.ts)), and the one script of the site follows the
   scroll, on that page only. Without the script, the tour reads as a page.
+- **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
+  description and a picture drawn from the page itself, in its language. The pictures are drawn
+  by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
+  committed in [`public/og/`](public/og/): they only change when the look of a page does.
 - **Fonts served by the site itself.** Geist and Geist Mono come from their Fontsource packages
   through Astro's font settings: Latin subset only, preloaded, with fallback faces resized to
   Geist's metrics so the text does not move when the font arrives. No request leaves the site.
@@ -67,9 +71,12 @@ Every pull request runs them, and a failure blocks the merge:
 | Whitespace, YAML and JSON, private keys, secrets, workflow mistakes | `pre-commit`, the same hooks as locally: `pre-commit run -a` |
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
+| The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
-Actions are pinned by commit, and Dependabot raises the pull requests that move them.
+Actions are pinned by commit, and Dependabot raises the pull requests that move them. The two
+scripts drive Chrome through its DevTools protocol, with nothing to install but Chrome; against a
+served build (`npm run build && npm run preview`), `npm run check:tour` runs the tour's check.
 
 ## Layout
 
@@ -106,6 +113,11 @@ src/
 └── styles/
     ├── tokens.css        # colours, type, sizes, spacing
     └── global.css        # background, type, links, layout helpers
+scripts/
+├── check-tour.mjs        # the guided tour, clicked through in Chrome
+├── og-images.mjs         # the pictures of link previews
+└── lib/cdp.mjs           # a minimal Chrome DevTools client
+public/og/                # the pictures, one per page and language
 .github/workflows/
 ├── ci.yml                # the checks above
 └── deploy.yml            # build, then publish to GitHub Pages
