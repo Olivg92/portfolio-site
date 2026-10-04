@@ -1,0 +1,27 @@
+# Build output and Astro's generated types
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Lighthouse CI reports
+.lighthouseci/
+
+# Logs
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local-only AI assistant instructions. The personal roadmap lives outside the
+# repository; its entry only keeps a stray copy from being committed.
+CLAUDE.local.md
+PLAN.md
