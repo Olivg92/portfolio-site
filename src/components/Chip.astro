@@ -1,19 +1,24 @@
 ---
 // A short label: a technology, a status. The tone carries the meaning the
-// signal colours have everywhere on the site (see tokens.css), and a dot
-// marks a status rather than a name; a live dot pulses, for what is running.
+// signal colours have everywhere on the site (see tokens.css). A technology
+// shows its logo; a status shows a dot, and a live dot pulses, for what is
+// running.
 import type { HTMLAttributes } from 'astro/types';
+import Logo from './Logo.astro';
+import type { LogoName } from '../logos';
 
 interface Props extends HTMLAttributes<'span'> {
   tone?: 'neutral' | 'cyan' | 'green' | 'amber' | 'magenta' | 'red';
+  logo?: LogoName | undefined;
   dot?: boolean;
   live?: boolean;
 }
 
-const { tone = 'neutral', dot = false, live = false, class: className, ...rest } = Astro.props;
+const { tone = 'neutral', logo, dot = false, live = false, class: className, ...rest } = Astro.props;
 ---
 
 <span class:list={['chip', className]} data-tone={tone} {...rest}>
+  {logo && <Logo name={logo} size={15} />}
   {(dot || live) && <span class:list={['dot', { live }]} aria-hidden="true" />}
   <slot />
 </span>
@@ -33,6 +38,8 @@ const { tone = 'neutral', dot = false, live = false, class: className, ...rest }
     font: 500 0.78125rem/1 var(--font-mono);
     letter-spacing: 0.02em;
     white-space: nowrap;
+    /* With or without a logo, chips in a row line up on their middle. */
+    vertical-align: middle;
   }
 
   .chip[data-tone='neutral'] {
