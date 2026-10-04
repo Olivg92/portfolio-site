@@ -50,7 +50,7 @@ const inline = (text: string) => text.split('`');
     document.documentElement.classList.add('js');
   </script>
 
-  <section class="tour" aria-label={t.tour.label} data-step-word={t.tour.step} data-of-word={t.tour.of} data-overview={t.tour.overview}>
+  <section class="tour" aria-label={t.tour.label} data-step-word={t.tour.step} data-of-word={t.tour.of} data-scroll={t.tour.scroll}>
     <div class="stage">
       <div class="progress" aria-hidden="true"><span id="tour-bar"></span></div>
       <div class="hud">
@@ -63,7 +63,7 @@ const inline = (text: string) => text.split('`');
             ))
           }
         </nav>
-        <span class="where" id="tour-where">{t.tour.overview}</span>
+        <span class="where" id="tour-where"><span class="no-script">{t.tour.overview}</span><span class="with-script">{t.tour.scroll}</span></span>
         <div class="nav">
           <button class="step-btn" id="tour-prev" type="button" hidden>{t.tour.previous}</button>
           <button class="step-btn" id="tour-next" type="button" hidden>{t.tour.next}</button>
@@ -129,7 +129,7 @@ const inline = (text: string) => text.split('`');
     const next = document.getElementById('tour-next') as HTMLButtonElement;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const narrow = window.matchMedia('(max-width: 899px)');
-    const { stepWord, ofWord, overview } = tour.dataset;
+    const { stepWord, ofWord, scroll } = tour.dataset;
     const full = (scene.getAttribute('viewBox') ?? '0 0 680 716').split(' ').map(Number);
     let view = full.slice();
     let frameId = 0;
@@ -162,10 +162,17 @@ const inline = (text: string) => text.split('`');
       active = n;
       segs.forEach((seg, i) => seg.classList.toggle('is-active', i === n - 1));
       frame(n);
+      // Before the first step, the drawing is empty: it builds itself as the
+      // steps go by. Without script, it shows the whole platform instead.
       if (n === 0) {
-        if (where) where.textContent = overview ?? '';
+        scene.removeAttribute('data-live');
+        scene.setAttribute('aria-label', scroll ?? '');
+        if (where) where.textContent = scroll ?? '';
+        if (bar) bar.style.width = '0';
+        chaps.forEach((chap) => chap.setAttribute('aria-current', 'false'));
         return;
       }
+      scene.setAttribute('data-live', '');
       scene.setAttribute('data-step', String(n));
       const label = `${stepWord} ${n} ${ofWord} ${segs.length} · ${titles[n - 1]}`;
       scene.setAttribute('aria-label', label);
@@ -201,7 +208,8 @@ const inline = (text: string) => text.split('`');
           return;
         }
       }
-      setStep(0);
+      // Above the first step, nothing yet; past the last, the last one stays.
+      setStep(segs.length && segs[0].getBoundingClientRect().top > line ? 0 : segs.length);
     };
 
     let queued = false;
@@ -308,6 +316,15 @@ const inline = (text: string) => text.split('`');
 
   .chap[aria-current='true'] {
     border-bottom-color: var(--cyan);
+  }
+
+  :global(.js) .no-script,
+  .with-script {
+    display: none;
+  }
+
+  :global(.js) .with-script {
+    display: inline;
   }
 
   .where {

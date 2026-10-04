@@ -1,8 +1,9 @@
 ---
-// The drawing of the guided tour, in the page's language. It starts on the
-// overview, the platform on AWS with everything checked; the tour's script
-// then sets data-step as the reader scrolls, and on a phone moves the viewBox
-// to frame the part of the drawing each step is about.
+// The drawing of the guided tour, in the page's language. Without script it
+// shows the overview, the platform on AWS with everything checked. With
+// script it starts empty; the tour's script then sets data-step as the
+// reader scrolls, and on a phone moves the viewBox to frame the part of the
+// drawing each step is about.
 import { tourScene, SCENE_WIDTH, SCENE_HEIGHT } from '../tour/scene';
 import { ui, type Lang } from '../i18n';
 
@@ -41,6 +42,13 @@ const OVERVIEW = 16;
     transition:
       opacity 0.45s ease,
       transform 0.45s ease;
+  }
+
+  /* With script, the drawing stays empty until the first step: the tour's
+     script sets data-live then. Without script, the overview shows. */
+  .js #tour-scene:not([data-live]) .el {
+    opacity: 0;
+    transform: translateY(6px);
   }
 
   #tour-scene .fill-top {

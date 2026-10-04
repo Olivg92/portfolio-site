@@ -40,6 +40,7 @@ type Strings = {
     step: string;
     of: string;
     overview: string;
+    scroll: string;
     previous: string;
     next: string;
     target: string;
@@ -89,6 +90,7 @@ export const ui: Record<Lang, Strings> = {
       step: 'Step',
       of: 'of',
       overview: 'Overview: the platform on AWS, every check passed',
+      scroll: 'Scroll, and the platform builds itself',
       previous: 'Previous',
       next: 'Next',
       target: 'Target it runs:',
@@ -136,6 +138,7 @@ export const ui: Record<Lang, Strings> = {
       step: 'Étape',
       of: 'sur',
       overview: "Vue d'ensemble\u00a0: la plateforme sur AWS, tous les contrôles réussis",
+      scroll: 'Faites défiler, la plateforme se construit',
       previous: 'Précédent',
       next: 'Suivant',
       target: 'Cible appelée\u00a0:',
