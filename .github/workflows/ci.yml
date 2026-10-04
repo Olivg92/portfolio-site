@@ -68,13 +68,18 @@ jobs:
           cat /tmp/preview.log
           exit 1
 
-      # The canonical and language links point at the published site, which
-      # shows the previous version until this one is merged: the pages they
-      # name are the ones crawled here, so they are skipped.
+      # Links within a page (#contact) must land on an element that exists.
+      # Two kinds of links are skipped. The canonical and language links point
+      # at the published site, which shows the previous version until this one
+      # is merged: the pages they name are the ones crawled here. And LinkedIn
+      # answers every client that is not a browser with HTTP 999, so a check
+      # from CI can only fail there.
       - name: Dead links
         run: >-
           npx linkinator http://localhost:4321/portfolio-site/ --recurse --retry --verbosity error
+          --check-fragments
           --skip '^https://olivg92\.github\.io/portfolio-site/'
+          --skip '^https://www\.linkedin\.com/'
 
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
