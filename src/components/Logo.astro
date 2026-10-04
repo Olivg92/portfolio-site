@@ -1,0 +1,21 @@
+---
+// A tool's logo, drawn inline. It always sits next to the tool's name, so
+// screen readers skip it.
+import { logos, type LogoName } from '../logos';
+
+interface Props {
+  name: LogoName;
+  size?: number;
+}
+
+const { name, size = 16 } = Astro.props;
+const logo = logos[name];
+---
+
+<svg class="logo" viewBox={logo.viewBox} width={size} height={size} aria-hidden="true" focusable="false" set:html={logo.body} />
+
+<style>
+  .logo {
+    flex: none;
+  }
+</style>

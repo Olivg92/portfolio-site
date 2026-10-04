@@ -1,13 +1,13 @@
 ---
-// The home page, the same in both languages apart from its words. A
-// placeholder until the real home page arrives: honest about it, and already
-// showing the first finished project, with proof that it runs.
+// The home page, the same in both languages apart from its words: who I am
+// in two sentences beside the platform drawn in isometric view, then the
+// three projects.
 import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
-import Chip from './Chip.astro';
-import Panel from './Panel.astro';
+import IsoPlatform from './IsoPlatform.astro';
+import ProjectCard from './ProjectCard.astro';
 import Terminal from './Terminal.astro';
-import { links } from '../links';
+import { projects } from '../projects';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -16,21 +16,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = ui[lang];
-
-const stack = [
-  'Kubernetes',
-  'Terraform',
-  'AWS EKS',
-  'k3d',
-  'Argo CD',
-  'Gateway API',
-  'External Secrets',
-  'Vault',
-  'Prometheus',
-  'Grafana',
-  'Sloth',
-  'GitHub Actions',
-];
+const [featured, ...others] = projects;
 
 // As the platform-eks-gitops README shows it, from a real run.
 const verify = `
@@ -50,51 +36,54 @@ checking the local platform:
 
 <Base lang={lang} title={t.title} description={t.description}>
   <section class="hero wrap" aria-labelledby="name">
-    <Chip tone="amber" live>{t.status}</Chip>
-    <p class="eyebrow">{t.kicker}</p>
-    <h1 id="name">Olivier Guandalini</h1>
-    <p class="lede">{t.lede}</p>
-    <div class="cluster actions">
-      <Button href="#project">{t.seeProject}</Button>
-      <Button href="#contact" variant="ghost">{t.contact}</Button>
+    <div class="intro">
+      <p class="eyebrow">{t.kicker}</p>
+      <h1 id="name">Olivier Guandalini</h1>
+      <p class="lede">{t.positioning}</p>
+      <div class="cluster actions">
+        <Button href="#projects">{t.seeProjects}</Button>
+        <Button href="#contact" variant="ghost">{t.contact}</Button>
+      </div>
     </div>
+    <IsoPlatform lang={lang} class="scene" />
   </section>
 
-  <div class="wrap">
-    <Panel as="article" id="project" class="project" aria-labelledby="project-title">
-      <div class="about">
-        <Chip tone="green" dot>{t.projectStatus}</Chip>
-        <h2 id="project-title">platform-eks-gitops</h2>
-        <p class="summary">{t.projectSummary}</p>
-        <ul class="cluster" aria-label={t.projectStack}>
-          {
-            stack.map((name) => (
-              <li>
-                <Chip>{name}</Chip>
-              </li>
-            ))
-          }
-        </ul>
-        <Button href={links.platform}>{t.projectCode}</Button>
-      </div>
+  <section id="projects" class="projects wrap" aria-labelledby="projects-title">
+    <div class="head">
+      <p class="eyebrow">{t.projects}</p>
+      <h2 id="projects-title">{t.projectsTitle}</h2>
+      <p class="lede">{t.projectsLede}</p>
+    </div>
+
+    <ProjectCard project={featured} lang={lang}>
       <div class="proof">
         <Terminal title="~/platform-eks-gitops" transcript={verify} />
-        <p class="note">{t.projectMeasured}</p>
+        <p class="note">{t.measured}</p>
       </div>
-    </Panel>
-  </div>
+    </ProjectCard>
+
+    <div class="pair">
+      {others.map((project) => <ProjectCard project={project} lang={lang} />)}
+    </div>
+  </section>
 </Base>
 
 <style>
   .hero {
     display: grid;
-    justify-items: start;
-    gap: var(--space-5);
-    padding-block: clamp(var(--space-7), 12vh, var(--space-9)) var(--space-8);
+    align-items: center;
+    gap: var(--space-7);
+    padding-block: var(--space-7) var(--space-8);
   }
 
-  .hero h1 {
-    margin-block: calc(-1 * var(--space-2));
+  .intro {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+  }
+
+  .intro h1 {
+    font-size: clamp(2.75rem, 1.5rem + 4.2vw, 4.75rem);
   }
 
   .actions {
@@ -102,21 +91,25 @@ checking the local platform:
     margin-top: var(--space-2);
   }
 
-  .project {
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: minmax(0, 4.6fr) minmax(0, 7.4fr);
+      gap: var(--space-6);
+      min-height: min(760px, calc(100svh - 92px));
+      padding-block: var(--space-5) var(--space-7);
+    }
+  }
+
+  .projects {
     display: grid;
-    gap: var(--space-7);
+    gap: var(--space-6);
     scroll-margin-top: var(--space-5);
   }
 
-  .about {
+  .head {
     display: grid;
-    justify-items: start;
-    gap: var(--space-5);
-    max-width: 46rem;
-  }
-
-  .summary {
-    color: var(--ink-2);
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
   }
 
   .proof {
@@ -128,5 +121,16 @@ checking the local platform:
   .note {
     color: var(--muted);
     font-size: var(--text-s);
+  }
+
+  .pair {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 900px) {
+    .pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 </style>

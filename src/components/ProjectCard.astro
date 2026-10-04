@@ -1,0 +1,64 @@
+---
+// One project: where it stands, what it is, what it is built with, and its
+// code once there is some to read. Anything passed inside, such as a
+// terminal, shows below as proof.
+import Button from './Button.astro';
+import Chip from './Chip.astro';
+import Panel from './Panel.astro';
+import type { Project } from '../projects';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+  class?: string;
+}
+
+const { project, lang, class: className } = Astro.props;
+const t = ui[lang];
+const tone = { finished: 'green', building: 'amber', next: 'cyan' } as const;
+const id = `project-${project.name}`;
+---
+
+<Panel as="article" class:list={['card', className]} aria-labelledby={id}>
+  <div class="about">
+    <Chip tone={tone[project.status]} dot live={project.status === 'building'}>{t.status[project.status]}</Chip>
+    <h3 id={id}>{project.name}</h3>
+    <p class="summary">{project.summary[lang]}</p>
+    <ul class="cluster" aria-label={t.stack}>
+      {
+        project.stack.map((tool) => (
+          <li>
+            <Chip logo={tool.logo}>{tool.name}</Chip>
+          </li>
+        ))
+      }
+    </ul>
+    {project.code && <Button href={project.code}>{t.readCode}</Button>}
+  </div>
+  <slot />
+</Panel>
+
+<style>
+  .card {
+    display: grid;
+    gap: var(--space-7);
+    align-content: start;
+  }
+
+  .about {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+    max-width: 46rem;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+    font-weight: 750;
+  }
+
+  .summary {
+    color: var(--ink-2);
+  }
+</style>

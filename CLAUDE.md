@@ -4,7 +4,7 @@ Ce repo est le site vitrine de mon portfolio public DevOps / SRE / Platform Engi
 Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du repo, commun aux trois projets) : le lire avant toute tâche et cocher les cases terminées.
 
 ## Mon profil
-- Ingénieur DevOps/SRE, expérience principale : infra Linux on-prem à grande échelle, astreinte
+- Ingénieur DevOps/SRE, expérience principale : infra Linux on-prem à grande échelle
 - Stack maîtrisée : Kubernetes (RKE2/Rancher), Terraform, Ansible, ArgoCD, Vault + External Secrets, Prometheus/Grafana, ELK
 - Me parler en français ; code, commentaires, commits et docs du repo en anglais ; le contenu du site en anglais et en français
 
@@ -19,6 +19,7 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 - Anglais à la racine, français sous `/fr/`.
 - Système de design : couleurs, polices, tailles et espacements sont des variables dans `src/styles/tokens.css`. Les composants de `src/components/` y prennent toutes leurs couleurs (une nuance passe par `color-mix()`), jamais de valeur à eux. Polices Geist et Geist Mono servies par le site lui-même.
 - Contact : LinkedIn et GitHub (`src/links.ts`), jamais d'adresse mail.
+- Les projets et leur stack sont dans `src/projects.ts` ; chaque techno a son logo à côté de son nom quand il existe (`src/logos.ts` : Simple Icons, icônes d'architecture AWS, External Secrets).
 - Adresse : https://olivg92.github.io/portfolio-site/ pour l'instant, à remplacer plus tard par un nom de domaine (`site` et `base` dans `astro.config.mjs`).
 
 ## Façon de travailler

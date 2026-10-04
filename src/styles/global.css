@@ -146,3 +146,7 @@ code {
   padding: 0;
   list-style: none;
 }
+
+.cluster > li {
+  display: flex;
+}
