@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 
 export default defineConfig({
   // GitHub Pages serves a project repository under its name. When a domain
@@ -17,4 +17,41 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  // Geist for text, Geist Mono for commands and labels, served by this site
+  // rather than by a font CDN. The files come from the Fontsource packages,
+  // Latin subset only: it covers English and French. Astro adds the preload
+  // links, and fallback faces sized like Geist so the text does not jump when
+  // the font arrives.
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'Geist',
+      cssVariable: '--font-geist',
+      fallbacks: ['system-ui', 'sans-serif'],
+      options: {
+        variants: [
+          {
+            src: ['@fontsource-variable/geist/files/geist-latin-wght-normal.woff2'],
+            weight: '100 900',
+            style: 'normal',
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'Geist Mono',
+      cssVariable: '--font-geist-mono',
+      fallbacks: ['ui-monospace', 'monospace'],
+      options: {
+        variants: [
+          {
+            src: ['@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2'],
+            weight: '100 900',
+            style: 'normal',
+          },
+        ],
+      },
+    },
+  ],
 });
