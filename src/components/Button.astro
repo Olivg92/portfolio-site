@@ -1,0 +1,67 @@
+---
+// A link that looks like a button. Every action on the site goes somewhere,
+// so there is no <button> here. The arrow says where: down for a place on the
+// same page, up and to the right for another site.
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+
+interface Props extends HTMLAttributes<'a'> {
+  href: string;
+  /** Primary for the one action a section leads to, ghost for the others. */
+  variant?: 'primary' | 'ghost';
+}
+
+const { href, variant = 'primary', class: className, ...rest } = Astro.props;
+const icon = href.startsWith('#') ? 'arrow-down' : /^https?:/.test(href) ? 'arrow-up-right' : undefined;
+---
+
+<a href={href} class:list={['btn', variant, className]} {...rest}>
+  <slot />
+  {icon && <Icon name={icon} />}
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    font: 500 0.9375rem/1 var(--font-ui);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .primary {
+    background: var(--cyan);
+    color: var(--night);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .primary:hover {
+    background: color-mix(in srgb, var(--cyan) 60%, var(--ink));
+    box-shadow: 0 0 32px color-mix(in srgb, var(--cyan) 40%, transparent);
+  }
+
+  .ghost {
+    border-color: color-mix(in srgb, var(--cyan) 45%, transparent);
+    color: var(--ink);
+  }
+
+  .ghost:hover {
+    border-color: var(--cyan);
+    background: color-mix(in srgb, var(--cyan) 8%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+// A pane of glass over the night background, for a block that stands on its
+// own: a project, a story. `as` picks the element, so the block keeps its
+// meaning (an article, a section) and not only its look.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'section' | 'article' | 'aside';
+}
+
+const { as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['panel', className]} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .panel {
+    position: relative;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-l);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--line) 7%, transparent), transparent 40%),
+      color-mix(in srgb, var(--card) 70%, transparent);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(14px);
+  }
+
+  /* A thin line of light along the top edge, where the glass catches it. */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: -1px 12% auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 60%, transparent), transparent);
+  }
+</style>

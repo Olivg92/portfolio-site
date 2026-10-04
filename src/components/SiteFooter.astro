@@ -1,0 +1,73 @@
+---
+// The bottom of every page, and its contact section: the header's "Contact"
+// link lands here, whatever the page.
+import Button from './Button.astro';
+import { links } from '../links';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const year = new Date().getFullYear();
+---
+
+<footer class="foot" id="contact" aria-labelledby="contact-title">
+  <div class="wrap">
+    <div class="reach">
+      <h2 id="contact-title" class="eyebrow">{t.contact}</h2>
+      <p class="text">{t.contactText}</p>
+      <ul class="cluster">
+        <li><Button href={links.linkedin}>LinkedIn</Button></li>
+        <li><Button href={links.github} variant="ghost">GitHub</Button></li>
+      </ul>
+    </div>
+    <p class="meta">
+      <span>© {year} Olivier Guandalini</span>
+      <a href={links.source}>{t.source}</a>
+      <span>{t.builtWith}</span>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    margin-top: var(--space-9);
+    padding-block: var(--space-8) var(--space-6);
+    border-top: 1px solid var(--line-faint);
+    scroll-margin-top: var(--space-5);
+  }
+
+  .reach {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+
+  .eyebrow {
+    line-height: 1.6;
+  }
+
+  .text {
+    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-8);
+    color: var(--muted);
+    font-size: var(--text-s);
+  }
+
+  .meta a {
+    color: var(--ink-2);
+  }
+</style>

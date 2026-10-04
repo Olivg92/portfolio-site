@@ -1,0 +1,100 @@
+---
+// A short label: a technology, a status. The tone carries the meaning the
+// signal colours have everywhere on the site (see tokens.css), and a dot
+// marks a status rather than a name; a live dot pulses, for what is running.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'span'> {
+  tone?: 'neutral' | 'cyan' | 'green' | 'amber' | 'magenta' | 'red';
+  dot?: boolean;
+  live?: boolean;
+}
+
+const { tone = 'neutral', dot = false, live = false, class: className, ...rest } = Astro.props;
+---
+
+<span class:list={['chip', className]} data-tone={tone} {...rest}>
+  {(dot || live) && <span class:list={['dot', { live }]} aria-hidden="true" />}
+  <slot />
+</span>
+
+<style>
+  .chip {
+    --tone: var(--ink-2);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 28px;
+    padding: 0 11px;
+    border: 1px solid color-mix(in srgb, var(--tone) 34%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--tone) 8%, transparent);
+    color: var(--tone);
+    font: 500 0.78125rem/1 var(--font-mono);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .chip[data-tone='neutral'] {
+    border-color: var(--line-soft);
+    background: var(--glass);
+  }
+
+  .chip[data-tone='cyan'] {
+    --tone: var(--cyan);
+  }
+
+  .chip[data-tone='green'] {
+    --tone: var(--green);
+  }
+
+  .chip[data-tone='amber'] {
+    --tone: var(--amber);
+  }
+
+  .chip[data-tone='magenta'] {
+    --tone: var(--magenta);
+  }
+
+  .chip[data-tone='red'] {
+    --tone: var(--red);
+  }
+
+  .dot {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  /* The pulse is a copy of the dot that grows and fades: transform and
+     opacity only, so the browser animates it without repainting the page. */
+  .live::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    animation: ping 2.2s ease-out infinite;
+  }
+
+  @keyframes ping {
+    from {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(2.8);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

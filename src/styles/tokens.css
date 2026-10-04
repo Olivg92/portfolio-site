@@ -1,0 +1,76 @@
+/* The design tokens of the site: the control room at night. Components take
+   every colour from these variables, never from values of their own (a shade
+   comes from color-mix()), and their sizes from the scales below where one
+   fits, so a change of look happens here. Every text colour reaches a contrast
+   of 7:1 or more on --night, and 5:1 or more on --sky-blue, the lightest part
+   of the background. */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces, from the darkest. The two skies are the glows of the
+     background, behind every page. */
+  --term-bg: #050a14;
+  --night: #070c16;
+  --card: #0b1524;
+  --sky-violet: #24123d;
+  --sky-blue: #13294a;
+
+  /* Text. */
+  --ink: #e6f0ff;
+  --ink-2: #c9d8f2;
+  --muted: #8aa3c4;
+
+  /* Lines and glass: the same blue, at the opacity each use needs. */
+  --line: #8fb8ff;
+  --line-soft: #8fb8ff2e;
+  --line-faint: #8fb8ff1a;
+  --glass: #8fb8ff0d;
+
+  /* Signals. Each one keeps its meaning across the site, as in the platform
+     diagrams: cyan for the interface, green for GitOps and what works, amber
+     for traffic and what is in progress, magenta for secrets, red for alerts. */
+  --cyan: #5fe3ff;
+  --green: #4ef0a3;
+  --amber: #ffb547;
+  --magenta: #ff7ad9;
+  --red: #ff6b6b;
+
+  /* Type. Astro defines both font variables from the `fonts` setting in
+     astro.config.mjs, fallbacks included. */
+  --font-ui: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+  --text-s: 0.875rem;
+  --text-m: 1.0625rem;
+  --text-l: 1.1875rem;
+  --text-h2: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+  --text-h1: clamp(2.75rem, 1.6rem + 5.6vw, 5.5rem);
+  --label: 0.75rem;
+
+  /* Space, on a 4 px grid. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --gutter: 24px;
+  --page: 1120px;
+
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 18px;
+  --radius-pill: 999px;
+
+  /* Glow: light that seems to come from the screen itself. */
+  --glow-cyan: 0 0 24px color-mix(in srgb, var(--cyan) 25%, transparent);
+  --shadow-panel: 0 1px 0 0 #e6f0ff0f inset, 0 40px 80px -48px #000000;
+}
+
+@media (max-width: 479px) {
+  :root {
+    --gutter: 16px;
+  }
+}
