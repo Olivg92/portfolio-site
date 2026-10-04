@@ -134,6 +134,7 @@ const inline = (text: string) => text.split('`');
     let view = full.slice();
     let frameId = 0;
     let active = -1;
+    let reading = false;
 
     // On a phone, the viewBox glides to the part of the drawing the step is
     // about; on a wide screen, the whole drawing stays in view.
@@ -157,10 +158,13 @@ const inline = (text: string) => text.split('`');
       frameId = requestAnimationFrame(step);
     };
 
-    const setStep = (n: number) => {
-      if (n === active) return;
+    // `inside` says whether the reading line is on the step, and so whether
+    // its words show: past the last step, the drawing keeps it, the words go.
+    const setStep = (n: number, inside = true) => {
+      if (n === active && inside === reading) return;
       active = n;
-      segs.forEach((seg, i) => seg.classList.toggle('is-active', i === n - 1));
+      reading = inside;
+      segs.forEach((seg, i) => seg.classList.toggle('is-active', inside && i === n - 1));
       frame(n);
       // Before the first step, the drawing is empty: it builds itself as the
       // steps go by. Without script, it shows the whole platform instead.
@@ -194,6 +198,13 @@ const inline = (text: string) => text.split('`');
     const stage = tour.querySelector<HTMLElement>('.stage');
     const below = () => (narrow.matches && stage ? stage.getBoundingClientRect().bottom : 0);
     const update = () => {
+      // The words are fixed to the window, but must not stay behind when the
+      // drawing is not yet, or no longer, pinned: they follow its edge then.
+      if (stage && !narrow.matches) {
+        const r = stage.getBoundingClientRect();
+        const shift = r.top > 0 ? r.top : Math.min(0, r.bottom - window.innerHeight);
+        tour.style.setProperty('--shift', `${shift.toFixed(1)}px`);
+      }
       const top = below();
       const line = narrow.matches ? top + (window.innerHeight - top) * 0.3 : window.innerHeight / 2;
       const still = reduce.matches || narrow.matches;
@@ -208,8 +219,9 @@ const inline = (text: string) => text.split('`');
           return;
         }
       }
-      // Above the first step, nothing yet; past the last, the last one stays.
-      setStep(segs.length && segs[0].getBoundingClientRect().top > line ? 0 : segs.length);
+      // Above the first step, nothing yet; past the last, the drawing keeps the
+      // last step while its words leave with the tour.
+      setStep(segs.length && segs[0].getBoundingClientRect().top > line ? 0 : segs.length, false);
     };
 
     let queued = false;
@@ -500,7 +512,7 @@ const inline = (text: string) => text.split('`');
   .tour:global(.ready) .seg:global(.is-active) .cap {
     visibility: visible;
     opacity: var(--a, 1);
-    transform: translateY(calc(-50% + var(--dy, 0px)));
+    transform: translateY(calc(-50% + var(--dy, 0px) + var(--shift, 0px)));
     pointer-events: auto;
   }
 

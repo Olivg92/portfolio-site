@@ -131,7 +131,7 @@ export function tourScene(lang: Lang) {
   for (const [label, mark] of [['python3', 'python'], ['curl', 'curl']] as const) x = chip(x, 270, label, mark, 's2');
   g('s2', T(40, 346, L('AND FOR AWS', 'ET POUR AWS'), 'tag'));
   x = 40;
-  for (const [label, mark] of [['terraform', 'terraform'], ['aws', 'awscloud']] as const) x = chip(x, 360, label, mark, 's2 dim2');
+  for (const [label, mark] of [['terraform', 'terraform'], ['aws', 'awscloud']] as const) x = chip(x, 360, label, mark, 's2');
 
   // Argo CD, installed by Helm, then pointed at the repository.
   arrow('M340,196 V115', `${S([6, 10], AWS_PLATFORM)} d10 t7`, 'gitops', 1.6);
@@ -241,7 +241,6 @@ export function tourScene(lang: Lang) {
     `${all.map((n) => `#tour-scene[data-step="${n}"] .arrow.s${n} path`).join(', ')} { stroke-dashoffset: 0; }`,
     `${all.map((n) => `#tour-scene[data-step="${n}"] .arrow.s${n} .pk`).join(', ')} { opacity: 1; }`,
     '#tour-scene[data-step="10"] .d10 { opacity: 0.2; }',
-    '#tour-scene[data-step="2"] .dim2 { opacity: 0.55; }',
     ...[1, 3, 4, 5, 9, 10, 12, 18].map((n) => `#tour-scene[data-step="${n}"] .h${n} > rect:first-child { stroke: var(--amber); stroke-opacity: 1; stroke-width: 1.8; filter: url(#tour-glow); }`),
     '#tour-scene[data-step="10"] .h10 .chip-r { fill: color-mix(in srgb, var(--amber) 14%, var(--night)); }',
     '#tour-scene[data-step="10"] .h10 .chip-t { fill: var(--amber); font-weight: 700; }',
