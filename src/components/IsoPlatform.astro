@@ -1,0 +1,467 @@
+---
+// platform-eks-gitops on AWS as an isometric model, at night: the region,
+// the VPC, two Spot nodes and their pods, the AWS services beside them, and
+// GitHub and the internet floating outside. The layers land one after the
+// other, then the flows start: GitOps in green, traffic in amber, secrets in
+// magenta, as everywhere on the site.
+//
+// Everything is computed here, at build time: the page receives plain SVG,
+// animated by CSS, and no script.
+import { logos, type LogoName } from '../logos';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  class?: string;
+}
+
+const { lang, class: className } = Astro.props;
+const t = ui[lang];
+
+// World units: x runs down to the right, y down to the left, z up.
+const C = Math.cos(Math.PI / 6);
+const P = (x: number, y: number, z: number): [number, number] => [(x - y) * C, (x + y) / 2 - z];
+const pts = (...ps: [number, number][]) => ps.map(([a, b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join(' ');
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+type Kind = 'region' | 'vpc' | 'node' | 'pod' | 'svc' | 'nlb' | 'ext';
+type Block = {
+  at: [number, number, number];
+  size: [number, number, number];
+  kind: Kind;
+  /** When it lands, in seconds after the page shows. */
+  delay: number;
+  /** A logo or a few letters, lying on the top face. */
+  logo?: LogoName;
+  letters?: string;
+  logoScale?: number;
+  label?: string;
+  /** Floats above a glowing pad, outside the region. */
+  floats?: boolean;
+  /** Small lights on the right face, as on a server. */
+  lights?: boolean;
+};
+
+const blocks: Block[] = [
+  { at: [0, 0, 0], size: [600, 560, 20], kind: 'region', delay: 0, label: 'AWS · eu-north-1' },
+  { at: [24, 24, 20], size: [380, 500, 12], kind: 'vpc', delay: 0.2, label: 'VPC' },
+  { at: [44, 48, 32], size: [160, 340, 16], kind: 'node', delay: 0.35, label: 'Spot · 1a', lights: true },
+  { at: [224, 48, 32], size: [160, 340, 16], kind: 'node', delay: 0.45, label: 'Spot · 1b', lights: true },
+  { at: [44, 410, 32], size: [340, 70, 22], kind: 'nlb', delay: 1.25, logo: 'nlb', logoScale: 0.5, label: 'NLB' },
+  { at: [432, 40, 20], size: [140, 120, 64], kind: 'svc', delay: 0.55, logo: 'eks', label: 'EKS 1.36' },
+  { at: [432, 196, 20], size: [140, 110, 48], kind: 'svc', delay: 0.65, logo: 'secretsmanager', label: 'Secrets Manager' },
+  { at: [432, 342, 20], size: [140, 96, 40], kind: 'svc', delay: 0.75, logo: 's3', label: t.stateBucket },
+  { at: [432, 466, 20], size: [140, 72, 30], kind: 'svc', delay: 0.85, logo: 'iam', logoScale: 0.5, label: 'Pod Identity' },
+  { at: [-200, 200, 130], size: [140, 120, 40], kind: 'ext', delay: 1.0, logo: 'github', logoScale: 0.7, label: 'GitHub', floats: true },
+  { at: [250, 640, 44], size: [140, 92, 28], kind: 'ext', delay: 1.1, letters: 'www', logoScale: 0.9, label: 'Internet', floats: true },
+];
+
+// The pods of each node, on a grid of two by three. Without a logo of its
+// own, a pod shows what it is for: TLS for cert-manager, SLO for Sloth.
+const nodes: { x: number; pods: ({ logo: LogoName } | { letters: string })[] }[] = [
+  {
+    x: 44,
+    pods: [{ logo: 'argo' }, { logo: 'envoy' }, { logo: 'externalsecrets' }, { logo: 'prometheus' }, { logo: 'grafana' }, { letters: 'TLS' }],
+  },
+  {
+    x: 224,
+    pods: [{ logo: 'fastapi' }, { logo: 'fastapi' }, { logo: 'envoy' }, { letters: 'SLO' }, { logo: 'kubernetes' }],
+  },
+];
+nodes.forEach((node, n) =>
+  node.pods.forEach((pod, i) =>
+    blocks.push({
+      at: [node.x + 14 + (i % 2) * 76, 62 + Math.floor(i / 2) * 104, 48],
+      size: [56, 56, 50],
+      kind: 'pod',
+      delay: 0.7 + n * 0.12 + i * 0.07,
+      ...pod,
+    }),
+  ),
+);
+
+const face = (b: Block) => {
+  const [x, y, z] = b.at;
+  const [w, d, h] = b.size;
+  const top = pts(P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h));
+  const left = pts(P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h));
+  const right = pts(P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h));
+  let out = `<polygon class="l" points="${left}"/><polygon class="r" points="${right}"/><polygon class="t" points="${top}"/>`;
+
+  // The region's floor carries a faint grid, as in a control room.
+  if (b.kind === 'region') {
+    let lines = '';
+    for (let v = 40; v < w; v += 40) lines += `<polyline points="${pts(P(x + v, y, z + h), P(x + v, y + d, z + h))}"/>`;
+    for (let v = 40; v < d; v += 40) lines += `<polyline points="${pts(P(x, y + v, z + h), P(x + w, y + v, z + h))}"/>`;
+    out += `<g class="grid">${lines}</g>`;
+  }
+
+  // A logo lies flat on the top face, on a square at its centre: the matrix
+  // maps a 100 by 100 square onto it, so the logo takes the perspective of
+  // the block and keeps its proportions.
+  if (b.logo || b.letters) {
+    const side = Math.min(w, d) * (b.logoScale ?? 0.66);
+    const [cx, cy, top] = [x + w / 2, y + d / 2, z + h];
+    const p0 = P(cx - side / 2, cy - side / 2, top);
+    const p1 = P(cx + side / 2, cy - side / 2, top);
+    const p3 = P(cx - side / 2, cy + side / 2, top);
+    const m = [(p1[0] - p0[0]) / 100, (p1[1] - p0[1]) / 100, (p3[0] - p0[0]) / 100, (p3[1] - p0[1]) / 100, p0[0], p0[1]];
+    const inner = b.logo
+      ? `<svg width="100" height="100" viewBox="${logos[b.logo].viewBox}">${logos[b.logo].body}</svg>`
+      : `<text class="letters" x="50" y="62" text-anchor="middle">${esc(b.letters ?? '')}</text>`;
+    out += `<g transform="matrix(${m.map((v) => v.toFixed(3)).join(' ')})">${inner}</g>`;
+  }
+
+  if (b.lights) {
+    for (let i = 0; i < 3; i++) {
+      const [lx, ly] = P(x + w, y + 22 + i * 14, z + h / 2);
+      out += `<circle class="light${i === 0 ? ' blink' : ''}" cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.2"/>`;
+    }
+  }
+
+  if (b.floats) {
+    const [cx, cy] = P(x + w / 2, y + d / 2, z - 44);
+    const r = Math.max(w, d) * 0.62;
+    const pad = `<ellipse class="pad" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(r * 1.2247).toFixed(1)}" ry="${(r * 0.7071).toFixed(1)}"/>`;
+    out = `${pad}<g class="bob">${out}</g>`;
+  }
+  return out;
+};
+
+// Painter's order: what is further back, then lower, is drawn first.
+const ordered = [...blocks].sort((a, b) => a.at[0] + a.at[1] + a.at[2] - (b.at[0] + b.at[1] + b.at[2]));
+const body = ordered
+  .map((b) => `<g class="blk k-${b.kind}" style="--d:${b.delay.toFixed(2)}s">${face(b)}</g>`)
+  .join('');
+
+// The labels go on top of every block, so none is ever hidden. Each one
+// starts at the block's front corner; its width is estimated, to fit the
+// frame of the picture around it.
+const LABEL = 20;
+const TAG = 17;
+const placed = blocks
+  .filter((b) => b.label)
+  .map((b) => {
+    const [x, y, z] = b.at;
+    const [w, d] = b.size;
+    const [lx, ly] = P(x + w, y + d, z);
+    const tag = b.kind === 'region';
+    const size = tag ? TAG : LABEL;
+    const text = b.label ?? '';
+    return { b, x: lx + 12, y: ly + 7, cls: tag ? 'tag' : 'lbl', text, width: text.length * size * (tag ? 0.68 : 0.56) };
+  });
+const labels = placed
+  .map(
+    (l) =>
+      `<g class="blk" style="--d:${(l.b.delay + 0.2).toFixed(2)}s"><text class="${l.cls}" x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}">${esc(l.text)}</text></g>`,
+  )
+  .join('');
+
+// Each flow is a line through points of the model, with packets running
+// along it once everything has landed.
+const flow = (kind: 'gitops' | 'traffic' | 'secrets', route: [number, number, number][], seconds: number, delay: number) => {
+  const d = route.map((p, i) => `${i ? 'L' : 'M'}${P(...p).map((v) => v.toFixed(1)).join(',')}`).join(' ');
+  const packets = [0, 1, 2]
+    .map((i) => `<circle r="4.5"><animateMotion dur="${seconds}s" repeatCount="indefinite" begin="${(-i * seconds) / 3}s" path="${d}"/></circle>`)
+    .join('');
+  return `<g class="flow f-${kind}" style="--d:${delay}s"><path d="${d}"/><g class="packets">${packets}</g></g>`;
+};
+const flows =
+  flow('gitops', [[-130, 260, 130], [86, 90, 98]], 2.6, 1.9) +
+  flow('traffic', [[320, 686, 44], [214, 445, 54], [266, 194, 98]], 2.4, 2.0) +
+  flow('secrets', [[86, 194, 98], [502, 251, 68]], 2.4, 2.1);
+
+// The viewBox fits the model and its labels, whatever its blocks.
+const corners = blocks.flatMap((b) => {
+  const [x, y, z] = b.at;
+  const [w, d, h] = b.size;
+  return [P(x, y, z + h), P(x + w, y, z + h), P(x, y + d, z), P(x + w, y + d, z), P(x, y + d, z + h), P(x + w, y, z)];
+});
+const ends = placed.flatMap((l): [number, number][] => [[l.x + l.width, l.y + 6], [l.x, l.y + 6]]);
+const xs = [...corners, ...ends].map(([a]) => a);
+const ys = [...corners, ...ends].map(([, b]) => b);
+const [minX, maxX, minY, maxY] = [Math.min(...xs) - 24, Math.max(...xs) + 24, Math.min(...ys) - 24, Math.max(...ys) + 24];
+const viewBox = [minX, minY, maxX - minX, maxY - minY].map((v) => v.toFixed(0)).join(' ');
+// A glow under the region, centred on it.
+const [floorX, floorY] = P(300, 280, 0);
+---
+
+<figure class:list={['iso', className]}>
+  <svg viewBox={viewBox} role="img" aria-label={t.sceneLabel}>
+    <defs>
+      <filter id="iso-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+        <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+      </filter>
+      <radialGradient id="iso-floor">
+        <stop offset="0" stop-opacity="0.16"></stop>
+        <stop offset="1" stop-opacity="0"></stop>
+      </radialGradient>
+    </defs>
+    <ellipse class="floor" cx={floorX} cy={floorY + 30} rx="620" ry="330" fill="url(#iso-floor)"></ellipse>
+    <Fragment set:html={body} />
+    <Fragment set:html={flows} />
+    <Fragment set:html={labels} />
+  </svg>
+  <figcaption class="legend">
+    <span class="key gitops">{t.flows.gitops}</span>
+    <span class="key traffic">{t.flows.traffic}</span>
+    <span class="key secrets">{t.flows.secrets}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .iso {
+    margin: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Faces: the top catches the light, the two sides fall into the night. */
+  .iso :global(.t) {
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+  }
+
+  .iso :global(.k-region .t) {
+    fill: color-mix(in srgb, var(--line) 9%, var(--night));
+    stroke: color-mix(in srgb, var(--cyan) 30%, transparent);
+  }
+  .iso :global(.k-region .l) {
+    fill: color-mix(in srgb, var(--line) 6%, var(--night));
+  }
+  .iso :global(.k-region .r) {
+    fill: color-mix(in srgb, var(--line) 3%, var(--night));
+  }
+
+  .iso :global(.k-vpc .t) {
+    fill: color-mix(in srgb, var(--green) 9%, var(--night));
+    stroke: color-mix(in srgb, var(--green) 45%, transparent);
+  }
+  .iso :global(.k-vpc .l) {
+    fill: color-mix(in srgb, var(--green) 7%, var(--night));
+  }
+  .iso :global(.k-vpc .r) {
+    fill: color-mix(in srgb, var(--green) 4%, var(--night));
+  }
+
+  .iso :global(.k-node .t) {
+    fill: color-mix(in srgb, var(--line) 15%, var(--night));
+    stroke: color-mix(in srgb, var(--line) 35%, transparent);
+  }
+  .iso :global(.k-node .l),
+  .iso :global(.k-svc .l),
+  .iso :global(.k-ext .l) {
+    fill: color-mix(in srgb, var(--line) 10%, var(--night));
+  }
+  .iso :global(.k-node .r),
+  .iso :global(.k-svc .r),
+  .iso :global(.k-ext .r) {
+    fill: color-mix(in srgb, var(--line) 6%, var(--night));
+  }
+
+  .iso :global(.k-pod .t) {
+    fill: color-mix(in srgb, var(--line) 24%, var(--night));
+    stroke: color-mix(in srgb, var(--line) 55%, transparent);
+  }
+  .iso :global(.k-pod .l) {
+    fill: color-mix(in srgb, var(--line) 15%, var(--night));
+  }
+  .iso :global(.k-pod .r) {
+    fill: color-mix(in srgb, var(--line) 10%, var(--night));
+  }
+
+  .iso :global(.k-svc .t) {
+    fill: color-mix(in srgb, var(--line) 17%, var(--night));
+    stroke: color-mix(in srgb, var(--line) 40%, transparent);
+  }
+
+  .iso :global(.k-ext .t) {
+    fill: color-mix(in srgb, var(--line) 20%, var(--night));
+    stroke: color-mix(in srgb, var(--cyan) 60%, transparent);
+  }
+
+  .iso :global(.k-nlb .t) {
+    fill: color-mix(in srgb, var(--amber) 14%, var(--night));
+    stroke: color-mix(in srgb, var(--amber) 70%, transparent);
+  }
+  .iso :global(.k-nlb .l) {
+    fill: color-mix(in srgb, var(--amber) 10%, var(--night));
+  }
+  .iso :global(.k-nlb .r) {
+    fill: color-mix(in srgb, var(--amber) 6%, var(--night));
+  }
+
+  stop {
+    stop-color: var(--cyan);
+  }
+
+  .iso :global(.grid) {
+    fill: none;
+    stroke: color-mix(in srgb, var(--line) 9%, transparent);
+    stroke-width: 1;
+  }
+
+  .iso :global(.letters) {
+    fill: var(--cyan);
+    font: 600 34px var(--font-mono);
+  }
+
+  .iso :global(.light) {
+    fill: var(--green);
+    filter: url(#iso-glow);
+  }
+
+  .iso :global(.pad) {
+    fill: color-mix(in srgb, var(--cyan) 6%, transparent);
+    stroke: color-mix(in srgb, var(--cyan) 40%, transparent);
+    stroke-width: 1.2;
+  }
+
+  .iso :global(.lbl),
+  .iso :global(.tag) {
+    paint-order: stroke;
+    stroke: var(--night);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  .iso :global(.lbl) {
+    fill: var(--ink-2);
+    font: 600 20px var(--font-ui);
+  }
+
+  .iso :global(.tag) {
+    fill: var(--cyan);
+    font: 500 17px var(--font-mono);
+    letter-spacing: 0.08em;
+  }
+
+  /* The flows: a glowing line, and packets running along it. */
+  .iso :global(.flow path) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-opacity: 0.8;
+    filter: url(#iso-glow);
+  }
+
+  .iso :global(.flow circle) {
+    fill: currentColor;
+    filter: url(#iso-glow);
+  }
+
+  .iso :global(.f-gitops) {
+    color: var(--green);
+  }
+  .iso :global(.f-traffic) {
+    color: var(--amber);
+  }
+  .iso :global(.f-secrets) {
+    color: var(--magenta);
+  }
+
+  /* The legend, in the page's own type, readable at any size. */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-5);
+    color: var(--muted);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .key::before {
+    content: '';
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .key.gitops::before {
+    color: var(--green);
+  }
+  .key.traffic::before {
+    color: var(--amber);
+  }
+  .key.secrets::before {
+    color: var(--magenta);
+  }
+
+  /* Motion: each block drops into place at its own moment, then the flows
+     fade in and the packets start; the floating blocks keep hovering. */
+  @media (prefers-reduced-motion: no-preference) {
+    .iso :global(.blk) {
+      animation: land 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d) both;
+    }
+
+    .iso :global(.flow) {
+      animation: appear 0.8s ease var(--d) both;
+    }
+
+    .iso :global(.bob) {
+      animation: bob 6s ease-in-out 2s infinite;
+    }
+
+    .iso :global(.blink) {
+      animation: blink 1.4s steps(1) 2s infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .iso :global(.packets) {
+      display: none;
+    }
+  }
+
+  @keyframes land {
+    from {
+      opacity: 0;
+      transform: translateY(-36px);
+    }
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes bob {
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  /* On a phone the labels would be too small to read; the logos and the
+     legend still say what is what. */
+  @media (max-width: 639px) {
+    .iso :global(.lbl),
+    .iso :global(.tag) {
+      display: none;
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
-// The top of every page: the name, which leads home, the way to the contact
-// links, and the switch to the same page in the other language.
+// The top of every page: the name, which leads home, the way to the
+// projects and to the contact links, and the switch to the same page in the
+// other language.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { languages, ui, type Lang } from '../i18n';
 
@@ -24,6 +25,7 @@ const codes = Object.keys(languages) as Lang[];
     Olivier Guandalini
   </a>
   <div class="cluster tools">
+    <a class="link" href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.projects}</a>
     <a class="link" href="#contact">{t.contact}</a>
     <nav class="langs" aria-label={t.language}>
       {
@@ -88,9 +90,10 @@ const codes = Object.keys(languages) as Lang[];
     color: var(--ink);
   }
 
-  /* On a phone the name and both switches would not fit on one line; the
-     contact links are still at the bottom of the page. */
-  @media (max-width: 479px) {
+  /* On a phone the name, the links and the switch would not fit on one line;
+     the projects follow the introduction, and the contact links end every
+     page. */
+  @media (max-width: 559px) {
     .link {
       display: none;
     }
