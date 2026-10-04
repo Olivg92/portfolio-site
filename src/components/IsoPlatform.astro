@@ -123,7 +123,7 @@ const face = (b: Block) => {
     const [cx, cy] = P(x + w / 2, y + d / 2, z - 44);
     const r = Math.max(w, d) * 0.62;
     const pad = `<ellipse class="pad" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(r * 1.2247).toFixed(1)}" ry="${(r * 0.7071).toFixed(1)}"/>`;
-    out = `${pad}<g class="bob">${out}</g>`;
+    out = `${pad}${out}`;
   }
   return out;
 };
@@ -157,19 +157,48 @@ const labels = placed
   )
   .join('');
 
-// Each flow is a line through points of the model, with packets running
-// along it once everything has landed.
-const flow = (kind: 'gitops' | 'traffic' | 'secrets', route: [number, number, number][], seconds: number, delay: number) => {
-  const d = route.map((p, i) => `${i ? 'L' : 'M'}${P(...p).map((v) => v.toFixed(1)).join(',')}`).join(' ');
-  const packets = [0, 1, 2]
-    .map((i) => `<circle r="4.5"><animateMotion dur="${seconds}s" repeatCount="indefinite" begin="${(-i * seconds) / 3}s" path="${d}"/></circle>`)
+// Each flow arcs from block to block, above the pods, in the direction the
+// data goes; packets run along it once everything has landed. A hop is a
+// curve whose middle rises `rise` above the straight line between its ends:
+// the projection is linear, so projecting the control point of the curve in
+// space draws its projection. The ends sit on the top faces, beside the
+// logos rather than on them, each marked by a small port.
+type Point = [number, number, number];
+const xy = (p: Point) =>
+  P(...p)
+    .map((v) => v.toFixed(1))
+    .join(',');
+const flow = (kind: 'gitops' | 'traffic' | 'secrets', start: Point, hops: { to: Point; rise: number }[], seconds: number, delay: number) => {
+  let from = start;
+  let d = `M${xy(start)}`;
+  for (const { to, rise } of hops) {
+    const control: Point = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2 + 2 * rise];
+    d += ` Q${xy(control)} ${xy(to)}`;
+    from = to;
+  }
+  const ports = [start, ...hops.map((hop) => hop.to)]
+    .map((point) => {
+      const [cx, cy] = P(...point);
+      return `<ellipse class="port" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="7.3" ry="4.2"/>`;
+    })
     .join('');
-  return `<g class="flow f-${kind}" style="--d:${delay}s"><path d="${d}"/><g class="packets">${packets}</g></g>`;
+  const count = hops.length + 2;
+  const packets = Array.from(
+    { length: count },
+    (_, i) => `<circle r="4.5"><animateMotion dur="${seconds}s" repeatCount="indefinite" begin="${((-i * seconds) / count).toFixed(2)}s" path="${d}"/></circle>`,
+  ).join('');
+  return `<g class="flow f-${kind}" style="--d:${delay}s">${ports}<path d="${d}"/><g class="packets">${packets}</g></g>`;
 };
 const flows =
-  flow('gitops', [[-130, 260, 130], [86, 90, 98]], 2.6, 1.9) +
-  flow('traffic', [[320, 686, 44], [214, 445, 54], [266, 194, 98]], 2.4, 2.0) +
-  flow('secrets', [[86, 194, 98], [502, 251, 68]], 2.4, 2.1);
+  // GitHub to Argo CD: the desired state comes from git.
+  flow('gitops', [-75, 260, 170], [{ to: [64, 100, 98], rise: 40 }], 2.8, 1.9) +
+  // The internet to the load balancer, then to the gateway.
+  flow('traffic', [320, 652, 72], [{ to: [300, 445, 54], rise: 24 }, { to: [266, 216, 98], rise: 46 }], 2.6, 2.0) +
+  // The gateway to the two replicas of the demo API.
+  flow('traffic', [270, 172, 98], [{ to: [266, 112, 98], rise: 16 }], 1.4, 2.4) +
+  flow('traffic', [270, 172, 98], [{ to: [330, 112, 98], rise: 22 }], 1.6, 2.5) +
+  // Secrets Manager to External Secrets, which turns them into Kubernetes secrets.
+  flow('secrets', [450, 251, 68], [{ to: [108, 194, 98], rise: 60 }], 2.8, 2.1);
 
 // The viewBox fits the model and its labels, whatever its blocks.
 const corners = blocks.flatMap((b) => {
@@ -358,6 +387,13 @@ const [floorX, floorY] = P(300, 280, 0);
     filter: url(#iso-glow);
   }
 
+  .iso :global(.port) {
+    fill: color-mix(in srgb, currentColor 30%, transparent);
+    stroke: currentColor;
+    stroke-width: 1.4;
+    filter: url(#iso-glow);
+  }
+
   .iso :global(.f-gitops) {
     color: var(--green);
   }
@@ -406,7 +442,7 @@ const [floorX, floorY] = P(300, 280, 0);
   }
 
   /* Motion: each block drops into place at its own moment, then the flows
-     fade in and the packets start; the floating blocks keep hovering. */
+     fade in and the packets start. */
   @media (prefers-reduced-motion: no-preference) {
     .iso :global(.blk) {
       animation: land 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d) both;
@@ -414,10 +450,6 @@ const [floorX, floorY] = P(300, 280, 0);
 
     .iso :global(.flow) {
       animation: appear 0.8s ease var(--d) both;
-    }
-
-    .iso :global(.bob) {
-      animation: bob 6s ease-in-out 2s infinite;
     }
 
     .iso :global(.blink) {
@@ -441,12 +473,6 @@ const [floorX, floorY] = P(300, 280, 0);
   @keyframes appear {
     from {
       opacity: 0;
-    }
-  }
-
-  @keyframes bob {
-    50% {
-      transform: translateY(-8px);
     }
   }
 
