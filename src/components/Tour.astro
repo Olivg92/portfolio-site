@@ -505,9 +505,17 @@ const inline = (text: string) => text.split('`');
     aspect-ratio: auto;
   }
 
+  /* The steps lie over the pinned drawing, a screen's height each: clicks
+     pass through them to the chapters and buttons, and only the words of a
+     step catch them. */
   :global(.js) .segments {
     margin-top: -100vh;
     margin-top: -100svh;
+    pointer-events: none;
+  }
+
+  :global(.js) .cap {
+    pointer-events: auto;
   }
 
   :global(.js) .seg {
