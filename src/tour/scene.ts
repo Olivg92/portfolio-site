@@ -67,14 +67,18 @@ export function tourScene(lang: Lang) {
 
   // A chip: a logo and a word in a rounded box, on one row of the drawing. It
   // returns where the next one starts, and remembers its corner for a tick.
+  // A wide logo, such as k3d's wordmark, is drawn lower and takes its width.
   const corners = new Map<string, [number, number]>();
   const CHAR = 7.6;
   const chip = (x: number, y: number, label: string, mark: LogoName | 'lock' | null, cls: string, key = label) => {
-    const w = Math.round((mark ? 40 : 14) + label.length * CHAR + 14);
+    const aspect = mark && mark !== 'lock' ? ((logos[mark] as { aspect?: number }).aspect ?? 1) : 1;
+    const [mw, mh] = aspect > 1.5 ? [Math.round(14 * aspect), 14] : [22, 22];
+    const textX = mark ? x + 10 + mw + 8 : x + 14;
+    const w = Math.round(textX - x + label.length * CHAR + 14);
     const parts = [R(x, y, w, 38, 'chip-r', 9)];
     if (mark === 'lock') parts.push(lock(x + 10, y + 8, 22));
-    else if (mark) parts.push(logo(mark, x + 10, y + 8, 22));
-    parts.push(T(x + (mark ? 40 : 14), y + 24, label, 'chip-t'));
+    else if (mark) parts.push(logo(mark, x + 10, y + (38 - mh) / 2, mw, mh));
+    parts.push(T(textX, y + 24, label, 'chip-t'));
     g(`chip ${cls}`, ...parts);
     corners.set(key, [x + w - 6, y + 2]);
     return x + w + 10;
@@ -95,7 +99,7 @@ export function tourScene(lang: Lang) {
   };
 
   // The grounds: the machine, then the AWS account.
-  g(`${S(LOCAL)} t8`, R(24, 150, 632, 548, 'frame-local', 16), R(40, 162, 52, 28, 'mini-r', 6), T(66, 181, 'k3d', 'mini-t', 'middle'), T(104, 182, L('ON THE MACHINE, IN DOCKER', 'SUR LA MACHINE, DANS DOCKER'), 'tag'));
+  g(`${S(LOCAL)} t8`, R(24, 150, 632, 548, 'frame-local', 16), logo('k3d', 40, 166, 50, 19), T(104, 182, L('ON THE MACHINE, IN DOCKER', 'SUR LA MACHINE, DANS DOCKER'), 'tag'));
   g(`${S(LOCAL)} t8 h3`, R(40, 200, 196, 30, 'mini-r', 7), T(52, 220, L('a kubeconfig of its own', 'un kubeconfig à part'), 'mini-t'));
   g(`${S(AWS)} g12 g13 t8`, R(24, 150, 632, 548, 'frame-aws', 16), logo('awscloud', 40, 162, 28));
   g('s12', T(80, 182, L('AWS ACCOUNT · EU-NORTH-1', 'COMPTE AWS · EU-NORTH-1'), 'tag'));
@@ -122,7 +126,7 @@ export function tourScene(lang: Lang) {
   // Step 2: what make check-tools looks for.
   g('s2', T(40, 190, L('WHAT MAKE CHECK-TOOLS LOOKS FOR', 'CE QUE MAKE CHECK-TOOLS CHERCHE'), 'tag'));
   let x = 40;
-  for (const [label, mark] of [['docker', 'docker'], ['k3d', null], ['kubectl', 'kubernetes'], ['helm', 'helm']] as const) x = chip(x, 214, label, mark, 's2');
+  for (const [label, mark] of [['docker', 'docker'], ['k3d', 'k3d'], ['kubectl', 'kubernetes'], ['helm', 'helm']] as const) x = chip(x, 214, label, mark, 's2');
   x = 40;
   for (const [label, mark] of [['python3', 'python'], ['curl', 'curl']] as const) x = chip(x, 270, label, mark, 's2');
   g('s2', T(40, 346, L('AND FOR AWS', 'ET POUR AWS'), 'tag'));
@@ -142,7 +146,7 @@ export function tourScene(lang: Lang) {
   const rows: [number, string, string, [string, LogoName | 'lock' | null, string, string?][]][] = [
     [272, '-2', 'w1 t6', [['cert-manager', 'lock', ''], ['Envoy Gateway', 'envoy', ''], ['External Secrets', 'externalsecrets', '']]],
     [330, '-1', 'w2 t5', [[L('Platform CA', 'CA plateforme'), 'lock', ''], ['SecretStore', 'externalsecrets', '', 'secretstore']]],
-    [388, '0', 'w3 t4', [['gateway', 'envoy', ''], ['Prometheus', 'prometheus', 'h9'], ['Grafana', 'grafana', 'h9'], ['Sloth', null, '']]],
+    [388, '0', 'w3 t4', [['gateway', 'envoy', ''], ['Prometheus', 'prometheus', 'h9'], ['Grafana', 'grafana', 'h9'], ['Sloth', 'sloth', '']]],
   ];
   for (const [y, wave, timing, chips] of rows) {
     g(`${platform} ${timing}`, R(40, y + 4, 44, 30, 'wave-r', 6), T(62, y + 24, wave, 'wave-t', 'middle'));

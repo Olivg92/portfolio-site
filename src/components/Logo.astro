@@ -9,10 +9,12 @@ interface Props {
 }
 
 const { name, size = 16 } = Astro.props;
-const logo = logos[name];
+const logo: { viewBox: string; body: string; aspect?: number } = logos[name];
+// A wide logo, such as a wordmark, keeps the height and takes the width it needs.
+const width = Math.round(size * (logo.aspect ?? 1));
 ---
 
-<svg class="logo" viewBox={logo.viewBox} width={size} height={size} aria-hidden="true" focusable="false" set:html={logo.body} />
+<svg class="logo" viewBox={logo.viewBox} width={width} height={size} aria-hidden="true" focusable="false" set:html={logo.body} />
 
 <style>
   .logo {

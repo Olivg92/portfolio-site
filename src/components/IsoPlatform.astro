@@ -57,7 +57,7 @@ const blocks: Block[] = [
 ];
 
 // The pods of each node, on a grid of two by three. Without a logo of its
-// own, a pod shows what it is for: TLS for cert-manager, SLO for Sloth.
+// own, a pod shows what it is for: TLS for cert-manager.
 const nodes: { x: number; pods: ({ logo: LogoName } | { letters: string })[] }[] = [
   {
     x: 44,
@@ -65,7 +65,7 @@ const nodes: { x: number; pods: ({ logo: LogoName } | { letters: string })[] }[]
   },
   {
     x: 224,
-    pods: [{ logo: 'fastapi' }, { logo: 'fastapi' }, { logo: 'envoy' }, { letters: 'SLO' }, { logo: 'kubernetes' }],
+    pods: [{ logo: 'fastapi' }, { logo: 'fastapi' }, { logo: 'envoy' }, { logo: 'sloth' }, { logo: 'kubernetes' }],
   },
 ];
 nodes.forEach((node, n) =>
