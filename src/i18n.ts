@@ -31,7 +31,7 @@ type Strings = {
   source: string;
   builtWith: string;
   takeTour: string;
-  previewAlt: { home: string; tour: string };
+  previewAlt: { home: string; tour: string; experience: string };
   experience: {
     nav: string;
     mine: string;
@@ -113,6 +113,7 @@ export const ui: Record<Lang, Strings> = {
     previewAlt: {
       home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
       tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
+      experience: 'What Olivier Guandalini runs in production, in numbers: 400+ on-prem Linux servers, a Kubernetes cluster in about 15 minutes',
     },
     experience: {
       nav: 'Experience',
@@ -126,8 +127,8 @@ export const ui: Record<Lang, Strings> = {
       solvedEyebrow: 'At work',
       solvedTitle: 'Problems solved',
       solvedLede: 'Each time: the problem, what I did, and what it changed.',
-      problem: 'The problem',
       toolsHint: 'Hover or tap a tool to see what it is.',
+      problem: 'The problem',
       did: 'What I did',
       result: 'The result',
       alsoTitle: 'Also',
@@ -185,9 +186,9 @@ export const ui: Record<Lang, Strings> = {
     projectsLede: "Chaque dépôt se clone et se lance\u00a0: un README pour démarrer en quelques minutes, les décisions écrites, les vérifications rejouées à chaque changement.",
     status: { finished: 'Terminé', building: 'En cours', next: 'À venir' },
     stack: 'Construit avec',
-    readCode: 'Lire le code sur GitHub',
     here: 'Ici',
     toolsHint: "Survolez ou touchez un outil pour voir ce que c'est, et ce qu'il fait ici.",
+    readCode: 'Lire le code sur GitHub',
     measured: "Mesuré depuis un clone neuf\u00a0: 4 minutes 33 secondes jusqu'à ce contrôle tout au vert.",
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
     source: 'Code source de ce site',
@@ -196,6 +197,7 @@ export const ui: Record<Lang, Strings> = {
     previewAlt: {
       home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
       tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
+      experience: "Ce qu'Olivier Guandalini fait tourner en production, en chiffres\u00a0: 400+ serveurs Linux on-prem, un cluster Kubernetes en 15 minutes environ",
     },
     experience: {
       nav: 'Expérience',
@@ -209,9 +211,9 @@ export const ui: Record<Lang, Strings> = {
       solvedEyebrow: 'Au travail',
       solvedTitle: 'Problèmes résolus',
       solvedLede: "Chaque fois\u00a0: le problème, ce que j'ai fait, et ce que ça a changé.",
+      toolsHint: "Survolez ou touchez un outil pour voir ce que c'est.",
       problem: 'Le problème',
       did: "Ce que j'ai fait",
-      toolsHint: "Survolez ou touchez un outil pour voir ce que c'est.",
       result: 'Le résultat',
       alsoTitle: 'Aussi',
       ongoing: 'En cours',
