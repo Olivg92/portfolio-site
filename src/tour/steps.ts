@@ -146,8 +146,8 @@ export const steps: Step[] = [
     chapter: 'local',
     title: t('Check', 'Vérifier'),
     body: t(
-      'Nine end-to-end checks, each of which passes or says what is missing: the applications, the gateway over HTTP and HTTPS, a secret that came from Vault, Grafana and the demo API behind the gateway, the metrics and the SLO rules.',
-      "Neuf vérifications de bout en bout, chacune passe ou dit ce qui manque : les applications, la gateway en HTTP et en HTTPS, un secret venu de Vault, Grafana et l'API de démo derrière la gateway, les métriques et les règles de SLO.",
+      'Nine end-to-end checks, each of which passes or says what is missing: the applications, the gateway over HTTP and HTTPS, a secret that came from Vault, Grafana and the demo API behind the gateway, the metrics, the SLO rules and their dashboard.',
+      "Neuf vérifications de bout en bout, chacune passe ou dit ce qui manque : les applications, la gateway en HTTP et en HTTPS, un secret venu de Vault, Grafana et l'API de démo derrière la gateway, les métriques, les règles de SLO et leur tableau de bord.",
     ),
     transcript: localVerify,
     metric: { value: t('9 / 9', '9 / 9'), caption: t('checks passed', 'contrôles réussis') },
@@ -179,8 +179,8 @@ export const steps: Step[] = [
     chapter: 'local',
     title: t('Delete it all', 'Tout supprimer'),
     body: t(
-      'One command deletes the cluster, and nothing else: the repository stays as it was, ready for the next `make local-up`.',
-      "Une commande supprime le cluster, et rien d'autre : le dépôt reste tel quel, prêt pour le prochain `make local-up`.",
+      'One command deletes the cluster and its kubeconfig, and nothing else: the repository stays as it was, ready for the next `make local-up`.',
+      "Une commande supprime le cluster et son kubeconfig, rien d'autre : le dépôt reste tel quel, prêt pour le prochain `make local-up`.",
     ),
     transcript: localDown,
     metric: { value: t('0 clusters', '0 cluster'), caption: t('after make local-down', 'après make local-down') },
@@ -259,10 +259,10 @@ export const steps: Step[] = [
     chapter: 'continuous',
     title: t('The CI', 'La CI'),
     body: t(
-      'The same checks run locally and on every push, from the same file: Terraform and Kubernetes linting, secrets detection. GitHub Actions then builds the image, tests it, scans it with Trivy and pushes it to GHCR; every week, a workflow checks the age of the base images and scans the published image again.',
-      "Les mêmes vérifications tournent en local et à chaque push, depuis le même fichier : lint de Terraform et de Kubernetes, détection de secrets. GitHub Actions construit ensuite l'image, la teste, la scanne avec Trivy et la publie sur GHCR ; chaque semaine, un workflow vérifie l'âge des images de base et scanne à nouveau l'image publiée.",
+      'The same checks run locally and on every pull request, from the same file: Terraform and Kubernetes linting, secrets detection. When the demo API changes, GitHub Actions also builds its image, tests it and scans it with Trivy, then pushes it to GHCR from `main`; every week, a workflow checks the age of the base images and scans the published image again.',
+      "Les mêmes vérifications tournent en local et à chaque pull request, depuis le même fichier : lint de Terraform et de Kubernetes, détection de secrets. Quand l'API de démo change, GitHub Actions construit aussi son image, la teste et la scanne avec Trivy, puis la publie sur GHCR depuis `main` ; chaque semaine, un workflow vérifie l'âge des images de base et scanne à nouveau l'image publiée.",
     ),
     transcript: lint,
-    metric: { value: t('14', '14'), caption: t('checks on every push', 'contrôles par push') },
+    metric: { value: t('14', '14'), caption: t('checks on every PR', 'contrôles par PR') },
   },
 ];

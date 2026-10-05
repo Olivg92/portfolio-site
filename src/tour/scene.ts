@@ -104,8 +104,8 @@ export function tourScene(lang: Lang) {
     g(`s${n} band${n === 17 ? ' late17' : ''}`, T(508, 72, step.metric.value[lang], cls), T(508, 98, step.metric.caption[lang], 'small'));
   });
 
-  // Step 2: what make check-tools looks for.
-  g('s2', T(40, 190, L('WHAT MAKE CHECK-TOOLS LOOKS FOR', 'CE QUE MAKE CHECK-TOOLS CHERCHE'), 'tag'));
+  // Step 2: what make check-tools looks for, for the local platform and for AWS.
+  g('s2', T(40, 190, L('FOR THE LOCAL PLATFORM', 'POUR LA PLATEFORME LOCALE'), 'tag'));
   let x = 40;
   for (const [label, mark] of [['docker', 'docker'], ['k3d', 'k3d'], ['kubectl', 'kubernetes'], ['helm', 'helm']] as const) x = chip(x, 214, label, mark, 's2');
   x = 40;
@@ -199,7 +199,7 @@ export function tourScene(lang: Lang) {
     L('IAM roles, Pod Identity, 2 secrets', 'les rôles IAM, Pod Identity, 2 secrets'),
   ];
   g('s11', R(170, 330, 340, 84, 'box ok-box', 12), '<path class="check" d="M194,372 l10,10 l20,-22"/>',
-    T(240, 366, L('Local cluster deleted', 'Cluster local supprimé'), 'ttl-l big-ok'), T(240, 390, L('the repo stays, nothing else', "le dépôt reste, rien d'autre"), 'small'));
+    T(240, 366, L('Local cluster deleted', 'Cluster local supprimé'), 'ttl-l big-ok'), T(240, 390, L('the repo stays as it was', 'le dépôt reste tel quel'), 'small'));
   card('s12', 120, 280, 440, 156, L('Set up by make aws-setup', 'Préparé par make aws-setup'), [
     L('the profile, and an open session', 'le profil, et une session ouverte'),
     L('the region eu-north-1 and two zones', 'la région eu-north-1 et deux zones'),
@@ -209,10 +209,10 @@ export function tourScene(lang: Lang) {
   card('s14', 120, 250, 440, 182, L('Created by Terraform', 'Créé par Terraform'), created, true);
   g('s17 late17', R(170, 330, 340, 84, 'box ok-box', 12), '<path class="check" d="M194,372 l10,10 l20,-22"/>',
     T(240, 366, L('Everything is gone', 'Tout est détruit'), 'ttl-l big-ok'), T(240, 390, L('the state bucket alone remains', "seul le bucket d'état reste"), 'small'));
-  g('s18', R(60, 170, 560, 330, 'box', 14), logo('githubactions', 84, 192, 28), T(124, 214, L('GitHub Actions, on every push', 'GitHub Actions, à chaque push'), 'ttl-l'),
+  g('s18', R(60, 170, 560, 330, 'box', 14), logo('githubactions', 84, 192, 28), T(124, 214, L('GitHub Actions, on every pull request', 'GitHub Actions, à chaque pull request'), 'ttl-l'),
     T(84, 262, 'PRE-COMMIT', 'tag'), T(84, 284, 'fmt, validate, tflint, checkov, gitleaks', 'lbl'),
     T(84, 326, L('MANIFESTS', 'MANIFESTES'), 'tag'), T(84, 348, L('kustomize render and kubeconform', 'rendu kustomize et kubeconform'), 'lbl'),
-    T(84, 390, 'IMAGE', 'tag'), T(84, 412, L('built, tested, scanned by Trivy, pushed to GHCR', 'construite, testée, scannée par Trivy, publiée sur GHCR'), 'lbl'),
+    T(84, 390, L('IMAGE, WHEN THE API CHANGES', "IMAGE, QUAND L'API CHANGE"), 'tag'), T(84, 412, L('built, tested, scanned by Trivy, pushed to GHCR from main', 'construite, testée, scannée par Trivy, publiée sur GHCR depuis main'), 'lbl'),
     T(84, 454, L('EVERY WEEK', 'CHAQUE SEMAINE'), 'tag'), T(84, 476, L('base image age, a new scan', 'âge des images de base, nouveau scan'), 'lbl'));
 
   // The rules that show each step: generated, since every step has its own.
