@@ -12,6 +12,7 @@ type Strings = {
   language: string;
   projects: string;
   contact: string;
+  pages: string;
   kicker: string;
   positioning: string;
   seeProjects: string;
@@ -29,6 +30,31 @@ type Strings = {
   builtWith: string;
   takeTour: string;
   previewAlt: { home: string; tour: string };
+  experience: {
+    nav: string;
+    mine: string;
+    title: string;
+    description: string;
+    eyebrow: string;
+    heading: string;
+    numbers: string;
+    solvedEyebrow: string;
+    solvedTitle: string;
+    solvedLede: string;
+    problem: string;
+    did: string;
+    result: string;
+    alsoTitle: string;
+    ongoing: string;
+    stackTitle: string;
+    atWork: string;
+    inProjects: string;
+    pathTitle: string;
+    educationTitle: string;
+    languages: string;
+    nextTitle: string;
+    nextText: string;
+  };
   tour: {
     title: string;
     description: string;
@@ -60,6 +86,7 @@ export const ui: Record<Lang, Strings> = {
     language: 'Language',
     projects: 'Projects',
     contact: 'Contact',
+    pages: 'Site pages',
     kicker: 'DevOps · SRE · Platform engineering',
     positioning:
       'DevOps and SRE engineer, I run critical infrastructure at scale: more than 400 Linux servers on-prem and Kubernetes clusters. On this site, the platforms I build on my own time, end to end: from Terraform to GitOps, SLOs and runbooks.',
@@ -81,6 +108,33 @@ export const ui: Record<Lang, Strings> = {
     previewAlt: {
       home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
       tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
+    },
+    experience: {
+      nav: 'Experience',
+      mine: 'My experience',
+      title: 'Experience · Olivier Guandalini',
+      description:
+        'Olivier Guandalini, DevOps and SRE engineer: 400+ on-prem Linux servers, Kubernetes clusters created as code, monitoring as code, an AI assistant taken to production. What I solved at work, case by case.',
+      eyebrow: 'Experience · 4 years in production',
+      heading: 'What I run in production',
+      numbers: 'In numbers',
+      solvedEyebrow: 'At work',
+      solvedTitle: 'Problems solved',
+      solvedLede: 'Each time: the problem, what I did, and what it changed.',
+      problem: 'The problem',
+      did: 'What I did',
+      result: 'The result',
+      alsoTitle: 'Also',
+      ongoing: 'In progress',
+      stackTitle: 'The tools, and where I use them',
+      atWork: 'At work, in production',
+      inProjects: 'In my projects, on my own time',
+      pathTitle: 'Path',
+      educationTitle: 'Education',
+      languages: 'Languages',
+      nextTitle: 'And on my own time',
+      nextText:
+        'The public projects on this site take the same subjects end to end, on AWS and on a laptop: cloned in minutes, documented, checked on every change.',
     },
     tour: {
       title: 'platform-eks-gitops, command by command · Olivier Guandalini',
@@ -112,6 +166,7 @@ export const ui: Record<Lang, Strings> = {
     language: 'Langue',
     projects: 'Projets',
     contact: 'Contact',
+    pages: 'Pages du site',
     kicker: 'DevOps · SRE · Platform engineering',
     positioning:
       "Ingénieur DevOps et SRE, je fais tourner une infrastructure critique à grande échelle\u00a0: plus de 400 serveurs Linux on-prem et des clusters Kubernetes. Sur ce site, les plateformes que je construis sur mon temps libre, de bout en bout\u00a0: de Terraform au GitOps, aux SLO et aux runbooks.",
@@ -133,6 +188,33 @@ export const ui: Record<Lang, Strings> = {
     previewAlt: {
       home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
       tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
+    },
+    experience: {
+      nav: 'Expérience',
+      mine: 'Mon expérience',
+      title: 'Expérience · Olivier Guandalini',
+      description:
+        "Olivier Guandalini, ingénieur DevOps et SRE\u00a0: 400+ serveurs Linux on-prem, des clusters Kubernetes créés en code, le monitoring en code, un assistant IA mis en production. Ce que j'ai résolu au travail, cas par cas.",
+      eyebrow: 'Expérience · 4 ans en production',
+      heading: 'Ce que je fais tourner en production',
+      numbers: 'En chiffres',
+      solvedEyebrow: 'Au travail',
+      solvedTitle: 'Problèmes résolus',
+      solvedLede: "Chaque fois\u00a0: le problème, ce que j'ai fait, et ce que ça a changé.",
+      problem: 'Le problème',
+      did: "Ce que j'ai fait",
+      result: 'Le résultat',
+      alsoTitle: 'Aussi',
+      ongoing: 'En cours',
+      stackTitle: 'Les outils, et où je les utilise',
+      atWork: 'Au travail, en production',
+      inProjects: 'Dans mes projets, sur mon temps libre',
+      pathTitle: 'Parcours',
+      educationTitle: 'Formation',
+      languages: 'Langues',
+      nextTitle: 'Et sur mon temps libre',
+      nextText:
+        "Les projets publics de ce site reprennent ces sujets de bout en bout, sur AWS et sur un portable\u00a0: clonés en quelques minutes, documentés, vérifiés à chaque changement.",
     },
     tour: {
       title: 'platform-eks-gitops, commande par commande · Olivier Guandalini',

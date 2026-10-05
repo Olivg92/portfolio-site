@@ -1,0 +1,488 @@
+---
+// The Experience page, the same in both languages apart from its words: what
+// I do at work, told as problems solved, then the rest of the work, the tools
+// and where I use them, the path and the education. No script.
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import Base from '../layouts/Base.astro';
+import Button from './Button.astro';
+import Chip from './Chip.astro';
+import Panel from './Panel.astro';
+import { experience } from '../experience';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const e = t.experience;
+// Words between backticks are code.
+const inline = (text: string) => text.split('`');
+const index = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<Base lang={lang} title={e.title} description={e.description} path="experience/">
+  <header class="intro wrap">
+    <p class="eyebrow">{e.eyebrow}</p>
+    <h1>{e.heading}</h1>
+    <p class="lede">{experience.lede[lang]}</p>
+    <ul class="numbers" aria-label={e.numbers}>
+      {
+        experience.metrics.map((metric) => (
+          <li>
+            <span class="value">{metric.value[lang]}</span>
+            <span class="caption">{metric.label[lang]}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </header>
+
+  <section class="solved wrap" aria-labelledby="solved-title">
+    <div class="head">
+      <p class="eyebrow">{e.solvedEyebrow}</p>
+      <h2 id="solved-title">{e.solvedTitle}</h2>
+      <p class="lede">{e.solvedLede}</p>
+    </div>
+    <ol class="problems">
+      {
+        experience.problems.map((problem, i) => (
+          <li id={problem.id}>
+            <Panel as="article" class="problem" aria-labelledby={`${problem.id}-title`}>
+              <div class="rail">
+                <span class="index" aria-hidden="true">
+                  {index(i)}
+                </span>
+                <h3 id={`${problem.id}-title`}>{problem.title[lang]}</h3>
+                <ul class="cluster" aria-label={t.stack}>
+                  {problem.stack.map((tool) => (
+                    <li>
+                      <Chip logo={tool.logo}>{tool.name}</Chip>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <dl class="story">
+                <div>
+                  <dt>{e.problem}</dt>
+                  <dd>{problem.problem[lang]}</dd>
+                </div>
+                <div>
+                  <dt>{e.did}</dt>
+                  <dd>{problem.did[lang]}</dd>
+                </div>
+                <div class="result">
+                  <dt>{e.result}</dt>
+                  <dd>{inline(problem.result[lang]).map((part, k) => (k % 2 ? <code>{part}</code> : part))}</dd>
+                </div>
+              </dl>
+            </Panel>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="also wrap" aria-labelledby="also-title">
+    <h2 id="also-title">{e.alsoTitle}</h2>
+    <ul class="lines">
+      {
+        experience.also.map((item) => (
+          <li>
+            {item.ongoing && (
+              <Chip tone="amber" live>
+                {e.ongoing}
+              </Chip>
+            )}
+            <span>{item.text[lang]}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="tools wrap" aria-labelledby="tools-title">
+    <h2 id="tools-title">{e.stackTitle}</h2>
+    <div class="columns">
+      <Panel class="column" data-tone="green">
+        <h3>{e.atWork}</h3>
+        <ul class="cluster">
+          {
+            experience.stack.work.map((tool) => (
+              <li>
+                <Chip logo={tool.logo}>{tool.name}</Chip>
+              </li>
+            ))
+          }
+        </ul>
+      </Panel>
+      <Panel class="column" data-tone="cyan">
+        <h3>{e.inProjects}</h3>
+        <ul class="cluster">
+          {
+            experience.stack.projects.map((tool) => (
+              <li>
+                <Chip logo={tool.logo}>{tool.name}</Chip>
+              </li>
+            ))
+          }
+        </ul>
+      </Panel>
+    </div>
+  </section>
+
+  <div class="history wrap">
+    <section aria-labelledby="path-title">
+      <h2 id="path-title">{e.pathTitle}</h2>
+      <ol class="timeline">
+        {
+          experience.path.map((step) => (
+            <li>
+              <p class="when">{step.when[lang]}</p>
+              <h3>{step.role[lang]}</h3>
+              <p>{step.where[lang]}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+    <section aria-labelledby="education-title">
+      <h2 id="education-title">{e.educationTitle}</h2>
+      <ol class="timeline">
+        {
+          experience.education.map((degree) => (
+            <li>
+              <p class="when">{degree.when[lang]}</p>
+              <h3>{degree.degree[lang]}</h3>
+              <p>{degree.note[lang]}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="languages">
+        <span class="eyebrow">{e.languages}</span>
+        <span>{experience.languages[lang]}</span>
+      </p>
+    </section>
+  </div>
+
+  <section class="next wrap" aria-labelledby="next-title">
+    <Panel class="next-panel">
+      <h2 id="next-title">{e.nextTitle}</h2>
+      <p class="lede">{e.nextText}</p>
+      <div class="cluster actions">
+        <Button href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.seeProjects}</Button>
+        <Button href={getRelativeLocaleUrl(lang, 'platform-eks-gitops/')} variant="ghost">{t.takeTour}</Button>
+      </div>
+    </Panel>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+    padding-block: var(--space-8) var(--space-7);
+  }
+
+  .intro h1 {
+    font-size: clamp(2.25rem, 1.2rem + 4.4vw, 4.75rem);
+    max-width: 13em;
+  }
+
+  /* The numbers, as on the control room's panels: the figure in mono, lit,
+     its caption below. */
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .numbers li {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-m);
+    background: color-mix(in srgb, var(--card) 70%, transparent);
+  }
+
+  .value {
+    color: var(--cyan);
+    font: 600 clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem) / 1.1 var(--font-mono);
+    letter-spacing: -0.02em;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .caption {
+    color: var(--muted);
+    font-size: var(--text-s);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 900px) {
+    .numbers {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .solved,
+  .also,
+  .tools,
+  .history,
+  .next {
+    padding-block: var(--space-8) 0;
+  }
+
+  .head {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .problems {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .problems > li {
+    scroll-margin-top: var(--space-5);
+  }
+
+  /* A problem reads as a case file: its title and tools on the side, the
+     story told in three steps, the last one lit, since it is what changed. */
+  .problem {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .rail {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-4);
+  }
+
+  .index {
+    color: var(--cyan);
+    font: 500 var(--label) / 1 var(--font-mono);
+    letter-spacing: 0.12em;
+  }
+
+  .rail h3 {
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+    font-weight: 750;
+  }
+
+  .story {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+  }
+
+  .story > div {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--line-soft);
+  }
+
+  dt {
+    color: var(--muted);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+
+  .story > .result {
+    border-left-color: var(--green);
+  }
+
+  .result dt {
+    color: var(--green);
+  }
+
+  .result dd {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  @media (min-width: 900px) {
+    .problem {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--space-7);
+    }
+  }
+
+  .also h2,
+  .tools h2,
+  .history h2 {
+    margin-bottom: var(--space-5);
+  }
+
+  .lines {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 52rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Each line hangs from a small lit square, the way a list shows on a
+     control panel. */
+  .lines li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--ink-2);
+  }
+
+  /* What is under way says so first, on the same line as its words. */
+  .lines :global(.chip) {
+    margin-right: var(--space-2);
+  }
+
+  .lines li::before {
+    content: '';
+    position: absolute;
+    top: 0.62em;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
+  }
+
+  .columns {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .column {
+    --tone: var(--green);
+    display: grid;
+    align-content: start;
+    gap: var(--space-5);
+  }
+
+  .column[data-tone='cyan'] {
+    --tone: var(--cyan);
+  }
+
+  .column h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--tone);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .column h3::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  @media (min-width: 900px) {
+    .columns {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+
+  .history {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 900px) {
+    .history {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-7);
+    }
+  }
+
+  /* A line down the side, a lit point at each step. */
+  .timeline {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0 0 0 var(--space-5);
+    border-left: 1px solid var(--line-soft);
+    list-style: none;
+  }
+
+  .timeline li {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    top: 0.2em;
+    left: calc(-1 * var(--space-5) - 4px);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+  }
+
+  .when {
+    color: var(--cyan);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .timeline h3 {
+    font-size: var(--text-l);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .timeline p:not(.when) {
+    color: var(--ink-2);
+  }
+
+  .languages {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+    color: var(--ink-2);
+  }
+
+  .next-panel {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+  }
+
+  .actions {
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+</style>
