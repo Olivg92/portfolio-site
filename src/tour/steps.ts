@@ -190,8 +190,8 @@ export const steps: Step[] = [
     chapter: 'aws',
     title: t('Prepare the account', 'Préparer le compte'),
     body: t(
-      'The first time on AWS takes one command. It keeps the profile in `local.mk`, opens a session if needed, finds the region the account allows and two zones EKS accepts, writes `terraform.tfvars` and `backend.hcl`, and creates the state bucket if there is none, after showing its plan.',
-      "La première fois sur AWS tient en une commande. Elle garde le profil dans `local.mk`, ouvre une session si besoin, trouve la région que le compte autorise et deux zones qu'EKS accepte, écrit `terraform.tfvars` et `backend.hcl`, et crée le bucket d'état s'il n'existe pas, après en avoir montré le plan.",
+      'The first time on AWS takes one command, here in a fresh clone. It keeps the profile in `local.mk`, checks the session, finds the region (here, the one where the state bucket already is) and two zones EKS accepts, then writes `terraform.tfvars` and `backend.hcl`. Without a state bucket, it would create one, after showing its plan.',
+      "La première fois sur AWS tient en une commande, ici dans un clone neuf. Elle garde le profil dans `local.mk`, vérifie la session, trouve la région (ici, celle où le bucket d'état existe déjà) et deux zones qu'EKS accepte, puis écrit `terraform.tfvars` et `backend.hcl`. Sans bucket d'état, elle en créerait un, après en avoir montré le plan.",
     ),
     transcript: awsSetup,
     metric: { value: t('1 command', '1 commande'), caption: t('the first time on AWS', 'pour débuter sur AWS') },

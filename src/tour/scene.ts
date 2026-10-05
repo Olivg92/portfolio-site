@@ -200,7 +200,7 @@ export function tourScene(lang: Lang) {
   ];
   g('s11', R(170, 330, 340, 84, 'box ok-box', 12), '<path class="check" d="M194,372 l10,10 l20,-22"/>',
     T(240, 366, L('Local cluster deleted', 'Cluster local supprimé'), 'ttl-l big-ok'), T(240, 390, L('the repo stays, nothing else', "le dépôt reste, rien d'autre"), 'small'));
-  card('s12', 120, 280, 440, 156, L('Found by make aws-setup', 'Trouvé par make aws-setup'), [
+  card('s12', 120, 280, 440, 156, L('Set up by make aws-setup', 'Préparé par make aws-setup'), [
     L('the profile, and an open session', 'le profil, et une session ouverte'),
     L('the region eu-north-1 and two zones', 'la région eu-north-1 et deux zones'),
     L('the state bucket, or its creation', "le bucket d'état, ou sa création"),

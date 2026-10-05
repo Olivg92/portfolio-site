@@ -1,17 +1,33 @@
-# placeholder: replaced by the output of a real session before the merge
 $ make up
-  Terraform init                                      ?s  ok
-  Terraform plan                                      ?s  ok
+AWS session opened 0h01 ago, about 11h58 left
+  Terraform init                                      2s  ok
+  Terraform plan                                      6s  ok
 
 Terraform plan:
   to create: 28
+    1 aws_default_security_group, 4 aws_eks_addon, 1 aws_eks_cluster, 1 aws_eks_node_group,
+    1 aws_eks_pod_identity_association, 3 aws_iam_role, 1 aws_iam_role_policy,
+    4 aws_iam_role_policy_attachment, 1 aws_internet_gateway, 1 aws_launch_template,
+    1 aws_route_table, 2 aws_route_table_association, 2 aws_secretsmanager_secret,
+    2 aws_secretsmanager_secret_version, 2 aws_subnet, 1 aws_vpc
 The Kubernetes API will answer to <your IP>/32 only.
 This costs about $0.18 an hour, until `make down`.
-Apply it? Only 'yes' will be accepted: yes
-  Terraform apply                                  ?m??s  ok  28 of 28 resources
-  Credentials for the new cluster                     ?s  ok
-  Argo CD                                             ?s  ok
-  Root application                                    ?s  ok
-  Platform, synced by Argo CD                      ?m??s  ok  12/12 ready
 
-The platform is up, in ??m??s. Log: logs/up-????????-??????.log
+Apply it? Only 'yes' will be accepted: yes
+
+  Terraform apply                                 11m17s  ok  28 of 28 resources
+  Credentials for the new cluster                     3s  ok
+  Argo CD                                            49s  ok
+  Root application                                    3s  ok
+  Platform, synced by Argo CD                      5m45s  ok  12/12 ready
+
+The platform is up, in 18m09s. Log: logs/up-20261005-092741.log
+
+Check:    make aws-verify
+Argo CD:  make argocd-ui ENV=aws       then http://localhost:8081 (user: admin, make argocd-password ENV=aws)
+Grafana:  make grafana-ui ENV=aws      then http://localhost:3000 (user: admin, make grafana-password ENV=aws)
+Alerts:   make prometheus-ui ENV=aws   then http://localhost:9090/alerts
+Break it: make demo-break ENV=aws RATE=0.2, make demo-load ENV=aws, then make demo-fix ENV=aws
+Gateway:  make aws-gateway-url
+
+This is billing by the hour: make down when you are finished.
