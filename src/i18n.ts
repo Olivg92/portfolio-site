@@ -23,6 +23,8 @@ type Strings = {
   projectsLede: string;
   status: { finished: string; building: string; next: string };
   stack: string;
+  here: string;
+  toolsHint: string;
   readCode: string;
   measured: string;
   contactText: string;
@@ -41,6 +43,7 @@ type Strings = {
     solvedEyebrow: string;
     solvedTitle: string;
     solvedLede: string;
+    toolsHint: string;
     problem: string;
     did: string;
     result: string;
@@ -99,6 +102,8 @@ export const ui: Record<Lang, Strings> = {
     projectsLede: 'Every repository can be cloned and run: a README to start in minutes, the decisions written down, the checks run on every change.',
     status: { finished: 'Finished', building: 'In progress', next: 'Next' },
     stack: 'Built with',
+    here: 'Here',
+    toolsHint: 'Hover or tap a tool to see what it is, and what it does here.',
     readCode: 'Read the code on GitHub',
     measured: 'Measured from a fresh clone: 4 minutes 33 seconds until this check is all green.',
     contactText: 'Write to me on LinkedIn. My code is on GitHub.',
@@ -122,6 +127,7 @@ export const ui: Record<Lang, Strings> = {
       solvedTitle: 'Problems solved',
       solvedLede: 'Each time: the problem, what I did, and what it changed.',
       problem: 'The problem',
+      toolsHint: 'Hover or tap a tool to see what it is.',
       did: 'What I did',
       result: 'The result',
       alsoTitle: 'Also',
@@ -180,6 +186,8 @@ export const ui: Record<Lang, Strings> = {
     status: { finished: 'Terminé', building: 'En cours', next: 'À venir' },
     stack: 'Construit avec',
     readCode: 'Lire le code sur GitHub',
+    here: 'Ici',
+    toolsHint: "Survolez ou touchez un outil pour voir ce que c'est, et ce qu'il fait ici.",
     measured: "Mesuré depuis un clone neuf\u00a0: 4 minutes 33 secondes jusqu'à ce contrôle tout au vert.",
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
     source: 'Code source de ce site',
@@ -203,6 +211,7 @@ export const ui: Record<Lang, Strings> = {
       solvedLede: "Chaque fois\u00a0: le problème, ce que j'ai fait, et ce que ça a changé.",
       problem: 'Le problème',
       did: "Ce que j'ai fait",
+      toolsHint: "Survolez ou touchez un outil pour voir ce que c'est.",
       result: 'Le résultat',
       alsoTitle: 'Aussi',
       ongoing: 'En cours',

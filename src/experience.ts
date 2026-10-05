@@ -5,11 +5,9 @@
 // plan not yet announced, no detail of its security. A missing translation is a
 // type error.
 import type { Lang } from './i18n';
-import type { LogoName } from './logos';
+import type { ToolName } from './tools';
 
 type Text = Record<Lang, string>;
-export type Tool = { name: string; logo?: LogoName };
-
 export type Problem = {
   /** The anchor of the card, the same in both languages. */
   id: string;
@@ -17,7 +15,7 @@ export type Problem = {
   problem: Text;
   did: Text;
   result: Text;
-  stack: Tool[];
+  stack: ToolName[];
 };
 
 // A number keeps its unit on the same line, in both languages. French also
@@ -27,52 +25,13 @@ const NBSP = String.fromCharCode(0xa0);
 const units = (text: string) => text.replace(/(\d) (?=(?:%|Ko|KB|min)(?![a-z]))/g, `$1${NBSP}`);
 const t = (en: string, fr: string): Text => ({ en: units(en), fr: units(fr).replace(/ ([:;?!])/g, `${NBSP}$1`) });
 
-const tool = {
-  ansible: { name: 'Ansible', logo: 'ansible' },
-  argo: { name: 'Argo CD', logo: 'argo' },
-  bash: { name: 'Bash', logo: 'bash' },
-  centos: { name: 'CentOS', logo: 'centos' },
-  datadog: { name: 'Datadog', logo: 'datadog' },
-  debian: { name: 'Debian', logo: 'debian' },
-  docker: { name: 'Docker', logo: 'docker' },
-  elk: { name: 'ELK', logo: 'elastic' },
-  envoy: { name: 'Envoy Gateway', logo: 'envoy' },
-  externalsecrets: { name: 'External Secrets', logo: 'externalsecrets' },
-  gitlab: { name: 'GitLab', logo: 'gitlab' },
-  grafana: { name: 'Grafana', logo: 'grafana' },
-  helm: { name: 'Helm', logo: 'helm' },
-  jenkins: { name: 'Jenkins', logo: 'jenkins' },
-  jira: { name: 'Jira', logo: 'jira' },
-  kibana: { name: 'Kibana', logo: 'kibana' },
-  kubernetes: { name: 'Kubernetes', logo: 'kubernetes' },
-  langfuse: { name: 'Langfuse', logo: 'langfuse' },
-  linux: { name: 'Linux', logo: 'linux' },
-  logstash: { name: 'Logstash', logo: 'logstash' },
-  longhorn: { name: 'Longhorn', logo: 'longhorn' },
-  mcp: { name: 'MCP', logo: 'mcp' },
-  mistral: { name: 'Mistral', logo: 'mistral' },
-  opensearch: { name: 'OpenSearch', logo: 'opensearch' },
-  opentelemetry: { name: 'OpenTelemetry', logo: 'opentelemetry' },
-  ovh: { name: 'OVH', logo: 'ovh' },
-  prometheus: { name: 'Prometheus', logo: 'prometheus' },
-  python: { name: 'Python', logo: 'python' },
-  qdrant: { name: 'Qdrant', logo: 'qdrant' },
-  rancher: { name: 'Rancher', logo: 'rancher' },
-  rundeck: { name: 'Rundeck', logo: 'rundeck' },
-  temurin: { name: 'Eclipse Temurin', logo: 'temurin' },
-  terraform: { name: 'Terraform', logo: 'terraform' },
-  threescale: { name: '3scale', logo: 'redhat' },
-  vault: { name: 'Vault', logo: 'vault' },
-  vsphere: { name: 'vSphere' },
-} satisfies Record<string, Tool>;
-
 type Experience = {
   lede: Text;
   metrics: { value: Text; label: Text }[];
   problems: Problem[];
   /** The rest of the work, in a line each; `ongoing` marks what is under way. */
   also: { ongoing: boolean; text: Text }[];
-  stack: { work: Tool[]; projects: Tool[] };
+  stack: { work: ToolName[]; projects: ToolName[] };
   path: { when: Text; role: Text; where: Text }[];
   education: { when: Text; degree: Text; note: Text }[];
   languages: Text;
@@ -107,7 +66,7 @@ export const experience: Experience = {
         'A new cluster in 10 to 15 minutes with `make apply`, documented for the team: the architecture, how it works, and a step-by-step tutorial.',
         "Un nouveau cluster en 10 à 15 minutes avec `make apply`, documenté pour l'équipe : l'architecture, le fonctionnement et un tutoriel pas à pas.",
       ),
-      stack: [tool.terraform, tool.rancher, tool.vsphere, tool.kubernetes, tool.argo],
+      stack: ['terraform', 'rancher', 'vsphere', 'kubernetes', 'argo'],
     },
     {
       id: 'java',
@@ -121,7 +80,7 @@ export const experience: Experience = {
         'Mon premier rôle Ansible : il installe Eclipse Temurin dans la version demandée, en JDK ou en JRE, sur Debian et CentOS. Puis la migration des projets, avec les applications back-office passées en Java 21.',
       ),
       result: t('One role, used today by 16 projects, from Java 8 to Java 25.', "Un seul rôle, utilisé aujourd'hui par 16 projets, de Java 8 à Java 25."),
-      stack: [tool.ansible, tool.temurin, tool.debian, tool.centos],
+      stack: ['ansible', 'temurin', 'debian', 'centos'],
     },
     {
       id: 'monitoring',
@@ -135,7 +94,7 @@ export const experience: Experience = {
         "Le monitoring en code : les jobs et règles d'alerte Prometheus et Alertmanager, les exporters déployés sur tout le parc par Ansible, des tableaux de bord Grafana pour les équipes. Des SLO et SLA dans Datadog, qui alertent sur Slack et dans Jira.",
       ),
       result: t('Incidents are caught earlier, from the alert rather than from a report.', "Les incidents sont détectés plus tôt, par l'alerte plutôt que par un signalement."),
-      stack: [tool.prometheus, tool.grafana, tool.datadog, tool.ansible, tool.jira],
+      stack: ['prometheus', 'grafana', 'datadog', 'ansible', 'jira'],
     },
     {
       id: 'secrets',
@@ -149,7 +108,7 @@ export const experience: Experience = {
         "J'ai mis en place HashiCorp Vault pour les centraliser, et External Secrets pour les livrer aux applications sur Kubernetes. Sur les serveurs, les secrets des projets Ansible sont chiffrés avec Ansible Vault.",
       ),
       result: t('Two mechanisms for one rule: no secret in clear text in a repository.', 'Deux mécanismes pour une seule règle : aucun secret en clair dans un dépôt.'),
-      stack: [tool.vault, tool.externalsecrets, tool.kubernetes, tool.ansible],
+      stack: ['vault', 'externalsecrets', 'kubernetes', 'ansible'],
     },
     {
       id: 'logs',
@@ -163,7 +122,7 @@ export const experience: Experience = {
         'Les logs applicatifs centralisés avec ELK : Filebeat sur les serveurs, un pipeline Logstash et un mapping par format de log, Kibana pour les chercher.',
       ),
       result: t('The developers debug on their own, without asking for access.', "Les développeurs déboguent en autonomie, sans demander d'accès."),
-      stack: [tool.elk, tool.logstash, tool.kibana],
+      stack: ['elk', 'logstash', 'kibana'],
     },
     {
       id: 'ai',
@@ -177,7 +136,7 @@ export const experience: Experience = {
         "Depuis 2025, son déploiement : une API Python, plusieurs fournisseurs de LLM (Mistral, Cohere), la base vectorielle Qdrant et Langfuse pour suivre chaque requête, le tout déployé par un pipeline Ansible en deux phases, avec les secrets chiffrés par Vault ; une gateway OpenResty pour les WebSockets (TLS, connexions longues, CORS) ; un serveur MCP qui ouvre des services de données aux agents IA ; et depuis septembre, les traces et les logs avec OpenTelemetry, Tempo et Loki.",
       ),
       result: t('A beta in production.', 'Une bêta en production.'),
-      stack: [tool.python, tool.mistral, tool.qdrant, tool.langfuse, tool.mcp, tool.opentelemetry],
+      stack: ['python', 'mistral', 'qdrant', 'langfuse', 'mcp', 'opentelemetry'],
     },
     {
       id: 'mentoring',
@@ -191,7 +150,7 @@ export const experience: Experience = {
         'Leur tutorat pendant deux ans : Ansible, Prometheus, la suite ELK et la gestion de la production critique.',
       ),
       result: t('Both became autonomous.', 'Tous deux sont devenus autonomes.'),
-      stack: [tool.ansible, tool.prometheus, tool.elk],
+      stack: ['ansible', 'prometheus', 'elk'],
     },
   ],
 
@@ -228,50 +187,50 @@ export const experience: Experience = {
 
   stack: {
     work: [
-      tool.linux,
-      tool.debian,
-      tool.centos,
-      tool.vsphere,
-      { name: 'vCloud Director' },
-      tool.ansible,
-      tool.terraform,
-      { name: 'Kubernetes (RKE2)', logo: 'kubernetes' },
-      tool.rancher,
-      tool.argo,
-      tool.helm,
-      { name: 'Kustomize' },
-      tool.docker,
-      tool.jenkins,
-      tool.rundeck,
-      tool.gitlab,
-      tool.vault,
-      tool.externalsecrets,
-      tool.envoy,
-      tool.longhorn,
-      tool.prometheus,
-      { name: 'Alertmanager', logo: 'prometheus' },
-      tool.grafana,
-      tool.datadog,
-      tool.elk,
-      tool.opensearch,
-      tool.opentelemetry,
-      { name: 'OpenResty' },
-      tool.threescale,
-      tool.qdrant,
-      tool.langfuse,
-      tool.ovh,
-      tool.bash,
-      tool.python,
+      'linux',
+      'debian',
+      'centos',
+      'vsphere',
+      'vcloud',
+      'ansible',
+      'terraform',
+      'rke2',
+      'rancher',
+      'argo',
+      'helm',
+      'kustomize',
+      'docker',
+      'jenkins',
+      'rundeck',
+      'gitlab',
+      'vault',
+      'externalsecrets',
+      'envoy',
+      'longhorn',
+      'prometheus',
+      'alertmanager',
+      'grafana',
+      'datadog',
+      'elk',
+      'opensearch',
+      'opentelemetry',
+      'openresty',
+      'threescale',
+      'qdrant',
+      'langfuse',
+      'ovh',
+      'bash',
+      'python',
     ],
     projects: [
-      { name: 'AWS EKS', logo: 'eks' },
-      { name: 'VPC, IAM, S3', logo: 'awscloud' },
-      { name: 'Secrets Manager', logo: 'secretsmanager' },
-      { name: 'k3d', logo: 'k3d' },
-      { name: 'cert-manager' },
-      { name: 'Sloth', logo: 'sloth' },
-      { name: 'GitHub Actions', logo: 'githubactions' },
-      { name: 'Trivy', logo: 'trivy' },
+      'eks',
+      'awscore',
+      'secretsmanager',
+      'k3d',
+      'certmanager',
+      'sloth',
+      'githubactions',
+      'trivy',
     ],
   },
 

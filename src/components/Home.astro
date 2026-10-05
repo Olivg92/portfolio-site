@@ -56,6 +56,7 @@ checking the local platform:
       <p class="eyebrow">{t.projects}</p>
       <h2 id="projects-title">{t.projectsTitle}</h2>
       <p class="lede">{t.projectsLede}</p>
+      <p class="hint">{t.toolsHint}</p>
     </div>
 
     <ProjectCard project={featured} lang={lang}>
@@ -113,6 +114,13 @@ checking the local platform:
     display: grid;
     gap: var(--space-4);
     margin-bottom: var(--space-3);
+  }
+
+  /* The chips open a card: said once, quietly, above them. */
+  .hint {
+    color: var(--muted);
+    font: 500 var(--label) / 1.6 var(--font-mono);
+    letter-spacing: 0.04em;
   }
 
   .proof {

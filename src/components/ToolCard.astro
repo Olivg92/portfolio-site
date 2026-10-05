@@ -1,0 +1,213 @@
+---
+// The card a tool's chip opens: the tool, its kind in the signal colour the
+// site gives that kind of thing, what it is, and, on a project, what it does
+// there. A popover, so the browser shows it above everything and closes it on
+// Escape or on a click elsewhere: anchored below its chip where the browser
+// can, centred where it cannot, and at the bottom of the screen on a phone.
+import Logo from './Logo.astro';
+import type { LogoName } from '../logos';
+import type { Tip } from '../tools';
+
+interface Props extends Tip {
+  logo?: LogoName | undefined;
+}
+
+const { id, title, text, kind, here, logo } = Astro.props;
+// Words between backticks are code.
+const inline = (words: string) => words.split('`');
+// The type definitions do not know the attribute yet.
+const popover = { popover: 'auto' };
+---
+
+<span id={id} class="tool-card" data-tone={kind?.tone ?? 'cyan'} style={`position-anchor: --${id}`} {...popover}>
+  <span class="head">
+    {logo && <Logo name={logo} size={22} />}
+    <strong class="title">{title}</strong>
+    {kind && <span class="kind">{kind.label}</span>}
+  </span>
+  <span class="text">{inline(text).map((part, i) => (i % 2 ? <code>{part}</code> : part))}</span>
+  {
+    here && (
+      <span class="here">
+        <span class="label">{here.label}</span>
+        <span>{inline(here.text).map((part, i) => (i % 2 ? <code>{part}</code> : part))}</span>
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .tool-card {
+    --tone: var(--cyan);
+    width: max-content;
+    max-width: min(22rem, calc(100vw - 2 * var(--gutter)));
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-m);
+    /* Opaque: the words of the page must not show through it, whether the
+       browser blurs what is behind or not. */
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--tone) 7%, transparent), transparent 42%),
+      var(--card);
+    box-shadow:
+      var(--shadow-panel),
+      0 24px 48px -28px color-mix(in srgb, var(--tone) 45%, transparent);
+    color: var(--ink-2);
+    font: 400 var(--text-s) / 1.55 var(--font-ui);
+    letter-spacing: normal;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+    /* In and out with a short fade and rise: opacity and translate only. */
+    opacity: 0;
+    translate: 0 6px;
+    transition:
+      opacity 0.18s ease-out,
+      translate 0.18s ease-out,
+      display 0.18s allow-discrete,
+      overlay 0.18s allow-discrete;
+  }
+
+  .tool-card[data-tone='green'] {
+    --tone: var(--green);
+  }
+
+  .tool-card[data-tone='amber'] {
+    --tone: var(--amber);
+  }
+
+  .tool-card[data-tone='magenta'] {
+    --tone: var(--magenta);
+  }
+
+  /* The line of light along the top edge, as on the panels, in the colour of
+     the tool's kind. */
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px 14% auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--tone) 75%, transparent), transparent);
+  }
+
+  /* Rows keep their own height, even in a box taller than them. */
+  .tool-card:popover-open {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    opacity: 1;
+    translate: 0;
+  }
+
+  @starting-style {
+    .tool-card:popover-open {
+      opacity: 0;
+      translate: 0 6px;
+    }
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .title {
+    color: var(--ink);
+    font-size: var(--text-m);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding-left: var(--space-3);
+    color: var(--tone);
+    font: 500 0.6875rem / 1 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .kind::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .here {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-faint);
+    color: var(--ink);
+  }
+
+  .label {
+    color: var(--green);
+    font: 500 0.6875rem / 1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Below the chip, or wherever there is room. */
+  @supports (anchor-name: --chip) {
+    .tool-card {
+      inset: auto;
+      margin: var(--space-2) 0;
+      position-area: bottom span-right;
+      position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
+    }
+  }
+
+  /* On a phone, a sheet at the bottom of the screen: the chips stay visible,
+     and the card is as wide as the page. */
+  @media (max-width: 559px) {
+    /* Each side said on its own, and the height of the content, aligned
+       at the bottom: Safari versions read a fixed box with an open top
+       differently, and one stretched the card over the whole screen. */
+    .tool-card {
+      position-area: none;
+      position-try-fallbacks: none;
+      top: auto;
+      right: var(--gutter);
+      bottom: var(--gutter);
+      left: var(--gutter);
+      width: auto;
+      height: auto;
+      max-width: none;
+      max-height: calc(100% - 2 * var(--gutter));
+      margin: 0;
+      align-self: end;
+      overflow-y: auto;
+      translate: 0 12px;
+    }
+
+    @starting-style {
+      .tool-card:popover-open {
+        translate: 0 12px;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tool-card,
+    .tool-card:popover-open {
+      translate: 0;
+    }
+
+    @starting-style {
+      .tool-card:popover-open {
+        translate: 0;
+      }
+    }
+  }
+</style>
