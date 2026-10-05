@@ -1,6 +1,8 @@
 ---
 // The bottom of every page, and its contact section: the header's "Contact"
-// link lands here, whatever the page.
+// link lands here, whatever the page. Its links to the pages are the way
+// around on a phone, where the header has no room for them.
+import { getRelativeLocaleUrl } from 'astro:i18n';
 import Button from './Button.astro';
 import { links } from '../links';
 import { ui, type Lang } from '../i18n';
@@ -24,6 +26,10 @@ const year = new Date().getFullYear();
         <li><Button href={links.github} variant="ghost">GitHub</Button></li>
       </ul>
     </div>
+    <nav class="pages" aria-label={t.pages}>
+      <a href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.projects}</a>
+      <a href={getRelativeLocaleUrl(lang, 'experience/')}>{t.experience.nav}</a>
+    </nav>
     <p class="meta">
       <span>© {year} Olivier Guandalini</span>
       <a href={links.source}>{t.source}</a>
@@ -58,11 +64,26 @@ const year = new Date().getFullYear();
     text-wrap: balance;
   }
 
-  .meta {
+  .pages {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-5);
     margin-top: var(--space-8);
+    font-size: var(--text-s);
+  }
+
+  .pages a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-2);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-4);
     color: var(--muted);
     font-size: var(--text-s);
   }
