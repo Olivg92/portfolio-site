@@ -18,7 +18,7 @@ interface Props {
   /** False for pages search engines should leave out, such as the 404. */
   indexable?: boolean;
   /** The picture of a link preview, under public/og/, without the language. */
-  preview?: 'home' | 'tour';
+  preview?: 'home' | 'tour' | 'experience';
 }
 
 const { lang, title, description, path = '', indexable = true, preview = 'home' } = Astro.props;

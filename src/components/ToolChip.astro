@@ -1,0 +1,33 @@
+---
+// A tool's chip with its card, the tool taken from the catalogue
+// (src/tools.ts), in the page's language. `context` keeps the card's id unique
+// on the page, as one tool can show in several places; `here` says what the
+// tool does where the chip stands, when that is worth a line.
+import Chip from './Chip.astro';
+import { kinds, tools, type Tool, type ToolName } from '../tools';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  name: ToolName;
+  context: string;
+  lang: Lang;
+  here?: Record<Lang, string> | undefined;
+}
+
+const { name, context, lang, here } = Astro.props;
+const tool: Tool = tools[name];
+const kind = kinds[tool.kind];
+---
+
+<Chip
+  logo={tool.logo}
+  tip={{
+    id: `tip-${context}-${name}`,
+    title: tool.name,
+    text: tool.about[lang],
+    kind: { label: kind.label[lang], tone: kind.tone },
+    here: here && { label: ui[lang].here, text: here[lang] },
+  }}
+>
+  {tool.name}
+</Chip>

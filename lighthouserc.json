@@ -5,7 +5,9 @@
         "http://localhost:4321/portfolio-site/",
         "http://localhost:4321/portfolio-site/fr/",
         "http://localhost:4321/portfolio-site/platform-eks-gitops/",
-        "http://localhost:4321/portfolio-site/fr/platform-eks-gitops/"
+        "http://localhost:4321/portfolio-site/fr/platform-eks-gitops/",
+        "http://localhost:4321/portfolio-site/experience/",
+        "http://localhost:4321/portfolio-site/fr/experience/"
       ],
       "numberOfRuns": 1
     },

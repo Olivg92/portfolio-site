@@ -1,7 +1,7 @@
 ---
 // The top of every page: the name, which leads home, the way to the
-// projects and to the contact links, and the switch to the same page in the
-// other language.
+// projects, to the experience and to the contact links, and the switch to
+// the same page in the other language.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { languages, ui, type Lang } from '../i18n';
 
@@ -26,6 +26,9 @@ const codes = Object.keys(languages) as Lang[];
   </a>
   <div class="cluster tools">
     <a class="link" href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.projects}</a>
+    <a class="link" href={getRelativeLocaleUrl(lang, 'experience/')} aria-current={path === 'experience/' ? 'page' : undefined}>
+      {t.experience.nav}
+    </a>
     <a class="link" href="#contact">{t.contact}</a>
     <nav class="langs" aria-label={t.language}>
       {
@@ -86,13 +89,14 @@ const codes = Object.keys(languages) as Lang[];
     text-decoration: none;
   }
 
-  .link:hover {
+  .link:hover,
+  .link[aria-current] {
     color: var(--ink);
   }
 
   /* On a phone the name, the links and the switch would not fit on one line;
-     the projects follow the introduction, and the contact links end every
-     page. */
+     the projects follow the introduction, and the foot of every page links
+     the projects, the experience and the contact. */
   @media (max-width: 559px) {
     .link {
       display: none;

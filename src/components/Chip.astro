@@ -3,8 +3,14 @@
 // signal colours have everywhere on the site (see tokens.css). A technology
 // shows its logo; a status shows a dot, and a live dot pulses, for what is
 // running.
+//
+// With a `tip`, the chip says what it names: it becomes a button that opens
+// its card (ToolCard) on a click, a tap or the keyboard, through the Popover
+// API, and on hover where the browser supports interest invokers. No script.
 import type { HTMLAttributes } from 'astro/types';
 import Logo from './Logo.astro';
+import ToolCard from './ToolCard.astro';
+import type { Tip } from '../tools';
 import type { LogoName } from '../logos';
 
 interface Props extends HTMLAttributes<'span'> {
@@ -12,16 +18,32 @@ interface Props extends HTMLAttributes<'span'> {
   logo?: LogoName | undefined;
   dot?: boolean;
   live?: boolean;
+  /** What the chip names, shown on a card. */
+  tip?: Tip | undefined;
 }
 
-const { tone = 'neutral', logo, dot = false, live = false, class: className, ...rest } = Astro.props;
+const { tone = 'neutral', logo, dot = false, live = false, tip, class: className, ...rest } = Astro.props;
+// Attributes the type definitions do not know yet.
+const invoker = tip && { popovertarget: tip.id, popovertargetaction: 'show' as const, interestfor: tip.id };
 ---
 
-<span class:list={['chip', className]} data-tone={tone} {...rest}>
-  {logo && <Logo name={logo} size={15} />}
-  {(dot || live) && <span class:list={['dot', { live }]} aria-hidden="true" />}
-  <slot />
-</span>
+{
+  tip ? (
+    <>
+      <button type="button" class:list={['chip', className]} data-tone={tone} style={`anchor-name: --${tip.id}`} {...invoker}>
+        {logo && <Logo name={logo} size={15} />}
+        <slot />
+      </button>
+      <ToolCard {...tip} logo={logo} />
+    </>
+  ) : (
+    <span class:list={['chip', className]} data-tone={tone} {...rest}>
+      {logo && <Logo name={logo} size={15} />}
+      {(dot || live) && <span class:list={['dot', { live }]} aria-hidden="true" />}
+      <slot />
+    </span>
+  )
+}
 
 <style>
   .chip {
@@ -103,5 +125,26 @@ const { tone = 'neutral', logo, dot = false, live = false, class: className, ...
       animation: none;
       opacity: 0;
     }
+  }
+
+  /* A chip that explains itself: the same look, as a button. The hover
+     waits a moment, so that a pointer passing over a row opens nothing. */
+  button.chip {
+    margin: 0;
+    cursor: pointer;
+    interest-delay: 0.35s 0.2s;
+  }
+
+  /* :is() ignores the states a browser does not know, instead of the rule. */
+  button.chip:is(:hover, :focus-visible, :interest-source) {
+    border-color: color-mix(in srgb, var(--line) 55%, transparent);
+    color: var(--ink);
+  }
+
+  /* While its card is open, the chip stays lit. */
+  button.chip:has(+ :global(.tool-card:popover-open)) {
+    border-color: color-mix(in srgb, var(--cyan) 60%, transparent);
+    background: color-mix(in srgb, var(--cyan) 10%, transparent);
+    color: var(--ink);
   }
 </style>

@@ -1,6 +1,7 @@
 // Draws the pictures that link previews show (LinkedIn, Slack, a message),
 // from the built site itself, 1200 by 630 in each language: the home page's
-// introduction beside its isometric view, and a step of the guided tour.
+// introduction beside its isometric view, a step of the guided tour, and the
+// experience page's introduction with its numbers.
 // Run against a served build, then commit what changed in public/og/:
 //   node scripts/og-images.mjs http://localhost:4321/portfolio-site/
 // A preview is fetched once and cached by whoever shows it, so the pictures
@@ -27,6 +28,13 @@ const shots = [
     // The step where Argo CD lays the platform down, wave by wave.
     step: 'platform',
     wait: 3000,
+  },
+  {
+    name: 'experience',
+    path: 'experience/',
+    // The header goes; the title, the introduction and the numbers fill it.
+    css: '.top, .skip { display: none !important; } .intro { padding-block: 56px 0 !important; }',
+    wait: 1500,
   },
 ];
 

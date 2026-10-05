@@ -7,6 +7,7 @@ import Button from './Button.astro';
 import Chip from './Chip.astro';
 import Panel from './Panel.astro';
 import type { Project } from '../projects';
+import ToolChip from './ToolChip.astro';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -28,9 +29,9 @@ const id = `project-${project.name}`;
     <p class="summary">{project.summary[lang]}</p>
     <ul class="cluster" aria-label={t.stack}>
       {
-        project.stack.map((tool) => (
+        project.stack.map((name) => (
           <li>
-            <Chip logo={tool.logo}>{tool.name}</Chip>
+            <ToolChip name={name} context={project.name} lang={lang} here={project.here?.[name]} />
           </li>
         ))
       }
