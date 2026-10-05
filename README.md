@@ -8,8 +8,8 @@ https://olivg92.github.io/portfolio-site/fr/ in French.
 
 The home page says who I am in two sentences, beside platform-eks-gitops drawn in isometric view,
 then shows the three projects. The guided tour of platform-eks-gitops walks through the project
-command by command. The other pages (my experience, the debugging stories) arrive one pull
-request at a time.
+command by command. The experience page tells what I do at work as problems solved, then the
+tools, the path and the education. The debugging stories arrive next.
 
 ## How it is built
 
@@ -33,6 +33,10 @@ request at a time.
   address is masked. Its drawing is computed at build time
   ([`src/tour/scene.ts`](src/tour/scene.ts)), and the one script of the site follows the
   scroll, on that page only. Without the script, the tour reads as a page.
+- **An experience page that names no employer.** Its words live in
+  [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
+  kind, and the page says how I work, never what belongs to the company: no host, product,
+  company figure, unannounced plan or security detail.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
