@@ -190,6 +190,17 @@ const inline = (text: string) => text.split('`');
       frameId = requestAnimationFrame(step);
     };
 
+    // A long transcript scrolls in its terminal: the line the step explains is
+    // brought into view, with a line of what follows.
+    const reveal = (n: number) => {
+      const body = segs[n - 1]?.querySelector<HTMLElement>('.term .body');
+      const line = body?.querySelector<HTMLElement>('.current');
+      if (!body || !line) return;
+      const box = body.getBoundingClientRect();
+      const at = line.getBoundingClientRect();
+      if (at.bottom > box.bottom - 8) body.scrollTop += at.bottom - box.bottom + at.height * 1.5;
+    };
+
     // `inside` says whether the reading line is on the step, and so whether
     // its words show: past the last step, the drawing keeps it, the words go.
     const setStep = (n: number, inside = true) => {
@@ -197,6 +208,7 @@ const inline = (text: string) => text.split('`');
       active = n;
       reading = inside;
       segs.forEach((seg, i) => seg.classList.toggle('is-active', inside && i === n - 1));
+      if (inside && n > 0) reveal(n);
       frame(n);
       // Before the first step, the drawing is empty: it builds itself as the
       // steps go by. Without script, it shows the whole platform instead.
