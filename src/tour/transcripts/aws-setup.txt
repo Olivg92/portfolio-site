@@ -1,0 +1,15 @@
+$ make aws-setup
+AWS setup of the demo environment:
+
+Which AWS CLI profile should this project use? It is kept in local.mk, which is not committed.
+Profiles on this machine: default perso my-profile
+Profile (a new name is created at the login): perso
+
+  profile            perso (now in local.mk)
+  session            opened 0h00 ago, about 11h59 left
+  account            <account id>
+  region             eu-north-1, where the state bucket is (now in local.mk)
+  terraform.tfvars   written, zones eu-north-1a eu-north-1b
+  backend.hcl        written, bucket platform-eks-gitops-tfstate-og92
+
+Ready. Next: make plan to see what would be created, or make up to create it.

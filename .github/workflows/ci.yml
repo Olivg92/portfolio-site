@@ -81,6 +81,12 @@ jobs:
           --skip '^https://olivg92\.github\.io/portfolio-site/'
           --skip '^https://www\.linkedin\.com/'
 
+      # The guided tour, used as a reader uses it, in the runner's Chrome:
+      # clicks on its buttons and chapters, the end of the page, and on a
+      # phone, each step's drawing framed whole.
+      - name: Guided tour, clicked through
+        run: node scripts/check-tour.mjs http://localhost:4321/portfolio-site/
+
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
       - name: Lighthouse

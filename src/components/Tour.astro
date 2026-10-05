@@ -1,0 +1,666 @@
+---
+// The guided tour of platform-eks-gitops, the same in both languages apart
+// from its words. A drawing of the platform stays pinned while the reader
+// scrolls through eighteen steps; each step's words fade in beside it, with
+// what the command printed in a real run.
+//
+// It works in three layers. Without script, the tour reads as a page: the
+// complete drawing, then the steps one after the other. A one-line inline
+// script pins the drawing before the first paint, so that nothing moves.
+// The module script below then follows the reading: it shows the current
+// step in the drawing, fades the words in and out, drives the chapters and
+// the Previous and Next buttons, and on a phone frames the part of the
+// drawing the step is about.
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import Base from '../layouts/Base.astro';
+import Button from './Button.astro';
+import Terminal from './Terminal.astro';
+import TourScene from './TourScene.astro';
+import { chapters, steps } from '../tour/steps';
+import { links } from '../links';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const total = steps.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+const chapterOf = (id: string) => chapters.find((chapter) => chapter.id === id);
+const firstOf = (id: string) => steps.findIndex((step) => step.chapter === id);
+// Words between backticks are commands or files, and read as code.
+const inline = (text: string) => text.split('`');
+---
+
+<Base lang={lang} title={t.tour.title} description={t.tour.description} path="platform-eks-gitops/" preview="tour">
+  <header class="intro wrap">
+    <p class="eyebrow">{t.tour.eyebrow}</p>
+    <h1>{t.tour.heading}</h1>
+    <p class="lede">{inline(t.tour.lede).map((part, i) => (i % 2 ? <code>{part}</code> : part))}</p>
+    <div class="cluster actions">
+      <Button href={`#${steps[0].id}`}>{t.tour.start}</Button>
+      <Button href={links.platform} variant="ghost">{t.readCode}</Button>
+    </div>
+  </header>
+
+  <script is:inline>
+    document.documentElement.classList.add('js');
+  </script>
+
+  <section class="tour" aria-label={t.tour.label} data-step-word={t.tour.step} data-of-word={t.tour.of} data-scroll={t.tour.scroll}>
+    <div class="stage">
+      <div class="progress" aria-hidden="true"><span id="tour-bar"></span></div>
+      <div class="hud">
+        <nav class="chapters" aria-label={t.tour.chapters}>
+          {
+            chapters.map((chapter) => (
+              <a class="chap" href={`#${steps[firstOf(chapter.id)].id}`} data-go={firstOf(chapter.id) + 1}>
+                {chapter.name[lang]}
+              </a>
+            ))
+          }
+        </nav>
+        <span class="where" id="tour-where"><span class="no-script">{t.tour.overview}</span><span class="with-script">{t.tour.scroll}</span></span>
+        <div class="nav">
+          <button class="step-btn" id="tour-prev" type="button" hidden>{t.tour.previous}</button>
+          <button class="step-btn" id="tour-next" type="button" hidden>{t.tour.next}</button>
+        </div>
+      </div>
+      <div class="scene-box"><TourScene lang={lang} /></div>
+    </div>
+
+    <div class="segments">
+      {
+        steps.map((step, i) => (
+          <article class="seg" id={step.id} data-step={i + 1} aria-labelledby={`${step.id}-title`}>
+            <div class="cap">
+              <p class="num">
+                {chapterOf(step.chapter)?.name[lang]} · {t.tour.step} {pad(i + 1)}/{total}
+              </p>
+              <h2 id={`${step.id}-title`}>{step.title[lang]}</h2>
+              <p>{inline(step.body[lang]).map((part, j) => (j % 2 ? <code>{part}</code> : part))}</p>
+              <p class="metric">
+                <span class="value">{step.metric.value[lang]}</span> {step.metric.caption[lang]}
+              </p>
+              {
+                step.target && (
+                  <p class="target">
+                    {t.tour.target} <code>{step.target}</code>
+                  </p>
+                )
+              }
+              <Terminal title="~/platform-eks-gitops" transcript={step.transcript} current={step.current} cursor={false} />
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <footer class="outro wrap">
+    <p class="eyebrow">{t.tour.outroTitle}</p>
+    <p class="lede">{t.tour.outroText}</p>
+    <div class="cluster actions">
+      <Button href={links.platform}>{t.readCode}</Button>
+      <Button href={`${getRelativeLocaleUrl(lang)}#projects`} variant="ghost">{t.tour.allProjects}</Button>
+    </div>
+  </footer>
+</Base>
+
+<script>
+  // Follows the reading: the step whose segment crosses the middle of the
+  // window is the current one. Measured on scroll, a frame at a time, rather
+  // than with an IntersectionObserver, so the words can fade with the exact
+  // progress through their segment.
+  const tour = document.querySelector<HTMLElement>('.tour');
+  const scene = document.getElementById('tour-scene');
+  if (tour && scene) {
+    const segs = [...tour.querySelectorAll<HTMLElement>('.seg')];
+    const caps = segs.map((seg) => seg.querySelector<HTMLElement>('.cap'));
+    const titles = segs.map((seg) => seg.querySelector('h2')?.textContent ?? '');
+    const chaps = [...tour.querySelectorAll<HTMLAnchorElement>('.chap')];
+    const starts = chaps.map((chap) => Number(chap.dataset.go));
+    const where = document.getElementById('tour-where');
+    const bar = document.getElementById('tour-bar');
+    const prev = document.getElementById('tour-prev') as HTMLButtonElement;
+    const next = document.getElementById('tour-next') as HTMLButtonElement;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const narrow = window.matchMedia('(max-width: 899px)');
+    const { stepWord, ofWord, scroll } = tour.dataset;
+    const full = (scene.getAttribute('viewBox') ?? '0 0 680 716').split(' ').map(Number);
+    let view = full.slice();
+    let frameId = 0;
+    let active = -1;
+    let reading = false;
+
+    // On a phone, the camera frames what the step shows: its elements, but
+    // not the band at the top nor the frames around the platform, which most
+    // steps show, nor what the step dims. A step that shows nothing else
+    // frames those. The frame is never smaller than a phone can read, and
+    // never leaves the drawing.
+    const boxes = new Map<number, number[]>();
+    const union = (els: SVGGraphicsElement[]) => {
+      let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
+      for (const el of els) {
+        const b = el.getBBox();
+        if (!b.width && !b.height) continue;
+        [x0, y0, x1, y1] = [Math.min(x0, b.x), Math.min(y0, b.y), Math.max(x1, b.x + b.width), Math.max(y1, b.y + b.height)];
+      }
+      return x0 < x1 ? [x0, y0, x1, y1] : null;
+    };
+    const focusOf = (n: number) => {
+      const known = boxes.get(n);
+      if (known) return known;
+      const shown = [...scene.querySelectorAll<SVGGraphicsElement>(`.s${n}`)].filter((el) => !el.classList.contains(`d${n}`));
+      const without = (...names: string[]) => shown.filter((el) => !names.some((name) => el.classList.contains(name)));
+      const [x0, y0, x1, y1] = union(without('band', 'frame')) ?? union(without('band')) ?? union(shown) ?? [0, 0, full[2], full[3]];
+      const w = Math.min(full[2], Math.max(360, x1 - x0 + 28));
+      const h = Math.min(full[3], Math.max(300, y1 - y0 + 28));
+      const box = [
+        Math.max(0, Math.min(full[2] - w, (x0 + x1 - w) / 2)),
+        Math.max(0, Math.min(full[3] - h, (y0 + y1 - h) / 2)),
+        w,
+        h,
+      ];
+      boxes.set(n, box);
+      return box;
+    };
+
+    // The viewBox glides from one frame to the next; on a wide screen, the
+    // whole drawing stays in view.
+    const frame = (n: number) => {
+      const target = narrow.matches && n > 0 ? focusOf(n) : full;
+      cancelAnimationFrame(frameId);
+      if (reduce.matches) {
+        view = target;
+        scene.setAttribute('viewBox', view.join(' '));
+        return;
+      }
+      const from = view.slice();
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 600);
+        const eased = 1 - (1 - p) ** 3;
+        view = from.map((v, i) => v + (target[i] - v) * eased);
+        scene.setAttribute('viewBox', view.map((v) => v.toFixed(1)).join(' '));
+        if (p < 1) frameId = requestAnimationFrame(step);
+      };
+      frameId = requestAnimationFrame(step);
+    };
+
+    // A long transcript scrolls in its terminal: the line the step explains is
+    // brought into view, with a line of what follows.
+    const reveal = (n: number) => {
+      const body = segs[n - 1]?.querySelector<HTMLElement>('.term .body');
+      const line = body?.querySelector<HTMLElement>('.current');
+      if (!body || !line) return;
+      const box = body.getBoundingClientRect();
+      const at = line.getBoundingClientRect();
+      if (at.bottom > box.bottom - 8) body.scrollTop += at.bottom - box.bottom + at.height * 1.5;
+    };
+
+    // `inside` says whether the reading line is on the step, and so whether
+    // its words show: past the last step, the drawing keeps it, the words go.
+    const setStep = (n: number, inside = true) => {
+      if (n === active && inside === reading) return;
+      active = n;
+      reading = inside;
+      segs.forEach((seg, i) => seg.classList.toggle('is-active', inside && i === n - 1));
+      if (inside && n > 0) reveal(n);
+      frame(n);
+      // Before the first step, the drawing is empty: it builds itself as the
+      // steps go by. Without script, it shows the whole platform instead.
+      if (n === 0) {
+        scene.removeAttribute('data-live');
+        scene.setAttribute('aria-label', scroll ?? '');
+        if (where) where.textContent = scroll ?? '';
+        if (bar) bar.style.width = '0';
+        chaps.forEach((chap) => chap.setAttribute('aria-current', 'false'));
+        return;
+      }
+      scene.setAttribute('data-live', '');
+      scene.setAttribute('data-step', String(n));
+      const label = `${stepWord} ${n} ${ofWord} ${segs.length} · ${titles[n - 1]}`;
+      scene.setAttribute('aria-label', label);
+      if (where) where.textContent = label;
+      if (bar) bar.style.width = `${(100 * n) / segs.length}%`;
+      let chapter = 0;
+      starts.forEach((first, i) => {
+        if (n >= first) chapter = i;
+      });
+      chaps.forEach((chap, i) => chap.setAttribute('aria-current', i === chapter ? 'true' : 'false'));
+      prev.disabled = n === 1;
+      next.disabled = n === segs.length;
+    };
+
+    // The words of the current step fade in over the first part of their
+    // segment and out over the last, drifting up as they go.
+    // On a phone the words scroll below the pinned drawing instead, without
+    // fading: the reading line sits in the upper part of what is left.
+    const stage = tour.querySelector<HTMLElement>('.stage');
+    const below = () => (narrow.matches && stage ? stage.getBoundingClientRect().bottom : 0);
+    const update = () => {
+      // The words are fixed to the window, but must not stay behind when the
+      // drawing is not yet, or no longer, pinned: they follow its edge then.
+      if (stage && !narrow.matches) {
+        const r = stage.getBoundingClientRect();
+        const shift = r.top > 0 ? r.top : Math.min(0, r.bottom - window.innerHeight);
+        tour.style.setProperty('--shift', `${shift.toFixed(1)}px`);
+      }
+      const top = below();
+      const line = narrow.matches ? top + (window.innerHeight - top) * 0.3 : window.innerHeight / 2;
+      const still = reduce.matches || narrow.matches;
+      for (let i = 0; i < segs.length; i++) {
+        const r = segs[i].getBoundingClientRect();
+        if (r.top <= line && r.bottom > line) {
+          const p = (line - r.top) / r.height;
+          const a = still ? 1 : Math.max(0, Math.min(1, p / 0.16, (1 - p) / 0.16));
+          caps[i]?.style.setProperty('--a', a.toFixed(3));
+          caps[i]?.style.setProperty('--dy', still ? '0px' : `${((0.5 - p) * 48).toFixed(1)}px`);
+          setStep(i + 1);
+          return;
+        }
+      }
+      // Above the first step, nothing yet; past the last, the drawing keeps the
+      // last step while its words leave with the tour.
+      setStep(segs.length && segs[0].getBoundingClientRect().top > line ? 0 : segs.length, false);
+    };
+
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
+    };
+
+    // Going to a step puts the middle of its segment under the reading line,
+    // or on a phone its top just below the drawing.
+    const go = (n: number) => {
+      const target = segs[n - 1];
+      if (!target) return;
+      const r = target.getBoundingClientRect();
+      const top = narrow.matches ? r.top - below() : r.top + r.height / 2 - window.innerHeight / 2;
+      window.scrollBy({ top, behavior: reduce.matches ? 'auto' : 'smooth' });
+      history.replaceState(null, '', `#${target.id}`);
+    };
+
+    prev.hidden = false;
+    next.hidden = false;
+    prev.addEventListener('click', () => go(Math.max(1, active - 1)));
+    next.addEventListener('click', () => go(Math.min(segs.length, active + 1)));
+    chaps.forEach((chap) =>
+      chap.addEventListener('click', (event) => {
+        event.preventDefault();
+        go(Number(chap.dataset.go));
+      }),
+    );
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      active = -1;
+      onScroll();
+    });
+    tour.classList.add('ready');
+
+    const linked = segs.findIndex((seg) => `#${seg.id}` === window.location.hash);
+    if (linked >= 0) requestAnimationFrame(() => go(linked + 1));
+    else update();
+  }
+</script>
+
+<style>
+  .intro {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-5);
+    padding-block: var(--space-8) var(--space-7);
+  }
+
+  .intro h1 {
+    font-size: clamp(2.25rem, 1.2rem + 4.4vw, 4.75rem);
+    max-width: 13em;
+  }
+
+  .actions {
+    gap: var(--space-3);
+  }
+
+  /* Without script: the HUD's chapters, the complete drawing, then the steps. */
+  .stage {
+    position: relative;
+  }
+
+  .progress {
+    display: none;
+  }
+
+  .hud {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    padding: var(--space-4) var(--gutter) 0;
+  }
+
+  .chapters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+  }
+
+  .chap {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: var(--text-s);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .chap:hover,
+  .chap[aria-current='true'] {
+    color: var(--ink);
+  }
+
+  .chap[aria-current='true'] {
+    border-bottom-color: var(--cyan);
+  }
+
+  :global(.js) .no-script,
+  .with-script {
+    display: none;
+  }
+
+  :global(.js) .with-script {
+    display: inline;
+  }
+
+  .where {
+    margin-left: auto;
+    min-width: 0;
+    color: var(--cyan);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .nav {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .step-btn {
+    min-height: 36px;
+    padding: 0 var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--ink);
+    font: 500 0.84375rem / 1 var(--font-ui);
+    cursor: pointer;
+  }
+
+  .step-btn:hover:not(:disabled) {
+    border-color: var(--cyan);
+    background: color-mix(in srgb, var(--cyan) 8%, transparent);
+  }
+
+  .step-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .scene-box {
+    width: min(100% - 2 * var(--gutter), 760px);
+    margin: var(--space-5) auto var(--space-7);
+    aspect-ratio: 680 / 716;
+  }
+
+  .segments {
+    position: relative;
+    z-index: 2;
+  }
+
+  .cap {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 36rem;
+    margin: 0 auto var(--space-8);
+    padding-inline: var(--gutter);
+  }
+
+  .num {
+    color: var(--cyan);
+    font: 500 0.71875rem / 1.4 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .cap h2 {
+    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3rem);
+    font-weight: 800;
+  }
+
+  .cap p {
+    color: var(--ink-2);
+  }
+
+  .metric {
+    font: 500 var(--text-s) / 1.4 var(--font-mono);
+  }
+
+  .cap .metric {
+    color: var(--muted);
+  }
+
+  .metric .value {
+    color: var(--cyan);
+  }
+
+  .target {
+    font-size: var(--text-s);
+  }
+
+  .cap .target {
+    color: var(--muted);
+  }
+
+  .cap :global(.term .body) {
+    max-height: 38vh;
+    overflow: auto;
+    font-size: 0.6875rem;
+  }
+
+  /* With script, before the first paint: the drawing is pinned to the
+     window, and each step takes a screen's height beside it. */
+  :global(.js) .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  :global(.js) .progress {
+    display: block;
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: color-mix(in srgb, var(--line) 14%, transparent);
+  }
+
+  :global(.js) .progress span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan);
+    transition: width 0.4s ease;
+  }
+
+  :global(.js) .scene-box {
+    position: absolute;
+    top: 72px;
+    bottom: 20px;
+    left: 43%;
+    right: var(--gutter);
+    width: auto;
+    margin: 0;
+    aspect-ratio: auto;
+  }
+
+  /* The steps lie over the pinned drawing, a screen's height each: clicks
+     pass through them to the chapters and buttons, and only the words of a
+     step catch them. */
+  :global(.js) .segments {
+    margin-top: -100vh;
+    margin-top: -100svh;
+    pointer-events: none;
+  }
+
+  :global(.js) .cap {
+    pointer-events: auto;
+  }
+
+  :global(.js) .seg {
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  :global(.js) .cap {
+    width: min(40vw, 560px);
+    margin: 0 0 0 var(--gutter);
+    padding: 0;
+  }
+
+  :global(.js) .metric {
+    display: none;
+  }
+
+  /* Once the module runs: the words of every step sit in the same place, and
+     only the step being read shows, fading with the scroll (--a, --dy). */
+  .tour:global(.ready) .cap {
+    position: fixed;
+    top: 50%;
+    left: var(--gutter);
+    max-height: calc(100vh - 110px);
+    overflow: auto;
+    opacity: 0;
+    transform: translateY(-50%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .tour:global(.ready) .seg:global(.is-active) .cap {
+    visibility: visible;
+    opacity: var(--a, 1);
+    transform: translateY(calc(-50% + var(--dy, 0px) + var(--shift, 0px)));
+    pointer-events: auto;
+  }
+
+  .outro {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+    padding-block: var(--space-8) 0;
+  }
+
+  /* A phone: the drawing stays pinned at the top, framed on the step, and
+     the words scroll below it like a page, without fading. The chapters take
+     the first row; where you are and the buttons, the second. */
+  @media (max-width: 899px) {
+    .hud {
+      gap: var(--space-1) var(--space-3);
+      padding-top: var(--space-2);
+    }
+
+    .chapters {
+      flex: 1 0 100%;
+    }
+
+    .where {
+      flex: 1;
+      margin-left: 0;
+      overflow: hidden;
+      font-size: 0.65625rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .step-btn {
+      min-height: 32px;
+      padding: 0 var(--space-3);
+      font-size: 0.8125rem;
+    }
+
+    :global(.js) .stage {
+      z-index: 3;
+      height: calc(100px + 40svh);
+      border-bottom: 1px solid var(--line-faint);
+      background: var(--night);
+      box-shadow: 0 16px 32px -16px var(--night);
+    }
+
+    :global(.js) .scene-box {
+      top: 96px;
+      left: var(--space-2);
+      right: var(--space-2);
+      bottom: var(--space-2);
+    }
+
+    :global(.js) .segments {
+      margin-top: 0;
+    }
+
+    :global(.js) .seg {
+      display: block;
+      min-height: 0;
+      padding-block: var(--space-7);
+    }
+
+    :global(.js) .cap {
+      width: auto;
+      margin: 0 var(--gutter);
+    }
+
+    :global(.js) .metric {
+      display: block;
+    }
+
+    .tour:global(.ready) .cap,
+    .tour:global(.ready) .seg:global(.is-active) .cap {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      opacity: 1;
+      transform: none;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .cap h2 {
+      font-size: 1.625rem;
+    }
+
+    .cap :global(.term .body) {
+      max-height: none;
+      font-size: 0.65625rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .progress span {
+      transition: none;
+    }
+  }
+</style>

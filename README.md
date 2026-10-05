@@ -7,8 +7,9 @@ and the debugging stories behind them.
 https://olivg92.github.io/portfolio-site/fr/ in French.
 
 The home page says who I am in two sentences, beside platform-eks-gitops drawn in isometric view,
-then shows the three projects. The other pages (the guided tour of platform-eks-gitops, my
-experience, the debugging stories) arrive one pull request at a time.
+then shows the three projects. The guided tour of platform-eks-gitops walks through the project
+command by command. The other pages (my experience, the debugging stories) arrive one pull
+request at a time.
 
 ## How it is built
 
@@ -26,6 +27,16 @@ experience, the debugging stories) arrive one pull request at a time.
   and flows come out as plain SVG, animated by CSS alone. The logos in
   [`src/logos.ts`](src/logos.ts) come from Simple Icons, the AWS Architecture Icons and the
   External Secrets repository, inline so that they cost no request.
+- **A guided tour made of real runs.** The tour of platform-eks-gitops has 18 steps, from
+  `git clone` to `make down`. Every terminal block in it is what the command printed, captured
+  in [`src/tour/transcripts/`](src/tour/transcripts/), never a mock-up; an AWS account ID or an
+  address is masked. Its drawing is computed at build time
+  ([`src/tour/scene.ts`](src/tour/scene.ts)), and the one script of the site follows the
+  scroll, on that page only. Without the script, the tour reads as a page.
+- **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
+  description and a picture drawn from the page itself, in its language. The pictures are drawn
+  by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
+  committed in [`public/og/`](public/og/): they only change when the look of a page does.
 - **Fonts served by the site itself.** Geist and Geist Mono come from their Fontsource packages
   through Astro's font settings: Latin subset only, preloaded, with fallback faces resized to
   Geist's metrics so the text does not move when the font arrives. No request leaves the site.
@@ -60,9 +71,12 @@ Every pull request runs them, and a failure blocks the merge:
 | Whitespace, YAML and JSON, private keys, secrets, workflow mistakes | `pre-commit`, the same hooks as locally: `pre-commit run -a` |
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
-| Performance, accessibility, best practices, SEO | Lighthouse CI on both languages, 90 or more on each |
+| The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
+| Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
-Actions are pinned by commit, and Dependabot raises the pull requests that move them.
+Actions are pinned by commit, and Dependabot raises the pull requests that move them. The two
+scripts drive Chrome through its DevTools protocol, with nothing to install but Chrome; against a
+served build (`npm run build && npm run preview`), `npm run check:tour` runs the tour's check.
 
 ## Layout
 
@@ -70,13 +84,19 @@ Actions are pinned by commit, and Dependabot raises the pull requests that move 
 src/
 ├── i18n.ts               # every string, in both languages
 ├── projects.ts           # the three projects: status, summary, stack
+├── tour/
+│   ├── steps.ts          # the 18 steps of the guided tour, in both languages
+│   ├── scene.ts          # its drawing, step by step
+│   └── transcripts/      # what each command printed in a real run
 ├── logos.ts              # the logos of the tools, drawn inline
 ├── links.ts              # every address the site links to
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
 │   ├── Home.astro        # the home page, shared by both languages
 │   ├── IsoPlatform.astro # the platform in isometric view, computed at build time
-│   ├── ProjectCard.astro # one project, with its stack and its code
+│   ├── ProjectCard.astro # one project, with its stack, its tour and its code
+│   ├── Tour.astro        # the guided tour, and the one script of the site
+│   ├── TourScene.astro   # the drawing of the tour
 │   ├── SiteHeader.astro  # name, contact link, EN/FR switch
 │   ├── SiteFooter.astro  # the contact section, on every page
 │   ├── Button.astro      # a link styled as a button, primary or ghost
@@ -87,11 +107,17 @@ src/
 │   └── Icon.astro
 ├── pages/
 │   ├── index.astro       # English, at the root
-│   ├── fr/index.astro    # French
+│   ├── platform-eks-gitops/index.astro  # the guided tour
+│   ├── fr/                # the same pages, in French
 │   └── 404.astro         # in both languages
 └── styles/
     ├── tokens.css        # colours, type, sizes, spacing
     └── global.css        # background, type, links, layout helpers
+scripts/
+├── check-tour.mjs        # the guided tour, clicked through in Chrome
+├── og-images.mjs         # the pictures of link previews
+└── lib/cdp.mjs           # a minimal Chrome DevTools client
+public/og/                # the pictures, one per page and language
 .github/workflows/
 ├── ci.yml                # the checks above
 └── deploy.yml            # build, then publish to GitHub Pages

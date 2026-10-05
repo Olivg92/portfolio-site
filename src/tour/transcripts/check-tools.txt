@@ -1,0 +1,17 @@
+$ make check-tools
+local platform (make local-up):
+  ok       docker       29.1.3
+  ok       k3d          v5.9.0
+  ok       kubectl      v1.37.0
+  ok       helm         v4.3.0+gbec5b06
+  ok       python3      3.10.12
+  ok       curl         7.81.0
+AWS demo (make up):
+  ok       terraform    v1.16.1
+  ok       aws          2.36.49
+contributing (make lint):
+  ok       pre-commit   4.6.2
+  ok       tflint       0.64.0
+  ok       checkov      3.3.19
+  ok       kubeconform  v0.8.0
+everything needed is there

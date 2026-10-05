@@ -19,6 +19,8 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 - Anglais à la racine, français sous `/fr/`.
 - Système de design : couleurs, polices, tailles et espacements sont des variables dans `src/styles/tokens.css`. Les composants de `src/components/` y prennent toutes leurs couleurs (une nuance passe par `color-mix()`), jamais de valeur à eux. Polices Geist et Geist Mono servies par le site lui-même.
 - Contact : LinkedIn et GitHub (`src/links.ts`), jamais d'adresse mail.
+- Visite guidée de platform-eks-gitops : chaque bloc de terminal est la vraie sortie d'une exécution (`src/tour/transcripts/`), jamais inventée ; compte AWS et adresses IP masqués. Le seul JavaScript du site est sur cette page, et elle se lit sans. `scripts/check-tour.mjs` la teste dans Chrome en CI.
+- Aperçus de liens (LinkedIn) : images dans `public/og/`, redessinées avec `npm run og` sur un build servi dès que le look de l'accueil ou de la visite change.
 - Les projets et leur stack sont dans `src/projects.ts` ; chaque techno a son logo à côté de son nom quand il existe (`src/logos.ts` : Simple Icons, icônes d'architecture AWS, External Secrets).
 - Adresse : https://olivg92.github.io/portfolio-site/ pour l'instant, à remplacer plus tard par un nom de domaine (`site` et `base` dans `astro.config.mjs`).
 

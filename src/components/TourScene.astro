@@ -1,0 +1,394 @@
+---
+// The drawing of the guided tour, in the page's language. Without script it
+// shows the overview, the platform on AWS with everything checked. With
+// script it starts empty; the tour's script then sets data-step as the
+// reader scrolls, and on a phone moves the viewBox to frame the part of the
+// drawing each step is about.
+import { tourScene, SCENE_WIDTH, SCENE_HEIGHT } from '../tour/scene';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const { defs, body, css } = tourScene(lang);
+const OVERVIEW = 16;
+---
+
+<svg id="tour-scene" data-step={OVERVIEW} viewBox={`0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`} role="img" aria-label={ui[lang].tour.overview}>
+  <defs set:html={defs} />
+  <style is:inline set:html={css}></style>
+  <g set:html={body} />
+</svg>
+
+<style is:global>
+  /* Everything is hidden unless its classes name the current step: the rules
+     that show them are generated with the drawing, in tour/scene.ts. */
+  #tour-scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #tour-scene text {
+    font-family: var(--font-ui);
+    fill: var(--ink);
+  }
+
+  #tour-scene .el {
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease;
+  }
+
+  /* With script, the drawing stays empty until the first step: the tour's
+     script sets data-live then. Without script, the overview shows. */
+  .js #tour-scene:not([data-live]) .el {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  #tour-scene .fill-top {
+    stop-color: var(--line);
+    stop-opacity: 0.14;
+  }
+
+  #tour-scene .fill-bottom {
+    stop-color: var(--line);
+    stop-opacity: 0.04;
+  }
+
+  #tour-scene .box,
+  #tour-scene .node-r {
+    fill: url(#tour-fill);
+    stroke: var(--line);
+    stroke-opacity: 0.42;
+    stroke-width: 1.1;
+    transition:
+      stroke 0.4s,
+      stroke-opacity 0.4s;
+  }
+
+  #tour-scene .box-strong {
+    stroke: var(--cyan);
+    stroke-opacity: 0.85;
+  }
+
+  #tour-scene .ghost-box {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-opacity: 0.6;
+    stroke-dasharray: 7 5;
+  }
+
+  #tour-scene .frame-local {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-opacity: 0.45;
+    stroke-width: 1.3;
+    stroke-dasharray: 8 6;
+  }
+
+  #tour-scene .frame-aws {
+    fill: var(--cyan);
+    fill-opacity: 0.035;
+    stroke: var(--cyan);
+    stroke-opacity: 0.6;
+    stroke-width: 1.4;
+  }
+
+  #tour-scene .chip-r,
+  #tour-scene .mini-r {
+    fill: var(--line);
+    fill-opacity: 0.07;
+    stroke: var(--line);
+    stroke-opacity: 0.38;
+    stroke-width: 1;
+    transition:
+      fill 0.4s,
+      stroke 0.4s,
+      stroke-opacity 0.4s;
+  }
+
+  #tour-scene .mini-r {
+    fill-opacity: 0.05;
+    stroke-opacity: 0.25;
+  }
+
+  #tour-scene .chip-t {
+    font-size: 14px;
+    font-weight: 500;
+    fill: var(--ink-2);
+  }
+
+  #tour-scene .mini-t,
+  #tour-scene .small,
+  #tour-scene .tag,
+  #tour-scene .port-t,
+  #tour-scene .chaos-t,
+  #tour-scene .wave-t,
+  #tour-scene .metric {
+    font-family: var(--font-mono);
+  }
+
+  #tour-scene .mini-t,
+  #tour-scene .small {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+
+  #tour-scene .tag {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    fill: var(--line);
+  }
+
+  #tour-scene .wave-r {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-opacity: 0.75;
+  }
+
+  #tour-scene .wave-t {
+    font-size: 13px;
+    font-weight: 500;
+    fill: var(--cyan);
+  }
+
+  #tour-scene .ttl {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  #tour-scene .ttl-l {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  #tour-scene .lbl {
+    font-size: 14px;
+    fill: var(--ink-2);
+  }
+
+  #tour-scene .metric {
+    font-size: 21px;
+    font-weight: 500;
+    fill: var(--cyan);
+    font-variant-numeric: tabular-nums;
+  }
+
+  #tour-scene .metric-alert,
+  #tour-scene .small-alert,
+  #tour-scene .chaos-t {
+    fill: var(--amber);
+  }
+
+  #tour-scene .metric-ok,
+  #tour-scene .big-ok {
+    fill: var(--green);
+  }
+
+  #tour-scene .chaos-r {
+    fill: var(--amber);
+    fill-opacity: 0.08;
+    stroke: var(--amber);
+    stroke-opacity: 0.85;
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+  }
+
+  #tour-scene .chaos-t {
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+
+  #tour-scene .budget-bg {
+    fill: var(--line);
+    fill-opacity: 0.15;
+  }
+
+  #tour-scene .budget-fill {
+    fill: var(--green);
+    filter: url(#tour-glow);
+    transform-origin: 56px 586px;
+    transform: scaleX(1);
+    transition:
+      transform 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+      fill 2.4s ease 0.3s;
+  }
+
+  #tour-scene[data-step='10'] .budget-fill {
+    transform: scaleX(0.03);
+    fill: var(--red);
+  }
+
+  #tour-scene .alert-r {
+    fill: var(--red);
+    fill-opacity: 0.1;
+    stroke: var(--red);
+    stroke-opacity: 0.9;
+    stroke-width: 1.2;
+  }
+
+  #tour-scene .alert-t {
+    font-size: 13.5px;
+    font-weight: 600;
+    fill: var(--red);
+  }
+
+  #tour-scene .port-r {
+    fill: var(--amber);
+    fill-opacity: 0.08;
+    stroke: var(--amber);
+    stroke-opacity: 0.85;
+    stroke-width: 1.2;
+  }
+
+  #tour-scene .port-t {
+    font-size: 11px;
+    fill: var(--amber);
+  }
+
+  #tour-scene .ok-box {
+    stroke: var(--green);
+    stroke-opacity: 0.9;
+    filter: url(#tour-glow);
+  }
+
+  #tour-scene .check,
+  #tour-scene .mini-check {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #tour-scene .mini-check {
+    stroke-width: 2.4;
+  }
+
+  #tour-scene .tick circle {
+    fill: var(--green);
+    stroke: var(--night);
+    stroke-width: 2;
+    filter: url(#tour-glow);
+  }
+
+  #tour-scene .tick path {
+    fill: none;
+    stroke: var(--night);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #tour-scene .glyph {
+    color: var(--cyan);
+  }
+
+  /* A flow draws itself, then its packets start running. */
+  #tour-scene .arrow path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-opacity: 0.85;
+    filter: url(#tour-glow);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.9s ease 0.25s;
+  }
+
+  #tour-scene .arrow .pk {
+    opacity: 0;
+    transition: opacity 0.4s ease 1s;
+  }
+
+  #tour-scene .pk circle {
+    fill: currentColor;
+    filter: url(#tour-glow);
+  }
+
+  #tour-scene .a-gitops {
+    color: var(--green);
+  }
+
+  #tour-scene .a-traffic {
+    color: var(--amber);
+  }
+
+  #tour-scene .a-secret {
+    color: var(--magenta);
+  }
+
+  #tour-scene .ring {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 1.5;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: tour-ring 2.6s ease-out infinite;
+  }
+
+  #tour-scene .live {
+    fill: var(--green);
+    animation: tour-blink 1.6s steps(2) infinite;
+  }
+
+  #tour-scene[data-step='10'] .alert-r {
+    animation: tour-alarm 1.2s ease-in-out 2.2s infinite;
+  }
+
+  @keyframes tour-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(2.1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes tour-blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @keyframes tour-alarm {
+    50% {
+      fill-opacity: 0.3;
+    }
+  }
+
+  @media (max-width: 899px) {
+    #tour-scene .opt {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #tour-scene .el,
+    #tour-scene .arrow path,
+    #tour-scene .arrow .pk,
+    #tour-scene .budget-fill,
+    #tour-scene .box,
+    #tour-scene .chip-r {
+      transition: none !important;
+    }
+
+    #tour-scene .ring,
+    #tour-scene .live,
+    #tour-scene .alert-r {
+      animation: none !important;
+    }
+
+    #tour-scene .pk {
+      display: none;
+    }
+  }
+</style>

@@ -27,6 +27,28 @@ type Strings = {
   contactText: string;
   source: string;
   builtWith: string;
+  takeTour: string;
+  previewAlt: { home: string; tour: string };
+  tour: {
+    title: string;
+    description: string;
+    eyebrow: string;
+    heading: string;
+    lede: string;
+    start: string;
+    label: string;
+    chapters: string;
+    step: string;
+    of: string;
+    overview: string;
+    scroll: string;
+    previous: string;
+    next: string;
+    target: string;
+    outroTitle: string;
+    outroText: string;
+    allProjects: string;
+  };
 };
 
 export const ui: Record<Lang, Strings> = {
@@ -55,6 +77,32 @@ export const ui: Record<Lang, Strings> = {
     contactText: 'Write to me on LinkedIn. My code is on GitHub.',
     source: 'Source of this site',
     builtWith: 'Built with Astro, hosted on GitHub Pages',
+    takeTour: 'Take the guided tour',
+    previewAlt: {
+      home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
+      tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
+    },
+    tour: {
+      title: 'platform-eks-gitops, command by command · Olivier Guandalini',
+      description:
+        'A guided tour of platform-eks-gitops in 18 steps, from git clone to make down: what each command does and what it printed in a real run, on k3d, then on AWS EKS.',
+      eyebrow: 'Guided tour · 18 steps',
+      heading: 'platform-eks-gitops, command by command',
+      lede: 'Eighteen steps, from `git clone` to `make down`. As you scroll, the drawing builds itself, and each command says what it does and shows what it printed in a real run.',
+      start: 'Start the tour',
+      label: 'Guided tour',
+      chapters: 'Chapters',
+      step: 'Step',
+      of: 'of',
+      overview: 'Overview: the platform on AWS, every check passed',
+      scroll: 'Scroll, and the platform builds itself',
+      previous: 'Previous',
+      next: 'Next',
+      target: 'Target it runs:',
+      outroTitle: 'What the tour does not show',
+      outroText: 'The reasons behind each choice are written down in the repository: twelve architecture decision records, a runbook for each alert, and what would change in production.',
+      allProjects: 'All the projects',
+    },
   },
   fr: {
     title: 'Olivier Guandalini · DevOps, SRE, plateforme',
@@ -81,5 +129,31 @@ export const ui: Record<Lang, Strings> = {
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
     source: 'Code source de ce site',
     builtWith: 'Construit avec Astro, hébergé sur GitHub Pages',
+    takeTour: 'Faire la visite guidée',
+    previewAlt: {
+      home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
+      tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
+    },
+    tour: {
+      title: 'platform-eks-gitops, commande par commande · Olivier Guandalini',
+      description:
+        "Une visite guidée de platform-eks-gitops en 18 étapes, du git clone au make down\u00a0: ce que fait chaque commande et ce qu'elle a affiché lors d'une vraie exécution, sur k3d, puis sur AWS EKS.",
+      eyebrow: 'Visite guidée · 18 étapes',
+      heading: 'platform-eks-gitops, commande par commande',
+      lede: "Dix-huit étapes, du `git clone` au `make down`. Au fil du défilement, le schéma se construit, et chaque commande dit ce qu'elle fait et montre ce qu'elle a affiché lors d'une vraie exécution.",
+      start: 'Commencer la visite',
+      label: 'Visite guidée',
+      chapters: 'Chapitres',
+      step: 'Étape',
+      of: 'sur',
+      overview: "Vue d'ensemble\u00a0: la plateforme sur AWS, tous les contrôles réussis",
+      scroll: 'Faites défiler, la plateforme se construit',
+      previous: 'Précédent',
+      next: 'Suivant',
+      target: 'Cible appelée\u00a0:',
+      outroTitle: 'Ce que la visite ne montre pas',
+      outroText: "Les raisons de chaque choix sont écrites dans le dépôt\u00a0: douze ADR, un runbook par alerte, et ce qui changerait en production.",
+      allProjects: 'Tous les projets',
+    },
   },
 };

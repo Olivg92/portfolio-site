@@ -1,0 +1,16 @@
+$ make lint
+pre-commit run -a
+trim trailing whitespace.................................................Passed
+fix end of files.........................................................Passed
+check for merge conflicts................................................Passed
+check for added large files..............................................Passed
+detect private key.......................................................Passed
+check yaml...............................................................Passed
+Detect hardcoded secrets.................................................Passed
+yamllint.................................................................Passed
+Terraform fmt............................................................Passed
+Terraform validate.......................................................Passed
+Terraform validate with tflint...........................................Passed
+Checkov..................................................................Passed
+Lint GitHub Actions workflow files.......................................Passed
+kubeconform..............................................................Passed

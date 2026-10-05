@@ -1,8 +1,12 @@
 ---
 // A terminal transcript, pasted as the command printed it, so what the site
-// shows is what a reader gets when they run it. Three rules colour it: a line
-// that starts with "$ " is a command, a line that starts with "ok" or "✓" has
-// passed, one that starts with "FAIL" has not. Everything else is output.
+// shows is what a reader gets when they run it. A few rules colour it:
+// - a line that starts with "$ " is a command;
+// - a line that starts with "# " is a note for the reader, not output;
+// - a status word standing alone, at the start of a line or after two
+//   spaces, says whether a step worked: ok and ✓ did, FAIL and FAILED did not;
+// - pre-commit's verdict after its row of dots: Passed, Failed or Skipped.
+// Everything else is output, as printed.
 interface Props {
   /** The title bar: the command, or the directory it runs in. */
   title: string;
@@ -10,21 +14,30 @@ interface Props {
   transcript: string;
   /** A prompt waiting at the end, with a blinking cursor. */
   cursor?: boolean;
+  /** The line being explained, counted from 0, picked out in amber. */
+  current?: number | undefined;
 }
 
-const { title, transcript, cursor = true } = Astro.props;
+const { title, transcript, cursor = true, current } = Astro.props;
 
 // A line is a few runs of text; only the runs with a tone are wrapped.
-type Run = { text: string; tone?: 'prompt' | 'cmd' | 'ok' | 'fail' };
+type Run = { text: string; tone?: 'prompt' | 'cmd' | 'note' | 'ok' | 'fail' };
+
+const STATUS = /(?:^|(?<=\s{2}))(?:ok|✓|FAILED|FAIL)(?=\s|$)|(?<=\.{3})(?:Passed|Failed|Skipped)$/g;
 
 const runs = (line: string): Run[] => {
   if (line.startsWith('$ ')) return [{ text: '$', tone: 'prompt' }, { text: line.slice(1), tone: 'cmd' }];
-  const status = line.match(/^(\s*)(ok|✓|FAIL(?:ED)?)(?=\s|$)(.*)$/);
-  if (status) {
-    const [, indent, mark, rest] = status;
-    return [{ text: indent }, { text: mark, tone: mark.startsWith('FAIL') ? 'fail' : 'ok' }, { text: rest }];
+  if (line.startsWith('# ')) return [{ text: line, tone: 'note' }];
+  const out: Run[] = [];
+  let last = 0;
+  for (const match of line.matchAll(STATUS)) {
+    const word = match[0];
+    const tone = ['ok', '✓', 'Passed'].includes(word) ? 'ok' : word === 'Skipped' ? 'note' : 'fail';
+    out.push({ text: line.slice(last, match.index) }, { text: word, tone });
+    last = match.index + word.length;
   }
-  return [{ text: line }];
+  out.push({ text: line.slice(last) });
+  return out.filter((run) => run.text);
 };
 
 const lines = transcript.replace(/^\n+|\s+$/g, '').split('\n').map(runs);
@@ -34,7 +47,7 @@ const lines = transcript.replace(/^\n+|\s+$/g, '').split('\n').map(runs);
   <figcaption class="bar">{title}</figcaption>
   {/* Focusable, so a keyboard can scroll the lines that are wider than the screen.
       Kept on one line: inside <pre>, any space in the markup would show. */}
-  <pre class="body" tabindex="0" lang="en"><code>{lines.map((line, i) => <>{i > 0 && '\n'}{line.map((run) => (run.tone ? <span class={run.tone}>{run.text}</span> : run.text))}</>)}{cursor && <>{'\n'}<span aria-hidden="true"><span class="prompt">$</span> <span class="cursor"></span></span></>}</code></pre>
+  <pre class="body" tabindex="0" lang="en"><code>{lines.map((line, i) => <>{i > 0 && '\n'}<span class:list={[{ current: i === current }]}>{line.map((run) => (run.tone ? <span class={run.tone}>{run.text}</span> : run.text))}</span></>)}{cursor && <>{'\n'}<span aria-hidden="true"><span class="prompt">$</span> <span class="cursor"></span></span></>}</code></pre>
 </figure>
 
 <style>
@@ -87,6 +100,19 @@ const lines = transcript.replace(/^\n+|\s+$/g, '').split('\n').map(runs);
 
   .fail {
     color: var(--red);
+  }
+
+  .note {
+    color: var(--muted);
+  }
+
+  .current {
+    color: var(--amber);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--amber) 40%, transparent);
+  }
+
+  .current .ok {
+    color: inherit;
   }
 
   .cursor {
