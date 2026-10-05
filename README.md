@@ -37,6 +37,11 @@ tools, the path and the education. The debugging stories arrive next.
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
   company figure, unannounced plan or security detail.
+- **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
+  Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
+  project, what it does there. The tools and their words live in one catalogue,
+  [`src/tools.ts`](src/tools.ts). No script: the card is a native popover, anchored to its
+  chip by CSS, and a sheet at the bottom of a phone's screen.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
@@ -76,11 +81,19 @@ Every pull request runs them, and a failure blocks the merge:
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
+| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
-Actions are pinned by commit, and Dependabot raises the pull requests that move them. The two
-scripts drive Chrome through its DevTools protocol, with nothing to install but Chrome; against a
-served build (`npm run build && npm run preview`), `npm run check:tour` runs the tour's check.
+Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
+check and the link previews drive Chrome through its DevTools protocol, with nothing to install
+but Chrome; against a served build (`npm run build && npm run preview`), `npm run check:tour`
+runs the tour's check. The card check needs Playwright and its browsers, which its image has:
+
+```bash
+docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
+  mcr.microsoft.com/playwright:v1.63.0-noble \
+  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs"
+```
 
 ## Layout
 
