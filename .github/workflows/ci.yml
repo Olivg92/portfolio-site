@@ -87,6 +87,20 @@ jobs:
       - name: Guided tour, clicked through
         run: node scripts/check-tour.mjs http://localhost:4321/portfolio-site/
 
+      # The tool cards, used as a reader uses them, in Chrome and in WebKit,
+      # the engine of Safari: a click or a tap opens the right card inside the
+      # screen, at the bottom of a phone's and no taller than its words, and
+      # it closes again. Safari once stretched it over a phone's screen, which
+      # Chrome could not show. Playwright brings the two browsers; its version
+      # and the browsers it installs go together.
+      - name: Tool cards, in Chrome and in WebKit
+        env:
+          PLAYWRIGHT_VERSION: 1.63.0
+        run: |
+          npm install --no-save "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium webkit
+          node scripts/check-cards.mjs http://localhost:4321/portfolio-site/
+
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
       - name: Lighthouse
