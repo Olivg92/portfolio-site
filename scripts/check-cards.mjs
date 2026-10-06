@@ -8,12 +8,17 @@
 //   screen, which Chrome never showed;
 // - in Chrome, resting the pointer on a chip opens its card too;
 // - Escape closes the card, and so does a tap elsewhere on a phone;
-// - with a card open, a tap or a click on a chip further down the page opens
-//   that chip's card and closes the first;
+// - with a card open, a tap or a click on a chip further down the page, or on
+//   the chip beside it, opens that chip's card and closes the first;
 // - no chip or link waits fully transparent for its block to come into view:
 //   Safari on iPhone drops the click of a tap during which one turns visible
 //   from opacity 0, so a tap while the next blocks arrive would only close
-//   the open card. No engine here behaves so, hence a check on the styles.
+//   the open card. No engine here behaves so, hence a check on the styles;
+// - a closing card goes at once where the browser cannot keep it above the
+//   page for its fade (no `overlay`, as in Safari): Safari on iPhone let it
+//   fall back into its panel, at the bottom, over the chips, and the tap on
+//   the next chip landed on the card. The WebKit here closes a card at once
+//   whatever the styles say, hence a check on them.
 // Run against a served build, with Playwright and its two browsers:
 //   npm install --no-save playwright@1.63.0
 //   npx playwright install --with-deps chromium webkit
@@ -107,6 +112,15 @@ const visit = async (browser, { device, options, url, hover }, check) => {
     );
     check(transparent === 0, 'no chip or link waits fully transparent, which would cost a tap its click on an iPhone');
 
+    // Without `overlay`, a card holding its `display` for a fade would leave
+    // the top layer and fall back into its panel.
+    const lingering = await page.evaluate(() =>
+      CSS.supports('overlay', 'auto')
+        ? 0
+        : [...document.querySelectorAll('[popover]')].filter((card) => getComputedStyle(card).transitionProperty.split(/,\s*/).includes('display')).length,
+    );
+    check(lingering === 0, 'a closing card goes at once where the browser cannot keep it above the page, as on an iPhone it would cover the chips');
+
     const action = device === 'phone' ? 'tap' : 'click';
     const press = async (chip) => {
       await chip.scrollIntoViewIfNeeded();
@@ -138,23 +152,31 @@ const visit = async (browser, { device, options, url, hover }, check) => {
     }
 
     // From one card to another: the first chip's card open, then the last
-    // chip, scrolled high on the screen as a reader brings it above the card
-    // at the bottom of a phone.
-    const [from, to] = [chips.first(), chips.nth(count - 1)];
-    const [fromId, toId] = [await from.getAttribute('popovertarget'), await to.getAttribute('popovertarget')];
-    await press(from);
-    await page.waitForFunction(isOpen, fromId, { timeout: 3000 }).catch(() => {});
-    await to.evaluate((chip) => {
-      chip.scrollIntoView({ block: 'start', behavior: 'instant' });
-      scrollBy({ top: -innerHeight / 4, behavior: 'instant' });
-    });
-    await press(to);
-    await page.waitForFunction(isOpen, toId, { timeout: 3000 }).catch(() => {});
-    check(
-      (await page.evaluate(isOpen, toId)) && !(await page.evaluate(isOpen, fromId)),
-      `with ${fromId} open, a ${action} on ${toId} opens it and closes the first`,
-    );
-    await page.keyboard.press('Escape');
+    // chip, in a block further down; and the next to last chip's card open,
+    // then the last chip, beside it in a block whose panel ends on the screen.
+    // Each chip is scrolled high on the screen, as a reader brings it above
+    // the card at the bottom of a phone.
+    const high = (chip) =>
+      chip.evaluate((chip) => {
+        chip.scrollIntoView({ block: 'start', behavior: 'instant' });
+        scrollBy({ top: -innerHeight / 4, behavior: 'instant' });
+      });
+    const last = chips.nth(count - 1);
+    const lastId = await last.getAttribute('popovertarget');
+    for (const from of [chips.first(), chips.nth(count - 2)]) {
+      const fromId = await from.getAttribute('popovertarget');
+      await high(from);
+      await press(from);
+      await page.waitForFunction(isOpen, fromId, { timeout: 3000 }).catch(() => {});
+      await high(last);
+      await press(last);
+      await page.waitForFunction(isOpen, lastId, { timeout: 3000 }).catch(() => {});
+      check(
+        (await page.evaluate(isOpen, lastId)) && !(await page.evaluate(isOpen, fromId)),
+        `with ${fromId} open, a ${action} on ${lastId} opens it and closes the first`,
+      );
+      await page.keyboard.press('Escape');
+    }
 
     if (hover && device === 'wide screen') {
       const chip = chips.first();
