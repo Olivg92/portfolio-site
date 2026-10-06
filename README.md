@@ -51,7 +51,10 @@ tools, the path and the education. The debugging stories arrive next.
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
   [`src/tools.ts`](src/tools.ts). No script: the card is a native popover, anchored to its
-  chip by CSS, and a sheet at the bottom of a phone's screen.
+  chip by CSS, and a sheet at the bottom of a phone's screen. It fades out only where the
+  browser keeps it above the page while it does. Safari cannot, as it has no `overlay`: the
+  fading card fell back into its panel, over the chips, and the tap meant for the next chip
+  landed on it. There the card closes at once.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
@@ -91,7 +94,7 @@ Every pull request runs them, and a failure blocks the merge:
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
-| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down opens its own; no chip or link waits fully transparent |
+| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
