@@ -60,10 +60,14 @@ for (const { name, engine, phone, hover } of engines) {
           ['wide screen', { viewport: { width: 1440, height: 900 } }],
           ['phone', phone],
         ]) {
-          const context = await browser.newContext({ ...options, reducedMotion: 'reduce' });
+          // Motion as a reader sees it, the reveal on scroll included; only the
+          // smooth scrolling goes, as the pointer would aim at a chip still on
+          // its way.
+          const context = await browser.newContext(options);
           const page = await context.newPage();
           const label = `${name}, ${lang}, /${path}, ${device}:`;
           await page.goto(`${base}${lang === 'en' ? '' : 'fr/'}${path}`, { waitUntil: 'networkidle' });
+          await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
 
           const chips = page.locator('[popovertarget]');
           const count = await chips.count();
