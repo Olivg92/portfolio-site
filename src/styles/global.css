@@ -171,9 +171,16 @@ code {
    of chips or a paragraph, waits until it comes into view itself. The
    script hides nothing itself: `reveal-on` is set only where motion is
    welcome and the browser can watch the scroll, so without script, or for
-   anyone who asks for less motion, everything is simply there. */
+   anyone who asks for less motion, everything is simply there.
+
+   A block on its way waits at a thousandth of opacity, which no one sees,
+   never at 0: Safari on iPhone drops the click of a tap during which a link
+   or a button turns visible from fully transparent, as it takes the tap for
+   a hover that opened a menu. A tap on a chip while the next blocks arrive
+   would then only close the open card. */
 :root {
   --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --reveal-faint: 0.001;
 }
 
 .reveal-on .reveal {
@@ -185,7 +192,7 @@ code {
 }
 
 .reveal-on .reveal:not(.is-in) {
-  opacity: 0;
+  opacity: var(--reveal-faint);
   translate: 0 48px;
   scale: 0.96;
 }
@@ -204,7 +211,7 @@ code {
 }
 
 .reveal-on .reveal-part:not(.is-in) {
-  opacity: 0;
+  opacity: var(--reveal-faint);
   translate: 0 20px;
 }
 
@@ -219,7 +226,7 @@ code {
 }
 
 .reveal-on .cascade:not(.is-in) > li {
-  opacity: 0;
+  opacity: var(--reveal-faint);
   translate: 0 10px;
   scale: 0.9;
 }

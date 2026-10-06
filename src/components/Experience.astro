@@ -341,7 +341,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   }
 
   :global(.reveal-on) .problem:not(:global(.is-in)) .rail > :not(ul) {
-    opacity: 0;
+    opacity: var(--reveal-faint);
     translate: 0 16px;
   }
 
