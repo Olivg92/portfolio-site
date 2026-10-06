@@ -37,6 +37,11 @@ tools, the path and the education. The debugging stories arrive next.
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
   company figure, unannounced plan or security detail.
+- **Motion that hides nothing.** Blocks rise into view as the page scrolls, and what they hold
+  follows in order, as on a product page. A few lines of script in the layout mark each block
+  as it comes into view, and CSS plays the animation; without script, or for anyone who asks
+  for less motion, everything is simply there. On a touch screen the night sky fades before the
+  top and bottom edges, where Safari floats its bars and tints them with the page's colour.
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
