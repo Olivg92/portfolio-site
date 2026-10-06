@@ -102,8 +102,8 @@ export const projects: Project[] = [
     name: 'portfolio-site',
     status: 'building',
     summary: {
-      en: 'This site. Static pages in two languages, with script only on the guided tour, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
-      fr: "Ce site. Des pages statiques en deux langues, du script seulement sur la visite guidée, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
+      en: 'This site. Static pages in two languages, readable without script, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
+      fr: "Ce site. Des pages statiques en deux langues, lisibles sans script, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
     },
     stack: [
       'astro',
@@ -114,8 +114,8 @@ export const projects: Project[] = [
     ],
     here: {
       astro: t(
-        'Every page of this site, in two languages, with script only on the guided tour.',
-        'Toutes les pages de ce site, en deux langues, avec du script seulement sur la visite guidée.',
+        'Every page of this site, in two languages, readable without script: it only drives the guided tour and reveals the blocks as they come into view.',
+        'Toutes les pages de ce site, en deux langues, lisibles sans script : il ne sert qu\'à la visite guidée et à faire apparaître les blocs au défilement.',
       ),
       typescript: t(
         'The words of every page are typed: a missing translation fails the build.',

@@ -1,7 +1,9 @@
 ---
 // A pane of glass over the night background, for a block that stands on its
 // own: a project, a story. `as` picks the element, so the block keeps its
-// meaning (an article, a section) and not only its look.
+// meaning (an article, a section) and not only its look. It rises into view
+// as the page scrolls, and the line of light along its top edge sweeps on as
+// it arrives (see the reveal in global.css).
 import type { HTMLAttributes } from 'astro/types';
 
 interface Props extends HTMLAttributes<'div'> {
@@ -11,7 +13,7 @@ interface Props extends HTMLAttributes<'div'> {
 const { as: Tag = 'div', class: className, ...rest } = Astro.props;
 ---
 
-<Tag class:list={['panel', className]} {...rest}>
+<Tag class:list={['panel', 'reveal', className]} {...rest}>
   <slot />
 </Tag>
 
@@ -35,5 +37,18 @@ const { as: Tag = 'div', class: className, ...rest } = Astro.props;
     inset: -1px 12% auto;
     height: 1px;
     background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 60%, transparent), transparent);
+  }
+
+  /* The line of light along the top edge sweeps on as the panel arrives,
+     like a screen of the control room powering up. */
+  :global(.reveal-on) .panel::before {
+    transition:
+      opacity 1.2s var(--ease-reveal) 0.25s,
+      scale 1.2s var(--ease-reveal) 0.25s;
+  }
+
+  :global(.reveal-on) .panel:not(:global(.is-in))::before {
+    opacity: 0;
+    scale: 0 1;
   }
 </style>

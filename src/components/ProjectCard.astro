@@ -27,10 +27,10 @@ const id = `project-${project.name}`;
     <Chip tone={tone[project.status]} dot live={project.status === 'building'}>{t.status[project.status]}</Chip>
     <h3 id={id}>{project.name}</h3>
     <p class="summary">{project.summary[lang]}</p>
-    <ul class="cluster" aria-label={t.stack}>
+    <ul class="cluster cascade" aria-label={t.stack}>
       {
-        project.stack.map((name) => (
-          <li>
+        project.stack.map((name, i) => (
+          <li style={`--i: ${i}`}>
             <ToolChip name={name} context={project.name} lang={lang} here={project.here?.[name]} />
           </li>
         ))
@@ -38,7 +38,7 @@ const id = `project-${project.name}`;
     </ul>
     {
       (project.tour || project.code) && (
-        <div class="cluster actions">
+        <div class="cluster actions reveal-part">
           {project.tour && <Button href={getRelativeLocaleUrl(lang, project.tour)}>{t.takeTour}</Button>}
           {project.code && (
             <Button href={project.code} variant={project.tour ? 'ghost' : 'primary'}>
@@ -77,5 +77,27 @@ const id = `project-${project.name}`;
 
   .actions {
     gap: var(--space-3);
+  }
+
+  /* As a project arrives: its status, its name and its summary, one after
+     the other. Its chips and its buttons come as they come into view
+     (global.css). */
+  :global(.reveal-on) .about > :not(ul, .actions) {
+    transition:
+      opacity 0.7s var(--ease-reveal),
+      translate 0.7s var(--ease-reveal);
+  }
+
+  :global(.reveal-on) .card:not(:global(.is-in)) .about > :not(ul, .actions) {
+    opacity: 0;
+    translate: 0 16px;
+  }
+
+  .about > h3 {
+    transition-delay: 0.08s;
+  }
+
+  .summary {
+    transition-delay: 0.18s;
   }
 </style>

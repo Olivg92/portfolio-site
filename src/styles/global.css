@@ -150,3 +150,73 @@ code {
 .cluster > li {
   display: flex;
 }
+
+/* Reveal on scroll, played once, as a block comes into view: a short script
+   in the layout (Base.astro) marks it `is-in`, and the transitions below do
+   the rest. Blocks rise, grow a little and fade in, with a long ease-out; a
+   section's title comes into focus. What lies lower in a tall block, a row
+   of chips or a paragraph, waits until it comes into view itself. The
+   script hides nothing itself: `reveal-on` is set only where motion is
+   welcome and the browser can watch the scroll, so without script, or for
+   anyone who asks for less motion, everything is simply there. */
+:root {
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on .reveal {
+  transition:
+    opacity 0.9s var(--ease-reveal),
+    translate 0.9s var(--ease-reveal),
+    scale 0.9s var(--ease-reveal),
+    filter 0.9s var(--ease-reveal);
+}
+
+.reveal-on .reveal:not(.is-in) {
+  opacity: 0;
+  translate: 0 48px;
+  scale: 0.96;
+}
+
+/* A section's title comes into focus. */
+.reveal-on :is(h2, .head).reveal:not(.is-in) {
+  filter: blur(8px);
+  scale: 1;
+}
+
+/* A part of a block, lower down: it rises a little as it comes into view. */
+.reveal-on .reveal-part {
+  transition:
+    opacity 0.7s var(--ease-reveal),
+    translate 0.7s var(--ease-reveal);
+}
+
+.reveal-on .reveal-part:not(.is-in) {
+  opacity: 0;
+  translate: 0 20px;
+}
+
+/* A row of chips lights up one chip after the other as it comes into view:
+   each waits its turn, given by --i, up to the thirteenth. */
+.reveal-on .cascade > li {
+  transition:
+    opacity 0.6s var(--ease-reveal),
+    translate 0.6s var(--ease-reveal),
+    scale 0.6s var(--ease-reveal);
+  transition-delay: calc(0.1s + min(var(--i, 0), 12) * 0.05s);
+}
+
+.reveal-on .cascade:not(.is-in) > li {
+  opacity: 0;
+  translate: 0 10px;
+  scale: 0.9;
+}
+
+@media print {
+  .reveal-on .reveal,
+  .reveal-on .reveal * {
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+    filter: none !important;
+  }
+}

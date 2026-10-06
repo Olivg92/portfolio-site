@@ -41,7 +41,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   </header>
 
   <section class="solved wrap" aria-labelledby="solved-title">
-    <div class="head">
+    <div class="head reveal">
       <p class="eyebrow">{e.solvedEyebrow}</p>
       <h2 id="solved-title">{e.solvedTitle}</h2>
       <p class="lede">{e.solvedLede}</p>
@@ -57,24 +57,24 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
                   {index(i)}
                 </span>
                 <h3 id={`${problem.id}-title`}>{problem.title[lang]}</h3>
-                <ul class="cluster" aria-label={t.stack}>
-                  {problem.stack.map((name) => (
-                    <li>
+                <ul class="cluster cascade" aria-label={t.stack}>
+                  {problem.stack.map((name, i) => (
+                    <li style={`--i: ${i}`}>
                       <ToolChip name={name} context={problem.id} lang={lang} />
                     </li>
                   ))}
                 </ul>
               </div>
               <dl class="story">
-                <div>
+                <div class="reveal-part">
                   <dt>{e.problem}</dt>
                   <dd>{problem.problem[lang]}</dd>
                 </div>
-                <div>
+                <div class="reveal-part">
                   <dt>{e.did}</dt>
                   <dd>{problem.did[lang]}</dd>
                 </div>
-                <div class="result">
+                <div class="result reveal-part">
                   <dt>{e.result}</dt>
                   <dd>{inline(problem.result[lang]).map((part, k) => (k % 2 ? <code>{part}</code> : part))}</dd>
                 </div>
@@ -87,11 +87,11 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   </section>
 
   <section class="also wrap" aria-labelledby="also-title">
-    <h2 id="also-title">{e.alsoTitle}</h2>
+    <h2 id="also-title" class="reveal">{e.alsoTitle}</h2>
     <ul class="lines">
       {
         experience.also.map((item) => (
-          <li>
+          <li class="reveal">
             {item.ongoing && (
               <Chip tone="amber" live>
                 {e.ongoing}
@@ -105,14 +105,14 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   </section>
 
   <section class="tools wrap" aria-labelledby="tools-title">
-    <h2 id="tools-title">{e.stackTitle}</h2>
+    <h2 id="tools-title" class="reveal">{e.stackTitle}</h2>
     <div class="columns">
       <Panel class="column" data-tone="green">
         <h3>{e.atWork}</h3>
-        <ul class="cluster">
+        <ul class="cluster cascade">
           {
-            experience.stack.work.map((name) => (
-              <li>
+            experience.stack.work.map((name, i) => (
+              <li style={`--i: ${i}`}>
                 <ToolChip name={name} context="work" lang={lang} />
               </li>
             ))
@@ -121,10 +121,10 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       </Panel>
       <Panel class="column" data-tone="cyan">
         <h3>{e.inProjects}</h3>
-        <ul class="cluster">
+        <ul class="cluster cascade">
           {
-            experience.stack.projects.map((name) => (
-              <li>
+            experience.stack.projects.map((name, i) => (
+              <li style={`--i: ${i}`}>
                 <ToolChip name={name} context="projects" lang={lang} />
               </li>
             ))
@@ -136,11 +136,11 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   <div class="history wrap">
     <section aria-labelledby="path-title">
-      <h2 id="path-title">{e.pathTitle}</h2>
+      <h2 id="path-title" class="reveal">{e.pathTitle}</h2>
       <ol class="timeline">
         {
           experience.path.map((step) => (
-            <li>
+            <li class="reveal">
               <p class="when">{step.when[lang]}</p>
               <h3>{step.role[lang]}</h3>
               <p>{step.where[lang]}</p>
@@ -150,11 +150,11 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       </ol>
     </section>
     <section aria-labelledby="education-title">
-      <h2 id="education-title">{e.educationTitle}</h2>
+      <h2 id="education-title" class="reveal">{e.educationTitle}</h2>
       <ol class="timeline">
         {
           experience.education.map((degree) => (
-            <li>
+            <li class="reveal">
               <p class="when">{degree.when[lang]}</p>
               <h3>{degree.degree[lang]}</h3>
               <p>{degree.note[lang]}</p>
@@ -162,7 +162,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
           ))
         }
       </ol>
-      <p class="languages">
+      <p class="languages reveal">
         <span class="eyebrow">{e.languages}</span>
         <span>{experience.languages[lang]}</span>
       </p>
@@ -331,6 +331,32 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     font-weight: 600;
   }
 
+  /* As a case arrives: its number and title. Then the problem, what I did
+     and the result, each as it comes into view (reveal-part), one after
+     the other when they arrive together. */
+  :global(.reveal-on) .problem .rail > :not(ul) {
+    transition:
+      opacity 0.7s var(--ease-reveal),
+      translate 0.7s var(--ease-reveal);
+  }
+
+  :global(.reveal-on) .problem:not(:global(.is-in)) .rail > :not(ul) {
+    opacity: 0;
+    translate: 0 16px;
+  }
+
+  .rail > h3 {
+    transition-delay: 0.08s;
+  }
+
+  .story > div:nth-child(2) {
+    transition-delay: 0.12s;
+  }
+
+  .story > div:nth-child(3) {
+    transition-delay: 0.24s;
+  }
+
   @media (min-width: 900px) {
     .problem {
       grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
@@ -433,6 +459,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   /* A line down the side, a lit point at each step. */
   .timeline {
+    position: relative;
     display: grid;
     gap: var(--space-6);
     margin: 0;
@@ -457,6 +484,40 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     border-radius: 50%;
     background: var(--cyan);
     box-shadow: 0 0 10px var(--cyan);
+  }
+
+  /* Over the faint track, a lit line. */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    width: 1px;
+    background: linear-gradient(var(--cyan), color-mix(in srgb, var(--cyan) 20%, transparent));
+    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
+    transform-origin: top;
+  }
+
+  /* Once the first step is in, the lit line draws itself down, and each
+     point lights up as its step arrives. */
+  :global(.reveal-on) .timeline::before {
+    transition: scale 1.6s var(--ease-reveal) 0.2s;
+  }
+
+  :global(.reveal-on) .timeline:not(:has(> li:global(.is-in)))::before {
+    scale: 1 0;
+  }
+
+  :global(.reveal-on) .timeline li::before {
+    transition:
+      background-color 0.6s ease 0.4s,
+      box-shadow 0.6s ease 0.4s;
+  }
+
+  :global(.reveal-on) .timeline li:not(:global(.is-in))::before {
+    background-color: var(--line-soft);
+    box-shadow: none;
   }
 
   .when {

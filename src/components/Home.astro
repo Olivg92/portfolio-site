@@ -52,7 +52,7 @@ checking the local platform:
   </section>
 
   <section id="projects" class="projects wrap" aria-labelledby="projects-title">
-    <div class="head">
+    <div class="head reveal">
       <p class="eyebrow">{t.projects}</p>
       <h2 id="projects-title">{t.projectsTitle}</h2>
       <p class="lede">{t.projectsLede}</p>
@@ -60,7 +60,7 @@ checking the local platform:
     </div>
 
     <ProjectCard project={featured} lang={lang}>
-      <div class="proof">
+      <div class="proof reveal-part">
         <Terminal title="~/platform-eks-gitops" transcript={verify} />
         <p class="note">{t.measured}</p>
       </div>
