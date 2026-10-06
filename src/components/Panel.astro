@@ -51,4 +51,40 @@ const { as: Tag = 'div', class: className, ...rest } = Astro.props;
     opacity: 0;
     scale: 0 1;
   }
+
+  /* On a screen with a mouse, a panel lifts a little under the pointer and
+     its edge lights up. `transform` for the lift, so it adds to the reveal,
+     which moves `translate` and `scale`; the transitions of both are listed
+     here, as a panel's own list would otherwise replace the reveal's. */
+  @media (hover: hover) and (pointer: fine) {
+    .panel {
+      transition:
+        transform 0.4s var(--ease-reveal),
+        box-shadow 0.4s var(--ease-reveal),
+        border-color 0.4s ease;
+    }
+
+    :global(.reveal-on) .panel {
+      transition:
+        opacity 0.9s var(--ease-reveal),
+        translate 0.9s var(--ease-reveal),
+        scale 0.9s var(--ease-reveal),
+        transform 0.4s var(--ease-reveal),
+        box-shadow 0.4s var(--ease-reveal),
+        border-color 0.4s ease;
+    }
+
+    .panel:hover {
+      border-color: color-mix(in srgb, var(--line) 34%, transparent);
+      box-shadow:
+        var(--shadow-panel),
+        0 28px 60px -34px color-mix(in srgb, var(--cyan) 45%, transparent);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .panel:hover {
+      transform: translateY(-4px);
+    }
+  }
 </style>

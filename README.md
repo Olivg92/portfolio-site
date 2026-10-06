@@ -42,6 +42,8 @@ tools, the path and the education. The debugging stories arrive next.
   as it comes into view, and CSS plays the animation; without script, or for anyone who asks
   for less motion, everything is simply there. On a touch screen the night sky fades before the
   top and bottom edges, where Safari floats its bars and tints them with the page's colour.
+  From page to page, the page fades into the next while the header stays put (cross-document
+  view transitions, CSS only), and on a screen with a mouse a panel lifts under the pointer.
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
