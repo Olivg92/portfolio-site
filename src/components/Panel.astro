@@ -48,7 +48,7 @@ const { as: Tag = 'div', class: className, ...rest } = Astro.props;
   }
 
   :global(.reveal-on) .panel:not(:global(.is-in))::before {
-    opacity: 0;
+    opacity: var(--reveal-faint);
     scale: 0 1;
   }
 
