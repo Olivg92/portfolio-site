@@ -239,8 +239,11 @@ export function tourScene(lang: Lang) {
   const symbols =
     [...used].map((name) => `<symbol id="tl-${name}" viewBox="${logos[name].viewBox}">${logos[name].body}</symbol>`).join('') +
     '<symbol id="tl-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/></g></symbol>';
+  // The glow of a flow's line spans a fixed region of the drawing: one
+  // measured on the line, which a vertical line gives no width, would hide it.
   const defs =
     '<filter id="tour-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+    '<filter id="tour-glow-line" filterUnits="userSpaceOnUse" x="-100" y="-100" width="1000" height="1300"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
     '<linearGradient id="tour-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="fill-top"/><stop offset="1" class="fill-bottom"/></linearGradient>' +
     symbols;
 
