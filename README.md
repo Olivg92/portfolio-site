@@ -38,12 +38,15 @@ tools, the path and the education. The debugging stories arrive next.
   kind, and the page says how I work, never what belongs to the company: no host, product,
   company figure, unannounced plan or security detail.
 - **Motion that hides nothing.** Blocks rise into view as the page scrolls, and what they hold
-  follows in order, as on a product page. A few lines of script in the layout mark each block
-  as it comes into view, and CSS plays the animation; without script, or for anyone who asks
-  for less motion, everything is simply there. On a touch screen the night sky fades before the
-  top and bottom edges, where Safari floats its bars and tints them with the page's colour.
-  From page to page, the page fades into the next while the header stays put (cross-document
-  view transitions, CSS only), and on a screen with a mouse a panel lifts under the pointer.
+  follows in order, as on a product page. A few lines of script in the layout mark each block as
+  it comes into view, and CSS plays the animation; without script, or for anyone who asks for
+  less motion, everything is simply there. A block on its way is nearly transparent, never
+  fully: Safari on iPhone drops the click of a tap during which a link or a button turns visible
+  from opacity 0, so a tap on a chip while the next blocks arrive would only close the open
+  card. On a touch screen the night sky fades before the top and bottom edges, where Safari
+  floats its bars and tints them with the page's colour. From page to page, the page fades into
+  the next while the header stays put (cross-document view transitions, CSS only), and on a
+  screen with a mouse a panel lifts under the pointer.
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
@@ -88,7 +91,7 @@ Every pull request runs them, and a failure blocks the merge:
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
-| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes |
+| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down opens its own; no chip or link waits fully transparent |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
