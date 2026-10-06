@@ -63,9 +63,22 @@ const popover = { popover: 'auto' };
     translate: 0 6px;
     transition:
       opacity 0.18s ease-out,
-      translate 0.18s ease-out,
-      display 0.18s allow-discrete,
-      overlay 0.18s allow-discrete;
+      translate 0.18s ease-out;
+  }
+
+  /* A card fades out only where the browser keeps it above the page while it
+     does. Safari cannot, as it has no `overlay`: the closing card would fall
+     back into the page for its fade, where the backdrop filter of its panel
+     holds it at the bottom of the panel, over the chips, and a tap on the
+     next chip would land on the card. There, a card closes at once. */
+  @supports (overlay: auto) {
+    .tool-card {
+      transition:
+        opacity 0.18s ease-out,
+        translate 0.18s ease-out,
+        display 0.18s allow-discrete,
+        overlay 0.18s allow-discrete;
+    }
   }
 
   .tool-card[data-tone='green'] {
