@@ -1,7 +1,9 @@
 ---
 // A pane of glass over the night background, for a block that stands on its
 // own: a project, a story. `as` picks the element, so the block keeps its
-// meaning (an article, a section) and not only its look.
+// meaning (an article, a section) and not only its look. It rises into view
+// as the page scrolls, and the line of light along its top edge sweeps on as
+// it arrives (see the reveal in global.css).
 import type { HTMLAttributes } from 'astro/types';
 
 interface Props extends HTMLAttributes<'div'> {
@@ -11,7 +13,7 @@ interface Props extends HTMLAttributes<'div'> {
 const { as: Tag = 'div', class: className, ...rest } = Astro.props;
 ---
 
-<Tag class:list={['panel', className]} {...rest}>
+<Tag class:list={['panel', 'reveal', className]} {...rest}>
   <slot />
 </Tag>
 
@@ -35,5 +37,54 @@ const { as: Tag = 'div', class: className, ...rest } = Astro.props;
     inset: -1px 12% auto;
     height: 1px;
     background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 60%, transparent), transparent);
+  }
+
+  /* The line of light along the top edge sweeps on as the panel arrives,
+     like a screen of the control room powering up. */
+  :global(.reveal-on) .panel::before {
+    transition:
+      opacity 1.2s var(--ease-reveal) 0.25s,
+      scale 1.2s var(--ease-reveal) 0.25s;
+  }
+
+  :global(.reveal-on) .panel:not(:global(.is-in))::before {
+    opacity: 0;
+    scale: 0 1;
+  }
+
+  /* On a screen with a mouse, a panel lifts a little under the pointer and
+     its edge lights up. `transform` for the lift, so it adds to the reveal,
+     which moves `translate` and `scale`; the transitions of both are listed
+     here, as a panel's own list would otherwise replace the reveal's. */
+  @media (hover: hover) and (pointer: fine) {
+    .panel {
+      transition:
+        transform 0.4s var(--ease-reveal),
+        box-shadow 0.4s var(--ease-reveal),
+        border-color 0.4s ease;
+    }
+
+    :global(.reveal-on) .panel {
+      transition:
+        opacity 0.9s var(--ease-reveal),
+        translate 0.9s var(--ease-reveal),
+        scale 0.9s var(--ease-reveal),
+        transform 0.4s var(--ease-reveal),
+        box-shadow 0.4s var(--ease-reveal),
+        border-color 0.4s ease;
+    }
+
+    .panel:hover {
+      border-color: color-mix(in srgb, var(--line) 34%, transparent);
+      box-shadow:
+        var(--shadow-panel),
+        0 28px 60px -34px color-mix(in srgb, var(--cyan) 45%, transparent);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .panel:hover {
+      transform: translateY(-4px);
+    }
   }
 </style>

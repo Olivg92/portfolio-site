@@ -12,16 +12,18 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 - **Confidentialité** : ne jamais mentionner mon employeur, ses hosts, IP, URLs ou données. Tout exemple issu de mon expérience doit être anonymisé.
 - **Sécurité** : aucun secret, clé ou token dans le repo. Le déploiement passe par le jeton OIDC de GitHub Pages, rien d'autre.
 - **Site public** : chaque page existe dans les deux langues, et rien n'est publié qui ne soit prêt à être lu par un recruteur.
-- **Léger** : HTML et CSS statiques, du JavaScript seulement là où une page en a besoin, pas de framework côté client. Lighthouse à 90 ou plus partout.
+- **Léger** : HTML et CSS statiques, du JavaScript seulement là où une page en a besoin, pas de framework côté client, et chaque page lisible sans. Lighthouse à 90 ou plus partout.
 
 ## Choix validés
 - Tout le site en sombre, dans le style « salle de contrôle ». Accueil : une grande image isométrique de la plateforme, en version nuit. Page platform-eks-gitops : la visite guidée en 18 étapes.
 - Anglais à la racine, français sous `/fr/`.
 - Système de design : couleurs, polices, tailles et espacements sont des variables dans `src/styles/tokens.css`. Les composants de `src/components/` y prennent toutes leurs couleurs (une nuance passe par `color-mix()`), jamais de valeur à eux. Polices Geist et Geist Mono servies par le site lui-même.
 - Contact : LinkedIn et GitHub (`src/links.ts`), jamais d'adresse mail.
-- Visite guidée de platform-eks-gitops : chaque bloc de terminal est la vraie sortie d'une exécution (`src/tour/transcripts/`), jamais inventée ; compte AWS et adresses IP masqués. Le seul JavaScript du site est sur cette page, et elle se lit sans. `scripts/check-tour.mjs` la teste dans Chrome en CI.
+- Visite guidée de platform-eks-gitops : chaque bloc de terminal est la vraie sortie d'une exécution (`src/tour/transcripts/`), jamais inventée ; compte AWS et adresses IP masqués. Elle a son propre script et se lit sans. `scripts/check-tour.mjs` la teste dans Chrome en CI.
 - Aperçus de liens (LinkedIn) : images dans `public/og/` (accueil, visite, expérience), redessinées avec `npm run og` sur un build servi dès que le look de l'une de ces pages change.
 - Page Expérience (`src/experience.ts`) : mon travail raconté en problèmes résolus, au niveau de détail d'un entretien. Les employeurs sont décrits par leur type, jamais nommés (l'actuel : « un éditeur de logiciels ») ; on y publie ce que je dirais en entretien à quelqu'un d'extérieur : ma façon de travailler et mes choix techniques, jamais ce qui appartient à l'entreprise (hôte, produit, chiffre de l'entreprise comme sa disponibilité, ses utilisateurs ou ses incidents, projet non annoncé, détail de sécurité).
+- Apparitions au défilement, façon Apple : un petit script commun (dans `src/layouts/Base.astro`, moins d'1 Ko) marque chaque bloc quand il entre à l'écran, et le CSS joue l'animation (montée, échelle, fondu, séquence interne, chips en cascade). Rien n'est caché sans script ni avec « réduire les animations ».
+- Safari 26 sur iPhone teinte ses barres flottantes avec la couleur de fond de la page ou d'un élément collé au bord : sur écran tactile, le ciel s'estompe avant le haut et le bas de l'écran, et un élément collé (la scène de la visite) porte son fond sur un calque intérieur, jamais sur lui-même.
 - Outils : chaque techno du site est une chip qui ouvre une carte (ce que c'est, et sur un projet ce qu'elle y fait), sans JavaScript (Popover API, `interestfor` pour le survol dans Chrome et Edge). Le catalogue est `src/tools.ts` ; `scripts/check-cards.mjs` teste les cartes dans Chrome et dans WebKit (moteur de Safari) en CI.
 - Les projets et leur stack sont dans `src/projects.ts` ; chaque techno a son logo à côté de son nom quand il existe (`src/logos.ts` : Simple Icons, icônes d'architecture AWS, External Secrets).
 - Adresse : https://olivg92.github.io/portfolio-site/ pour l'instant, à remplacer plus tard par un nom de domaine (`site` et `base` dans `astro.config.mjs`).

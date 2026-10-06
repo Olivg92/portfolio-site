@@ -47,7 +47,10 @@ const codes = Object.keys(languages) as Lang[];
 </header>
 
 <style>
+  /* Named for the move from page to page (global.css): the header stays
+     where it is while the page under it changes. */
   .top {
+    view-transition-name: site-header;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;

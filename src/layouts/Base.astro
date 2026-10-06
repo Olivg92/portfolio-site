@@ -39,6 +39,26 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#070c16" />
+    <script is:inline>
+      // Reveal on scroll (see global.css): only where motion is welcome and the
+      // browser can watch what comes into view; each block is marked once.
+      if (matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
+        document.documentElement.classList.add('reveal-on');
+        addEventListener('DOMContentLoaded', () => {
+          const watch = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                entry.target.classList.add('is-in');
+                watch.unobserve(entry.target);
+              }
+            },
+            { rootMargin: '0px 0px -8% 0px' },
+          );
+          for (const block of document.querySelectorAll('.reveal, .reveal-part, .cascade')) watch.observe(block);
+        });
+      }
+    </script>
     {
       indexable ? (
         <>
