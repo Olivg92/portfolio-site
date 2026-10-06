@@ -606,6 +606,17 @@ const inline = (text: string) => text.split('`');
     :global(.js) .stage {
       z-index: 3;
       height: calc(100px + 40svh);
+    }
+
+    /* Safari 26 tints the bars it floats over the page from the background
+       of an element stuck to the edge of the screen. The pinned drawing
+       keeps its background, its edge and its shadow on a layer of its own,
+       so that Safari shows the page itself under its bars, as elsewhere. */
+    :global(.js) .stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
       border-bottom: 1px solid var(--line-faint);
       background: var(--night);
       box-shadow: 0 16px 32px -16px var(--night);
