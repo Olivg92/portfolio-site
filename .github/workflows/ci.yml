@@ -83,7 +83,7 @@ jobs:
 
       # The guided tour, used as a reader uses it, in the runner's Chrome:
       # clicks on its buttons and chapters, the end of the page, and on a
-      # phone, each step's drawing framed whole.
+      # phone, each step's drawing framed whole, no word of it under 8 px.
       - name: Guided tour, clicked through
         run: node scripts/check-tour.mjs http://localhost:4321/portfolio-site/
 
