@@ -32,7 +32,9 @@ tools, the path and the education. The debugging stories arrive next.
   in [`src/tour/transcripts/`](src/tour/transcripts/), never a mock-up; an AWS account ID or an
   address is masked. Its drawing is computed at build time
   ([`src/tour/scene.ts`](src/tour/scene.ts)), and the one script of the site follows the
-  scroll, on that page only. Without the script, the tour reads as a page.
+  scroll, on that page only. On a phone the drawing has a tighter layout of its own, the same
+  platform with smaller chips and closer rows, framed on each step as on a wide screen, so that
+  no word of it is under 8 px. Without the script, the tour reads as a page.
 - **An experience page that names no employer.** Its words live in
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
@@ -93,7 +95,7 @@ Every pull request runs them, and a failure blocks the merge:
 | Whitespace, YAML and JSON, private keys, secrets, workflow mistakes | `pre-commit`, the same hooks as locally: `pre-commit run -a` |
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
-| The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; each step's drawing framed whole |
+| The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
@@ -116,7 +118,7 @@ src/
 ├── projects.ts           # the three projects: status, summary, stack
 ├── tour/
 │   ├── steps.ts          # the 18 steps of the guided tour, in both languages
-│   ├── scene.ts          # its drawing, step by step
+│   ├── scene.ts          # its drawing, step by step, for a wide screen and for a phone
 │   └── transcripts/      # what each command printed in a real run
 ├── logos.ts              # the logos of the tools, drawn inline
 ├── links.ts              # every address the site links to
