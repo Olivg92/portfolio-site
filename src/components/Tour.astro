@@ -17,6 +17,7 @@ import Button from './Button.astro';
 import Terminal from './Terminal.astro';
 import TourScene from './TourScene.astro';
 import { chapters, steps } from '../tour/steps';
+import { PHONE_WIDTH, PHONE_HEIGHT } from '../tour/scene';
 import { links } from '../links';
 import { ui, type Lang } from '../i18n';
 
@@ -68,7 +69,7 @@ const inline = (text: string) => text.split('`');
           <button class="step-btn" id="tour-next" type="button" hidden>{t.tour.next}</button>
         </div>
       </div>
-      <div class="scene-box"><TourScene lang={lang} /></div>
+      <div class="scene-box" style={`--phone-ratio: ${PHONE_WIDTH} / ${PHONE_HEIGHT}`}><TourScene lang={lang} /></div>
     </div>
 
     <div class="segments">
@@ -129,17 +130,20 @@ const inline = (text: string) => text.split('`');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const narrow = window.matchMedia('(max-width: 899px)');
     const { stepWord, ofWord, scroll } = tour.dataset;
-    const full = (scene.getAttribute('viewBox') ?? '0 0 680 716').split(' ').map(Number);
+    // On a phone, the drawing made for it: the one the camera frames.
+    const camera = scene.querySelector<SVGSVGElement>('svg.phone');
+    const full = (camera?.getAttribute('viewBox') ?? '0 0 464 566').split(' ').map(Number);
     let view = full.slice();
     let frameId = 0;
     let active = -1;
     let reading = false;
 
     // On a phone, the camera frames what the step shows: its elements, but
-    // not the band at the top nor the frames around the platform, which most
-    // steps show, nor what the step dims. A step that shows nothing else
-    // frames those. The frame is never smaller than a phone can read, and
-    // never leaves the drawing.
+    // not the band at the top nor the grounds around the platform and their
+    // labels, which most steps show, nor what the step dims. A step that
+    // shows nothing else frames the labels, then the grounds. The frame is
+    // as wide as the drawing, made for a phone, never shorter than a phone
+    // can read, and never leaves the drawing.
     const boxes = new Map<number, number[]>();
     const union = (els: SVGGraphicsElement[]) => {
       let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity];
@@ -153,10 +157,10 @@ const inline = (text: string) => text.split('`');
     const focusOf = (n: number) => {
       const known = boxes.get(n);
       if (known) return known;
-      const shown = [...scene.querySelectorAll<SVGGraphicsElement>(`.s${n}`)].filter((el) => !el.classList.contains(`d${n}`));
+      const shown = [...(camera ?? scene).querySelectorAll<SVGGraphicsElement>(`.s${n}`)].filter((el) => !el.classList.contains(`d${n}`));
       const without = (...names: string[]) => shown.filter((el) => !names.some((name) => el.classList.contains(name)));
-      const [x0, y0, x1, y1] = union(without('band', 'frame')) ?? union(without('band')) ?? union(shown) ?? [0, 0, full[2], full[3]];
-      const w = Math.min(full[2], Math.max(360, x1 - x0 + 28));
+      const [x0, y0, x1, y1] = union(without('band', 'frame', 'ground')) ?? union(without('band', 'ground')) ?? union(without('band')) ?? union(shown) ?? [0, 0, full[2], full[3]];
+      const w = full[2];
       const h = Math.min(full[3], Math.max(300, y1 - y0 + 28));
       const box = [
         Math.max(0, Math.min(full[2] - w, (x0 + x1 - w) / 2)),
@@ -168,14 +172,15 @@ const inline = (text: string) => text.split('`');
       return box;
     };
 
-    // The viewBox glides from one frame to the next; on a wide screen, the
-    // whole drawing stays in view.
+    // On a phone, the viewBox glides from one frame to the next; a wide
+    // screen keeps its whole drawing in view.
     const frame = (n: number) => {
+      if (!camera) return;
       const target = narrow.matches && n > 0 ? focusOf(n) : full;
       cancelAnimationFrame(frameId);
       if (reduce.matches) {
         view = target;
-        scene.setAttribute('viewBox', view.join(' '));
+        camera.setAttribute('viewBox', view.join(' '));
         return;
       }
       const from = view.slice();
@@ -184,7 +189,7 @@ const inline = (text: string) => text.split('`');
         const p = Math.min(1, (now - start) / 600);
         const eased = 1 - (1 - p) ** 3;
         view = from.map((v, i) => v + (target[i] - v) * eased);
-        scene.setAttribute('viewBox', view.map((v) => v.toFixed(1)).join(' '));
+        camera.setAttribute('viewBox', view.map((v) => v.toFixed(1)).join(' '));
         if (p < 1) frameId = requestAnimationFrame(step);
       };
       frameId = requestAnimationFrame(step);
@@ -579,6 +584,11 @@ const inline = (text: string) => text.split('`');
      the words scroll below it like a page, without fading. The chapters take
      the first row; where you are and the buttons, the second. */
   @media (max-width: 899px) {
+    /* Without script, the phone's drawing whole, in its own shape. */
+    .scene-box {
+      aspect-ratio: var(--phone-ratio);
+    }
+
     .hud {
       gap: var(--space-1) var(--space-3);
       padding-top: var(--space-2);

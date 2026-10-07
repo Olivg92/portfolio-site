@@ -2,9 +2,10 @@
 // The drawing of the guided tour, in the page's language. Without script it
 // shows the overview, the platform on AWS with everything checked. With
 // script it starts empty; the tour's script then sets data-step as the
-// reader scrolls, and on a phone moves the viewBox to frame the part of the
-// drawing each step is about.
-import { tourScene, SCENE_WIDTH, SCENE_HEIGHT } from '../tour/scene';
+// reader scrolls. It holds two layouts of the same drawing, with the logos
+// and effects they share: one for a wide screen, and one for a phone,
+// tightened for the small frame it pins at the top of the screen.
+import { tourScene, SCENE_WIDTH, SCENE_HEIGHT, PHONE_WIDTH, PHONE_HEIGHT } from '../tour/scene';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -12,14 +13,15 @@ interface Props {
 }
 
 const { lang } = Astro.props;
-const { defs, body, css } = tourScene(lang);
+const { defs, wide, phone, css } = tourScene(lang);
 const OVERVIEW = 16;
 ---
 
-<svg id="tour-scene" data-step={OVERVIEW} viewBox={`0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`} role="img" aria-label={ui[lang].tour.overview}>
+<svg id="tour-scene" data-step={OVERVIEW} role="img" aria-label={ui[lang].tour.overview}>
   <defs set:html={defs} />
   <style is:inline set:html={css}></style>
-  <g set:html={body} />
+  <svg class="wide" viewBox={`0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`}><g set:html={wide} /></svg>
+  <svg class="phone" viewBox={`0 0 ${PHONE_WIDTH} ${PHONE_HEIGHT}`}><g set:html={phone} /></svg>
 </svg>
 
 <style is:global>
@@ -29,6 +31,26 @@ const OVERVIEW = 16;
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  /* One layout or the other, at the width where the tour changes its own. */
+  #tour-scene .phone {
+    display: none;
+  }
+
+  @media (max-width: 899px) {
+    #tour-scene .wide {
+      display: none;
+    }
+
+    #tour-scene .phone {
+      display: inline;
+    }
+  }
+
+  /* The phone's drawing shows smaller: its small words a size up. */
+  #tour-scene .phone :is(.tag, .mini-t, .small, .port-t, .chaos-t) {
+    font-size: 12px;
   }
 
   #tour-scene text {
@@ -210,10 +232,12 @@ const OVERVIEW = 16;
     fill-opacity: 0.15;
   }
 
+  /* The budget drains towards its left end, wherever the layout puts it. */
   #tour-scene .budget-fill {
     fill: var(--green);
     filter: url(#tour-glow);
-    transform-origin: 56px 586px;
+    transform-box: fill-box;
+    transform-origin: 0 50%;
     transform: scaleX(1);
     transition:
       transform 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
