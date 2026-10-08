@@ -38,7 +38,11 @@ tools, the path and the education.
 - **An experience page that names no employer.** Its words live in
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
-  company figure, unannounced plan or security detail.
+  company figure, unannounced plan or security detail. On a phone, where the seven problems
+  took seven screens, each folds to its number, title and tools, and its story unfolds from a
+  line at the foot of the card, growing and fading in, and folds back the same way: a native
+  `<details>`, no script. A wide screen shows every story beside its title, as before, and so
+  does paper.
 - **Motion that hides nothing.** Blocks rise into view as the page scrolls, and what they hold
   follows in order, as on a product page. A few lines of script in the layout mark each block as
   it comes into view, and CSS plays the animation; without script, or for anyone who asks for
@@ -97,17 +101,19 @@ Every pull request runs them, and a failure blocks the merge:
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; in Chrome, screen readers get the stories and skip a folded one |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
 check and the link previews drive Chrome through its DevTools protocol, with nothing to install
 but Chrome; against a served build (`npm run build && npm run preview`), `npm run check:tour`
-runs the tour's check. The card check needs Playwright and its browsers, which its image has:
+runs the tour's check. The checks of the cards and of the solved problems need Playwright and
+its browsers, which its image has:
 
 ```bash
 docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
   mcr.microsoft.com/playwright:v1.63.0-noble \
-  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs"
+  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs && node scripts/check-experience.mjs"
 ```
 
 ## Layout
@@ -116,6 +122,8 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app
 src/
 ├── i18n.ts               # every string, in both languages
 ├── projects.ts           # the three projects: status, summary, stack
+├── experience.ts         # the words of the experience page, in both languages
+├── tools.ts              # every tool on the site: what it is, and its kind
 ├── tour/
 │   ├── steps.ts          # the 18 steps of the guided tour, in both languages
 │   ├── scene.ts          # its drawing, step by step, for a wide screen and for a phone
@@ -127,6 +135,9 @@ src/
 │   ├── Home.astro        # the home page, shared by both languages
 │   ├── IsoPlatform.astro # the platform in isometric view, computed at build time
 │   ├── ProjectCard.astro # one project, with its stack, its tour and its code
+│   ├── Experience.astro  # the experience page, shared by both languages
+│   ├── ToolChip.astro    # a tool's chip, with the card it opens
+│   ├── ToolCard.astro    # that card: a popover, a sheet at the bottom of a phone
 │   ├── Tour.astro        # the guided tour, and the one script of the site
 │   ├── TourScene.astro   # the drawing of the tour
 │   ├── SiteHeader.astro  # name, contact link, EN/FR switch
@@ -140,6 +151,7 @@ src/
 ├── pages/
 │   ├── index.astro       # English, at the root
 │   ├── platform-eks-gitops/index.astro  # the guided tour
+│   ├── experience/index.astro           # the experience page
 │   ├── fr/                # the same pages, in French
 │   └── 404.astro         # in both languages
 └── styles/
@@ -147,6 +159,8 @@ src/
     └── global.css        # background, type, links, layout helpers
 scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
+├── check-cards.mjs       # the tool cards, in Chrome and WebKit
+├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
 ├── og-images.mjs         # the pictures of link previews
 └── lib/cdp.mjs           # a minimal Chrome DevTools client
 public/og/                # the pictures, one per page and language
