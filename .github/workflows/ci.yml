@@ -56,6 +56,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Every link to another site opens in a new tab, so that the site stays
+      # open behind it, and says so to screen readers. Read from the build.
+      - name: Links to other sites, in a new tab
+        run: node scripts/check-new-tab.mjs dist
+
       # The built site, served under the same path as on GitHub Pages, for the
       # two checks below. It keeps running until the job ends.
       - name: Serve the build

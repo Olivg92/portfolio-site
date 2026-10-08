@@ -1,9 +1,11 @@
 ---
 // A link that looks like a button. Every action on the site goes somewhere,
 // so there is no <button> here. The arrow says where: down for a place on the
-// same page, up and to the right for another site.
+// same page, up and to the right for another site, which opens in a new tab
+// so that this one stays open behind it; screen readers hear it said.
 import type { HTMLAttributes } from 'astro/types';
 import Icon from './Icon.astro';
+import { ui, type Lang } from '../i18n';
 
 interface Props extends HTMLAttributes<'a'> {
   href: string;
@@ -12,11 +14,15 @@ interface Props extends HTMLAttributes<'a'> {
 }
 
 const { href, variant = 'primary', class: className, ...rest } = Astro.props;
-const icon = href.startsWith('#') ? 'arrow-down' : /^https?:/.test(href) ? 'arrow-up-right' : undefined;
+const elsewhere = /^https?:/.test(href);
+const icon = href.startsWith('#') ? 'arrow-down' : elsewhere ? 'arrow-up-right' : undefined;
+const lang = (Astro.currentLocale ?? 'en') as Lang;
+const newTab = elsewhere ? { target: '_blank', rel: 'noopener' } : {};
 ---
 
-<a href={href} class:list={['btn', variant, className]} {...rest}>
+<a href={href} class:list={['btn', variant, className]} {...newTab} {...rest}>
   <slot />
+  {elsewhere && <span class="visually-hidden">{ui[lang].newTab}</span>}
   {icon && <Icon name={icon} />}
 </a>
 

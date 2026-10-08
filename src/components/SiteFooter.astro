@@ -32,7 +32,10 @@ const year = new Date().getFullYear();
     </nav>
     <p class="meta">
       <span>© {year} Olivier Guandalini</span>
-      <a href={links.source}>{t.source}</a>
+      <a href={links.source} target="_blank" rel="noopener">
+        {t.source}
+        <span class="visually-hidden">{t.newTab}</span>
+      </a>
       <span>{t.builtWith}</span>
     </p>
   </div>
