@@ -119,6 +119,16 @@ const popover = { popover: 'auto' };
     }
   }
 
+  /* Leaving as the page scrolls on, on a phone (see Base.astro): it fades
+     and sinks while still open, above the page, and closes once gone, so it
+     fades in Safari too. Taps go through it to what is below meanwhile. */
+  .tool-card:popover-open.leaving {
+    opacity: 0;
+    translate: 0 12px;
+    pointer-events: none;
+    transition-duration: 0.25s;
+  }
+
   .head {
     display: flex;
     align-items: center;
