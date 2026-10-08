@@ -47,6 +47,8 @@ type Strings = {
     problem: string;
     did: string;
     result: string;
+    showDetails: string;
+    hideDetails: string;
     alsoTitle: string;
     ongoing: string;
     stackTitle: string;
@@ -131,6 +133,8 @@ export const ui: Record<Lang, Strings> = {
       problem: 'The problem',
       did: 'What I did',
       result: 'The result',
+      showDetails: 'Show the details',
+      hideDetails: 'Hide the details',
       alsoTitle: 'Also',
       ongoing: 'In progress',
       stackTitle: 'The tools, and where I use them',
@@ -215,6 +219,8 @@ export const ui: Record<Lang, Strings> = {
       problem: 'Le problème',
       did: "Ce que j'ai fait",
       result: 'Le résultat',
+      showDetails: 'Voir le détail',
+      hideDetails: 'Masquer le détail',
       alsoTitle: 'Aussi',
       ongoing: 'En cours',
       stackTitle: 'Les outils, et où je les utilise',
