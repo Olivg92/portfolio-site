@@ -1,7 +1,7 @@
 # portfolio-site
 
-The portfolio of Olivier Guandalini, DevOps and SRE engineer: the projects, what each one shows,
-and the debugging stories behind them.
+The portfolio of Olivier Guandalini, DevOps and SRE engineer: the projects, and what each one
+shows.
 
 **Live:** https://olivg92.github.io/portfolio-site/ in English, and
 https://olivg92.github.io/portfolio-site/fr/ in French.
@@ -9,7 +9,7 @@ https://olivg92.github.io/portfolio-site/fr/ in French.
 The home page says who I am in two sentences, beside platform-eks-gitops drawn in isometric view,
 then shows the three projects. The guided tour of platform-eks-gitops walks through the project
 command by command. The experience page tells what I do at work as problems solved, then the
-tools, the path and the education. The debugging stories arrive next.
+tools, the path and the education.
 
 ## How it is built
 
