@@ -101,6 +101,12 @@ jobs:
           npx playwright install --with-deps chromium webkit
           node scripts/check-cards.mjs http://localhost:4321/portfolio-site/
 
+      # The solved problems of the Experience page, in the same two browsers:
+      # folded on a phone, each unfolded and folded again by a tap; every
+      # story beside its title on a wide screen, as before, and on paper.
+      - name: Solved problems, in Chrome and in WebKit
+        run: node scripts/check-experience.mjs http://localhost:4321/portfolio-site/
+
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
       - name: Lighthouse
