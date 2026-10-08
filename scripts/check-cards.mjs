@@ -7,9 +7,13 @@
 //   than its words: one version of Safari once stretched it over the whole
 //   screen, which Chrome never showed;
 // - in Chrome, resting the pointer on a chip opens its card too;
-// - Escape closes the card, and so does a tap elsewhere on a phone;
+// - Escape closes the card, and so does a tap elsewhere on a phone, the page
+//   left where it is; there, scrolling the page on closes it too, as the
+//   sheet would cover what comes up, though a slight move does not, and it
+//   fades out first while still open, which Safari can do;
 // - with a card open, a tap or a click on a chip further down the page, or on
-//   the chip beside it, opens that chip's card and closes the first;
+//   the chip beside it, opens that chip's card and closes the first (on a
+//   phone, the scroll to the chip further down has closed the first already);
 // - no chip or link waits fully transparent for its block to come into view:
 //   Safari on iPhone drops the click of a tap during which one turns visible
 //   from opacity 0, so a tap while the next blocks arrive would only close
@@ -63,6 +67,26 @@ const where = (id) => {
 };
 
 const isOpen = (id) => document.getElementById(id).matches(':popover-open');
+const isClosed = (id) => !document.getElementById(id).matches(':popover-open');
+
+// A spot in the upper half of the screen, below the header, that nothing
+// answers a tap on: words, or the background between them.
+const quiet = () => {
+  const top = Math.max(0, document.querySelector('header')?.getBoundingClientRect().bottom ?? 0) + 16;
+  for (let y = top; y < innerHeight / 2; y += 12) {
+    for (const x of [innerWidth / 2, 24, innerWidth - 24]) {
+      const target = document.elementFromPoint(x, y);
+      if (target && !target.closest('a, button, summary, [popover], [popovertarget]')) return { x, y };
+    }
+  }
+  return { x: innerWidth / 2, y: top };
+};
+
+// Whether a chip is on the screen, clear of the card open at its bottom.
+const clear = (chip, cardId) => {
+  const box = chip.getBoundingClientRect();
+  return box.top >= 0 && box.bottom <= document.getElementById(cardId).getBoundingClientRect().top;
+};
 
 // A reader presses a chip once it has arrived: its block marked in view, if
 // it was waiting for that, and done rising. A chip still on its way moves
@@ -125,7 +149,12 @@ const visit = async (browser, { device, options, url, hover }, check) => {
     const press = async (chip) => {
       await chip.scrollIntoViewIfNeeded();
       await chip.evaluate(arrived);
-      await (device === 'phone' ? chip.tap() : chip.click());
+      if (device !== 'phone') return chip.click();
+      // At the chip's place on the screen: in WebKit, Playwright's own tap
+      // may scroll the page first, which on a phone closes an open card
+      // before the tap lands, as no reader's finger does.
+      const box = await chip.boundingBox();
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
     };
 
     // The first chip, one in the middle and the last: the edges of the page
@@ -140,15 +169,41 @@ const visit = async (browser, { device, options, url, hover }, check) => {
       check(card.top >= 0 && card.left >= 0 && card.right <= card.width + 1 && card.bottom <= card.height + 1, `${id} stays inside the screen`);
       if (device === 'phone') {
         check(card.height - card.bottom <= 40 && card.head < 48, `${id} sits at the bottom, no taller than its words`);
-        // A tap on the title, away from any chip or link, closes it: the title
-        // first goes to the top, far from the card at the bottom.
-        await page.evaluate(() => document.querySelector('h1').scrollIntoView({ block: 'start', behavior: 'instant' }));
-        await page.locator('h1').tap({ force: true });
+        // A tap elsewhere closes it, the page left where it is.
+        const spot = await page.evaluate(quiet);
+        await page.touchscreen.tap(spot.x, spot.y);
       } else {
         await page.keyboard.press('Escape');
       }
-      await page.waitForFunction((id) => !document.getElementById(id).matches(':popover-open'), id, { timeout: 3000 }).catch(() => {});
-      check(!(await page.evaluate(isOpen, id)), `${id} closes`);
+      await page.waitForFunction(isClosed, id, { timeout: 3000 }).catch(() => {});
+      check(await page.evaluate(isClosed, id), `${id} closes`);
+
+      // On a phone, open again: a slight move of the page keeps it, and
+      // scrolling on closes it. Upwards when the page allows, so that the
+      // end of the page never stops the scroll.
+      if (device === 'phone') {
+        await press(chip);
+        await page.waitForFunction(isOpen, id, { timeout: 3000 }).catch(() => {});
+        const by = (top) => page.evaluate((top) => scrollBy({ top: scrollY > 300 ? -top : top, behavior: 'instant' }), top);
+        await by(10);
+        await page.waitForTimeout(200);
+        check(await page.evaluate(isOpen, id), `a slight move of the page keeps ${id} open`);
+        // Faded out while still open, then closed: Safari could not fade it
+        // once closed.
+        await page.evaluate((id) => {
+          const card = document.getElementById(id);
+          window.faded = false;
+          new MutationObserver(() => {
+            if (card.matches(':popover-open.leaving')) window.faded = true;
+          }).observe(card, { attributes: true, attributeFilter: ['class'] });
+        }, id);
+        await by(200);
+        await page.waitForFunction(isClosed, id, { timeout: 3000 }).catch(() => {});
+        check(
+          (await page.evaluate(isClosed, id)) && (await page.evaluate(() => window.faded)),
+          `scrolling the page on fades ${id} out, then closes it, as it would cover what comes up`,
+        );
+      }
     }
 
     // From one card to another: the first chip's card open, then the last
@@ -168,7 +223,9 @@ const visit = async (browser, { device, options, url, hover }, check) => {
       await high(from);
       await press(from);
       await page.waitForFunction(isOpen, fromId, { timeout: 3000 }).catch(() => {});
-      await high(last);
+      // On a phone, a chip already on the screen, clear of the card, is
+      // tapped where it is: a scroll would close the card first.
+      if (device !== 'phone' || !(await last.evaluate(clear, fromId))) await high(last);
       await press(last);
       await page.waitForFunction(isOpen, lastId, { timeout: 3000 }).catch(() => {});
       check(

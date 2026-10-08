@@ -6,6 +6,7 @@ import { getRelativeLocaleUrl } from 'astro:i18n';
 import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
+import Icon from './Icon.astro';
 import Panel from './Panel.astro';
 import ToolChip from './ToolChip.astro';
 import { experience } from '../experience';
@@ -65,20 +66,29 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
                   ))}
                 </ul>
               </div>
-              <dl class="story">
-                <div class="reveal-part">
-                  <dt>{e.problem}</dt>
-                  <dd>{problem.problem[lang]}</dd>
-                </div>
-                <div class="reveal-part">
-                  <dt>{e.did}</dt>
-                  <dd>{problem.did[lang]}</dd>
-                </div>
-                <div class="result reveal-part">
-                  <dt>{e.result}</dt>
-                  <dd>{inline(problem.result[lang]).map((part, k) => (k % 2 ? <code>{part}</code> : part))}</dd>
-                </div>
-              </dl>
+              <details class="more">
+                <summary>
+                  <span class="label">
+                    <span class="show">{e.showDetails}</span>
+                    <span class="hide">{e.hideDetails}</span>
+                  </span>
+                  <span class="ring"><Icon name="chevron-down" /></span>
+                </summary>
+                <dl class="story">
+                  <div class="reveal-part">
+                    <dt>{e.problem}</dt>
+                    <dd>{problem.problem[lang]}</dd>
+                  </div>
+                  <div class="reveal-part">
+                    <dt>{e.did}</dt>
+                    <dd>{problem.did[lang]}</dd>
+                  </div>
+                  <div class="result reveal-part">
+                    <dt>{e.result}</dt>
+                    <dd>{inline(problem.result[lang]).map((part, k) => (k % 2 ? <code>{part}</code> : part))}</dd>
+                  </div>
+                </dl>
+              </details>
             </Panel>
           </li>
         ))
@@ -272,7 +282,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
      story told in three steps, the last one lit, since it is what changed. */
   .problem {
     display: grid;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
   .rail {
@@ -361,6 +371,137 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     .problem {
       grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
       gap: var(--space-7);
+    }
+  }
+
+  /* On a phone, the story stacks under its title, and the seven problems
+     would take seven screens: each shows its number, title and tools, and
+     its story unfolds from a line at the foot of the card, worded like the
+     story's own steps, its chevron in a lit ring. */
+  .more > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line-soft);
+    color: var(--cyan);
+    font: 500 var(--label) / 1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+    transition: margin-bottom 0.45s var(--ease-reveal);
+  }
+
+  /* Safari still draws its own triangle. */
+  .more > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ring {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 18%, transparent);
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .ring :global(.icon) {
+    width: 14px;
+    height: 14px;
+    transition: rotate 0.3s var(--ease-reveal);
+  }
+
+  .more[open] .ring :global(.icon) {
+    rotate: 180deg;
+  }
+
+  /* Only under a mouse: on a phone, the hover would stay after the tap. */
+  @media (hover: hover) {
+    .more > summary:hover .ring {
+      border-color: var(--cyan);
+      background: color-mix(in srgb, var(--cyan) 10%, transparent);
+    }
+  }
+
+  .more[open] > summary {
+    margin-bottom: var(--space-5);
+  }
+
+  .more[open] .show,
+  .more:not([open]) .hide {
+    display: none;
+  }
+
+  /* The story unfolds: it opens to its height as it fades in, and folds
+     back the same way. Its row grows from 0fr to 1fr, which every engine
+     animates, and its words stay shown until the folding ends. */
+  .more::details-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.45s var(--ease-reveal),
+      opacity 0.35s ease,
+      content-visibility 0.45s allow-discrete;
+  }
+
+  .more[open]::details-content {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .more .story {
+    min-height: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .more > summary,
+    .more::details-content,
+    .ring,
+    .ring :global(.icon) {
+      transition: none;
+    }
+  }
+
+  /* On a wide screen, the story reads beside its title, as it always has:
+     no button, the story shown whether the <details> is open or not. A
+     browser that cannot style its content keeps the button there too. */
+  @supports selector(::details-content) {
+    @media (min-width: 900px) {
+      .more > summary {
+        display: none;
+      }
+
+      .more::details-content {
+        display: block;
+        overflow: visible;
+        opacity: 1;
+        content-visibility: visible;
+        transition: none;
+      }
+    }
+  }
+
+  /* On paper, or saved as a PDF, every story, and no button. */
+  @media print {
+    .more > summary {
+      display: none;
+    }
+
+    .more::details-content {
+      display: block;
+      overflow: visible;
+      opacity: 1;
+      content-visibility: visible;
     }
   }
 

@@ -58,6 +58,39 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
           for (const block of document.querySelectorAll('.reveal, .reveal-part, .cascade')) watch.observe(block);
         });
       }
+
+      // On a phone, a tool's card is a sheet at the bottom of the screen (see
+      // ToolCard.astro): once the page scrolls on, it goes, rather than cover
+      // what comes up; a slight move does not count. It fades out first,
+      // still open, then closes: 0.25 s, as its `leaving` style says. On a
+      // wider screen it stays, as it scrolls with its chip.
+      {
+        const sheet = matchMedia('(max-width: 559px)');
+        const calm = matchMedia('(prefers-reduced-motion: reduce)');
+        addEventListener(
+          'toggle',
+          (event) => {
+            const card = event.target;
+            if (event.newState !== 'open' || !card.matches('.tool-card')) return;
+            card.classList.remove('leaving');
+            if (!sheet.matches) return;
+            const from = scrollY;
+            const away = () => {
+              if (card.matches(':popover-open') && Math.abs(scrollY - from) < 40) return;
+              removeEventListener('scroll', away);
+              if (!card.matches(':popover-open')) return;
+              if (calm.matches) return card.hidePopover();
+              card.classList.add('leaving');
+              setTimeout(() => {
+                if (card.matches(':popover-open.leaving')) card.hidePopover();
+                card.classList.remove('leaving');
+              }, 250);
+            };
+            addEventListener('scroll', away, { passive: true });
+          },
+          true,
+        );
+      }
     </script>
     {
       indexable ? (

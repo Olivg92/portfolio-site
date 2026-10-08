@@ -56,6 +56,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Every link to another site opens in a new tab, so that the site stays
+      # open behind it, and says so to screen readers. Read from the build.
+      - name: Links to other sites, in a new tab
+        run: node scripts/check-new-tab.mjs dist
+
       # The built site, served under the same path as on GitHub Pages, for the
       # two checks below. It keeps running until the job ends.
       - name: Serve the build
@@ -100,6 +105,12 @@ jobs:
           npm install --no-save "playwright@${PLAYWRIGHT_VERSION}"
           npx playwright install --with-deps chromium webkit
           node scripts/check-cards.mjs http://localhost:4321/portfolio-site/
+
+      # The solved problems of the Experience page, in the same two browsers:
+      # folded on a phone, each unfolded and folded again by a tap; every
+      # story beside its title on a wide screen, as before, and on paper.
+      - name: Solved problems, in Chrome and in WebKit
+        run: node scripts/check-experience.mjs http://localhost:4321/portfolio-site/
 
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.

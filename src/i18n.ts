@@ -29,6 +29,8 @@ type Strings = {
   measured: string;
   contactText: string;
   source: string;
+  /** Read by screen readers after a link to another site. */
+  newTab: string;
   builtWith: string;
   takeTour: string;
   previewAlt: { home: string; tour: string; experience: string };
@@ -47,6 +49,8 @@ type Strings = {
     problem: string;
     did: string;
     result: string;
+    showDetails: string;
+    hideDetails: string;
     alsoTitle: string;
     ongoing: string;
     stackTitle: string;
@@ -108,6 +112,7 @@ export const ui: Record<Lang, Strings> = {
     measured: 'Measured from a fresh clone: 4 minutes 33 seconds until this check is all green.',
     contactText: 'Write to me on LinkedIn. My code is on GitHub.',
     source: 'Source of this site',
+    newTab: '(opens in a new tab)',
     builtWith: 'Built with Astro, hosted on GitHub Pages',
     takeTour: 'Take the guided tour',
     previewAlt: {
@@ -131,6 +136,8 @@ export const ui: Record<Lang, Strings> = {
       problem: 'The problem',
       did: 'What I did',
       result: 'The result',
+      showDetails: 'Show the details',
+      hideDetails: 'Hide the details',
       alsoTitle: 'Also',
       ongoing: 'In progress',
       stackTitle: 'The tools, and where I use them',
@@ -192,6 +199,7 @@ export const ui: Record<Lang, Strings> = {
     measured: "Mesuré depuis un clone neuf\u00a0: 4 minutes 33 secondes jusqu'à ce contrôle tout au vert.",
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
     source: 'Code source de ce site',
+    newTab: "(s'ouvre dans un nouvel onglet)",
     builtWith: 'Construit avec Astro, hébergé sur GitHub Pages',
     takeTour: 'Faire la visite guidée',
     previewAlt: {
@@ -215,6 +223,8 @@ export const ui: Record<Lang, Strings> = {
       problem: 'Le problème',
       did: "Ce que j'ai fait",
       result: 'Le résultat',
+      showDetails: 'Voir le détail',
+      hideDetails: 'Masquer le détail',
       alsoTitle: 'Aussi',
       ongoing: 'En cours',
       stackTitle: 'Les outils, et où je les utilise',
