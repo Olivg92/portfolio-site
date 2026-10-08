@@ -56,11 +56,17 @@ tools, the path and the education.
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
-  [`src/tools.ts`](src/tools.ts). No script: the card is a native popover, anchored to its
-  chip by CSS, and a sheet at the bottom of a phone's screen. It fades out only where the
-  browser keeps it above the page while it does. Safari cannot, as it has no `overlay`: the
-  fading card fell back into its panel, over the chips, and the tap meant for the next chip
-  landed on it. There the card closes at once.
+  [`src/tools.ts`](src/tools.ts). No script needed: the card is a native popover, anchored to
+  its chip by CSS, and a sheet at the bottom of a phone's screen. There, a few lines in the
+  layout close the sheet once the page scrolls on, as it would cover what comes up; a slight
+  move does not count, and without script it stays until a tap elsewhere. A card fades out
+  when it closes only where the browser keeps it above the page while it does. Safari cannot,
+  as it has no `overlay`: the fading card fell back into its panel, over the chips, and the
+  tap meant for the next chip landed on it. There the card closes at once, except when the
+  scroll closes it: the script fades it out while it is still open, then closes it.
+- **Other sites in a new tab.** GitHub and LinkedIn open in a new tab, so that the portfolio
+  stays open behind them. The arrow on the button already says it is another site, and screen
+  readers hear that it opens a new tab. Links within the site open where they are.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
@@ -100,7 +106,8 @@ Every pull request runs them, and a failure blocks the merge:
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
-| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; in Chrome, screen readers get the stories and skip a folded one |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
@@ -161,6 +168,7 @@ scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
 ├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
+├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── og-images.mjs         # the pictures of link previews
 └── lib/cdp.mjs           # a minimal Chrome DevTools client
 public/og/                # the pictures, one per page and language
