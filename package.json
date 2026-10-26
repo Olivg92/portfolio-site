@@ -21,7 +21,7 @@
     "astro": "^7.4.2"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@lhci/cli": "^0.15.1",
     "linkinator": "^8.1.0",
     "typescript": "~6.0.3"
