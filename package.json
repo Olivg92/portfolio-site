@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@lhci/cli": "^0.15.1",
+    "@lhci/cli": "^0.16.0",
     "linkinator": "^8.1.0",
     "typescript": "~6.0.3"
   },
