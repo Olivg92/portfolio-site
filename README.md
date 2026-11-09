@@ -79,7 +79,7 @@ tools, the path and the education.
 
 ## Run it locally
 
-With Node 22.12 or later (`.nvmrc` pins 24):
+With Node 22.23.4 or later (`.nvmrc` pins 24):
 
 ```bash
 npm ci
