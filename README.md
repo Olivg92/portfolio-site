@@ -102,7 +102,8 @@ Every pull request runs them, and a failure blocks the merge:
 
 | What | How |
 |---|---|
-| Whitespace, YAML and JSON, private keys, secrets, workflow mistakes | `pre-commit`, the same hooks as locally: `pre-commit run -a` |
+| Whitespace, YAML and JSON, private keys, workflow mistakes | `pre-commit`, the same hooks as locally: `pre-commit run -a` |
+| Secrets in any commit of the pull request, even one a later commit deletes | gitleaks on the commits themselves, since its pre-commit hook reads what is staged and a CI checkout stages nothing. Locally: `gitleaks git --redact --log-opts="origin/main..HEAD"` |
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
