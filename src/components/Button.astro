@@ -18,9 +18,11 @@ const elsewhere = /^https?:/.test(href);
 const icon = href.startsWith('#') ? 'arrow-down' : elsewhere ? 'arrow-up-right' : undefined;
 const lang = (Astro.currentLocale ?? 'en') as Lang;
 const newTab = elsewhere ? { target: '_blank', rel: 'noopener' } : {};
+// Printed after the words of a link to another site: its address, short.
+const address = elsewhere ? { 'data-address': href.replace(/^https?:\/\/(www\.)?/, '') } : {};
 ---
 
-<a href={href} class:list={['btn', variant, className]} {...newTab} {...rest}>
+<a href={href} class:list={['btn', variant, className]} {...newTab} {...address} {...rest}>
   <slot />
   {elsewhere && <span class="visually-hidden">{ui[lang].newTab}</span>}
   {icon && <Icon name={icon} />}
@@ -68,6 +70,29 @@ const newTab = elsewhere ? { target: '_blank', rel: 'noopener' } : {};
   @media (prefers-reduced-motion: reduce) {
     .btn {
       transition: none;
+    }
+  }
+
+  /* On paper, a link reads as words, and one to another site gives its
+     address, as the page can no longer be clicked. */
+  @media print {
+    .btn {
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      color: var(--ink);
+    }
+
+    .btn :global(.icon) {
+      display: none;
+    }
+
+    .btn[data-address]::after {
+      content: attr(data-address);
+      color: var(--muted);
+      font: 400 var(--text-s) / 1 var(--font-mono);
     }
   }
 </style>

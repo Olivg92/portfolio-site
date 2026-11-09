@@ -14,9 +14,11 @@ interface Props {
 const { lang, path } = Astro.props;
 const t = ui[lang];
 const codes = Object.keys(languages) as Lang[];
+// Printed beside the name, for a reader holding the page: where the site is.
+const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^https?:\/\//, '');
 ---
 
-<header class="top wrap">
+<header class="top wrap" data-address={address}>
   <a class="brand" href={getRelativeLocaleUrl(lang)}>
     <svg class="mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false">
       <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" stroke-width="5"></circle>
@@ -136,5 +138,30 @@ const codes = Object.keys(languages) as Lang[];
   .lang[aria-current] {
     background: color-mix(in srgb, var(--cyan) 16%, transparent);
     color: var(--cyan);
+  }
+
+  /* On paper: the name, and the address of the site instead of its links. */
+  @media print {
+    .top {
+      padding-block: 0 var(--space-5);
+    }
+
+    .tools {
+      display: none;
+    }
+
+    .brand {
+      min-height: 0;
+    }
+
+    .mark {
+      filter: none;
+    }
+
+    .top::after {
+      content: attr(data-address);
+      color: var(--muted);
+      font: 400 var(--text-s) / 1 var(--font-mono);
+    }
   }
 </style>

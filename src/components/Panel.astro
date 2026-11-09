@@ -87,4 +87,16 @@ const { as: Tag = 'div', class: className, ...rest } = Astro.props;
       transform: translateY(-4px);
     }
   }
+
+  /* On paper, a frame around the block, kept whole on its page. */
+  @media print {
+    .panel {
+      backdrop-filter: none;
+      break-inside: avoid;
+    }
+
+    .panel::before {
+      display: none;
+    }
+  }
 </style>

@@ -491,7 +491,11 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     }
   }
 
-  /* On paper, or saved as a PDF, every story, and no button. */
+  /* On paper, or saved as a PDF: a CV of a few A4 pages. Every story shows,
+     with nothing to press, each step's label running into its words; the
+     path and the education sit side by side; the hint about tools and the
+     links to the other pages go. The timeline is drawn whole, whether its
+     steps have come into view on screen or not. */
   @media print {
     .more > summary {
       display: none;
@@ -502,6 +506,112 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       overflow: visible;
       opacity: 1;
       content-visibility: visible;
+    }
+
+    .intro {
+      gap: var(--space-3);
+      padding-block: 0;
+    }
+
+    .intro h1 {
+      max-width: none;
+      font-size: var(--text-h1);
+    }
+
+    .numbers {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+    }
+
+    .numbers li {
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .value {
+      font-size: 14pt;
+    }
+
+    .hint {
+      display: none;
+    }
+
+    .head {
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    .problems,
+    .problem {
+      gap: var(--space-3);
+    }
+
+    /* A fine rule between blocks rather than a frame around each, and a page
+       may turn between two steps of a story, never inside one. */
+    .problems .problem,
+    .tools .column,
+    .next .next-panel {
+      padding: var(--space-4) 0 0;
+      border: 0;
+      border-top: 1px solid var(--line-soft);
+      border-radius: 0;
+      background: none;
+      break-inside: auto;
+    }
+
+    .rail,
+    .story {
+      gap: var(--space-2);
+    }
+
+    .rail,
+    .story > div {
+      break-inside: avoid;
+    }
+
+    .rail {
+      break-after: avoid;
+    }
+
+    .rail h3 {
+      font-size: 12pt;
+    }
+
+    .story > div {
+      display: block;
+    }
+
+    dt {
+      display: inline;
+      margin-right: var(--space-2);
+    }
+
+    dd {
+      display: inline;
+    }
+
+    .lines li,
+    .timeline li {
+      break-inside: avoid;
+    }
+
+    .history {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+
+    .timeline::before {
+      scale: none !important;
+    }
+
+    .timeline li::before {
+      background-color: var(--cyan) !important;
+      box-shadow: none !important;
+    }
+
+    .actions {
+      display: none;
     }
   }
 

@@ -272,7 +272,87 @@ code {
   }
 }
 
+/* On paper, or saved as a PDF: the night becomes a white page through the
+   same tokens, so every component follows, with its signal colours darkened
+   to read on white; the sky and the glows go, type and space tighten, and a
+   block moves on to the next page rather than breaking in two. */
 @media print {
+  @page {
+    size: A4;
+    margin: 14mm 15mm;
+  }
+
+  :root {
+    color-scheme: light;
+    --term-bg: #f3f4f6;
+    --night: #fff;
+    --card: #fff;
+    --sky-violet: #fff;
+    --sky-blue: #fff;
+    --ink: #111;
+    --ink-2: #333;
+    --muted: #5f6670;
+    --line: #8a94a3;
+    --line-soft: #d3d8de;
+    --line-faint: #e5e8ec;
+    --glass: transparent;
+    --cyan: #0b6178;
+    --green: #1b6e3f;
+    --amber: #8a5200;
+    --magenta: #8c2a6f;
+    --red: #b42318;
+    --text-s: 8pt;
+    --text-m: 9pt;
+    --text-l: 10pt;
+    --text-h2: 14pt;
+    --text-h1: 20pt;
+    --label: 6.5pt;
+    --space-5: 12px;
+    --space-6: 16px;
+    --space-7: 20px;
+    --space-8: 24px;
+    --space-9: 32px;
+    --gutter: 0px;
+    --glow-cyan: none;
+    --shadow-panel: none;
+  }
+
+  /* The paper tokens are light, so the page prints its own backgrounds, the
+     bullets and the timeline's points included, whatever the print dialog
+     says about background graphics. */
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    min-height: 0;
+    line-height: 1.4;
+  }
+
+  body::before,
+  body::after {
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* Chips read as words in a row, with a dot between them, which ends a
+     line rather than starts the next when the row wraps. */
+  .cluster > li:has(> .chip):has(+ li > .chip)::after {
+    content: '·';
+    margin-left: var(--space-2);
+    color: var(--muted);
+  }
+
   .reveal-on .reveal,
   .reveal-on .reveal * {
     opacity: 1 !important;
