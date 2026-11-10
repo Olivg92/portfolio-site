@@ -36,6 +36,6 @@ Le plan complet et l'avancement sont dans @../PLAN.md (fichier local, hors du re
 - Après chaque étape : mettre à jour le README si nécessaire et lancer les checks (`pre-commit run -a`)
 
 ## Commandes
-- `npm run dev` / `npm run build` / `npm run preview` : le site en local (Node 22.12 ou plus, sinon le conteneur du README)
+- `npm run dev` / `npm run build` / `npm run preview` : le site en local (Node 22.23.4 ou plus, sinon le conteneur du README)
 - `npm run check` : les types
 - `pre-commit run -a` : lint et secrets
