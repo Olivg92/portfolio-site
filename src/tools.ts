@@ -230,15 +230,6 @@ export const tools = {
       "L'observabilité des applications LLM : chaque requête tracée, avec ses prompts, sa latence et son coût en tokens.",
     ),
   },
-  k6: {
-    name: 'k6',
-    kind: 'testing',
-    logo: 'k6',
-    about: t(
-      'A load-testing tool: scripted virtual users push a service, to see where it holds and where it breaks.',
-      'Un outil de test de charge : des utilisateurs virtuels scriptés poussent un service, pour voir où il tient et où il casse.',
-    ),
-  },
   // On the Experience page.
   ansible: {
     name: 'Ansible',

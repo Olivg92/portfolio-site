@@ -18,7 +18,7 @@ interface Props {
 
 const { project, lang, class: className } = Astro.props;
 const t = ui[lang];
-const tone = { finished: 'green', building: 'amber', next: 'cyan' } as const;
+const tone = { finished: 'green', building: 'amber' } as const;
 const id = `project-${project.name}`;
 ---
 

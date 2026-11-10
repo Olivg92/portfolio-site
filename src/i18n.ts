@@ -21,7 +21,7 @@ type Strings = {
   flows: { gitops: string; traffic: string; secrets: string };
   projectsTitle: string;
   projectsLede: string;
-  status: { finished: string; building: string; next: string };
+  status: { finished: string; building: string };
   stack: string;
   here: string;
   toolsHint: string;
@@ -102,9 +102,9 @@ export const ui: Record<Lang, Strings> = {
       'platform-eks-gitops on AWS, in isometric view: in a VPC, two Spot nodes run the pods Argo CD installs from GitHub; a load balancer brings the traffic in from the internet; secrets come from AWS Secrets Manager; the cluster is managed by EKS, its Terraform state kept in S3.',
     stateBucket: 'State bucket',
     flows: { gitops: 'GitOps, from git', traffic: 'Traffic', secrets: 'Secrets' },
-    projectsTitle: 'Three projects, each one finished before the next',
+    projectsTitle: 'Two projects, each one finished before the next',
     projectsLede: 'Every repository can be cloned and run: a README to start in minutes, the decisions written down, the checks run on every change.',
-    status: { finished: 'Finished', building: 'In progress', next: 'Next' },
+    status: { finished: 'Finished', building: 'In progress' },
     stack: 'Built with',
     here: 'Here',
     toolsHint: 'Hover or tap a tool to see what it is, and what it does here.',
@@ -189,9 +189,9 @@ export const ui: Record<Lang, Strings> = {
       "platform-eks-gitops sur AWS, en vue isométrique\u00a0: dans un VPC, deux nœuds Spot font tourner les pods qu'Argo CD installe depuis GitHub\u00a0; un load balancer fait entrer le trafic d'internet\u00a0; les secrets viennent d'AWS Secrets Manager\u00a0; le cluster est géré par EKS, et son état Terraform est gardé dans S3.",
     stateBucket: "Bucket d'état",
     flows: { gitops: 'GitOps, depuis git', traffic: 'Trafic', secrets: 'Secrets' },
-    projectsTitle: 'Trois projets, chacun terminé avant le suivant',
+    projectsTitle: 'Deux projets, chacun terminé avant le suivant',
     projectsLede: "Chaque dépôt se clone et se lance\u00a0: un README pour démarrer en quelques minutes, les décisions écrites, les vérifications rejouées à chaque changement.",
-    status: { finished: 'Terminé', building: 'En cours', next: 'À venir' },
+    status: { finished: 'Terminé', building: 'En cours' },
     stack: 'Construit avec',
     here: 'Ici',
     toolsHint: "Survolez ou touchez un outil pour voir ce que c'est, et ce qu'il fait ici.",
