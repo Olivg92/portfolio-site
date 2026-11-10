@@ -1,5 +1,5 @@
-// The two projects, in the order they were built: the first finished and
-// documented before the second started. A project's words exist in both
+// The two projects, in the order they are built: each one finished and
+// documented before the next starts. A project's words exist in both
 // languages, so a missing translation is a type error.
 import type { Lang } from './i18n';
 import type { ToolName } from './tools';
