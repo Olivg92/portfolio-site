@@ -6,7 +6,8 @@
 //   the seven took seven screens of an iPhone;
 // - a tap on that line unfolds the story whole, and the line then offers to
 //   fold it, which a second tap does; brought into view, the story lights up;
-// - printed, every story shows, and nothing to press;
+// - printed, every story shows, and nothing to press; saved as a PDF, the
+//   page fits on three A4 pages at most, a CV a recruiter can pass on;
 // - on a wide screen, every story shows beside its title, with nothing to
 //   press, as before the fold; in Chrome, whose tree the check can read,
 //   screen readers get the stories there and skip a folded one on a phone.
@@ -75,6 +76,21 @@ const marked = (problem) => problem.querySelector('.story > *').classList.contai
 
 const folded = (problem) => problem.querySelector('.story').getBoundingClientRect().height === 0;
 
+// A reader taps a line once its card has arrived: marked in view, and done
+// rising, as in check-cards.mjs. A card still on its way moves under the
+// finger, which then taps beside the line. Checked frame by frame.
+const arrived = async (line) => {
+  const frame = () => new Promise(requestAnimationFrame);
+  const rising = () => {
+    for (let node = line; node; node = node.parentElement) {
+      if (node.getAnimations().some((animation) => animation instanceof CSSTransition && animation.playState === 'running')) return true;
+    }
+    return false;
+  };
+  for (let i = 0; i < 10 && line.closest('.reveal-on :is(.reveal, .reveal-part, .cascade):not(.is-in)'); i++) await frame();
+  for (let i = 0; i < 180 && rising(); i++) await frame();
+};
+
 // One page, on one device, in one browser: what a reader finds there, each
 // result passed to `check`. Says whether the browser crashed on the way.
 const visit = async (browser, { device, options, url, engine }, check) => {
@@ -106,17 +122,25 @@ const visit = async (browser, { device, options, url, engine }, check) => {
       for (const i of [...new Set([0, count - 1])]) {
         const problem = page.locator('.problem').nth(i);
         const line = problem.locator('summary');
+        // At the line's place on the screen: in WebKit, Playwright's own tap
+        // may scroll the page first, as no reader's finger does.
+        const tap = async () => {
+          await line.scrollIntoViewIfNeeded();
+          await line.evaluate(arrived);
+          const box = await line.boundingBox();
+          await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+        };
         await problem.evaluate((el) => el.scrollIntoView({ block: 'start', behavior: 'instant' }));
-        await line.tap();
+        await tap();
         const handle = await problem.elementHandle();
         await page.waitForFunction(unfolded, handle, { timeout: 10_000, polling: 100 }).catch(() => {});
         check(await problem.evaluate(unfolded), `a tap on problem ${i + 1} unfolds its story whole, and the line then offers to fold it`);
         // The story may open below the screen's edge: read, it lights up.
         await problem.locator('.story').evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
-        const arrived = engine === 'WebKit' ? marked : lit;
-        await page.waitForFunction(arrived, handle, { timeout: 10_000, polling: 100 }).catch(() => {});
-        check(await problem.evaluate(arrived), `the story of problem ${i + 1} lights up as it comes into view`);
-        await line.tap();
+        const shown = engine === 'WebKit' ? marked : lit;
+        await page.waitForFunction(shown, handle, { timeout: 10_000, polling: 100 }).catch(() => {});
+        check(await problem.evaluate(shown), `the story of problem ${i + 1} lights up as it comes into view`);
+        await tap();
         await page.waitForFunction(folded, handle, { timeout: 10_000, polling: 100 }).catch(() => {});
         check(await problem.evaluate(folded), `a second tap on problem ${i + 1} folds it again`);
       }
@@ -127,15 +151,28 @@ const visit = async (browser, { device, options, url, engine }, check) => {
       await page.emulateMedia({ media: 'screen' });
     }
 
+    // Saved as a PDF, as a recruiter's "Save as PDF" does it: a CV of three
+    // A4 pages at most. Only Chrome's headless build writes PDFs.
+    if (engine === 'Chrome' && device === 'wide screen') {
+      const pdf = await page.pdf({ preferCSSPageSize: true });
+      const sheets = (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) ?? []).length;
+      check(sheets > 0 && sheets <= 3, `saved as a PDF, it fits on ${sheets} A4 pages, three at most`);
+    }
+
     if (engine === 'Chrome') {
       const cdp = await context.newCDPSession(page);
       const words = (await page.locator('.problem dd').first().textContent()).trim().slice(0, 40);
-      const { nodes } = await cdp.send('Accessibility.getFullAXTree');
-      const heard = nodes.some((node) => !node.ignored && (node.name?.value ?? '').startsWith(words));
-      check(
-        device === 'wide screen' ? heard : !heard,
-        device === 'wide screen' ? 'screen readers get the stories' : 'screen readers skip a folded story',
-      );
+      const heard = async () =>
+        (await cdp.send('Accessibility.getFullAXTree')).nodes.some((node) => !node.ignored && (node.name?.value ?? '').startsWith(words));
+      // Chrome updates its tree a moment after the page: asked again a few
+      // times before it counts as an answer.
+      const expected = device === 'wide screen';
+      let answer = await heard();
+      for (let i = 0; i < 10 && answer !== expected; i++) {
+        await page.waitForTimeout(300);
+        answer = await heard();
+      }
+      check(answer === expected, expected ? 'screen readers get the stories' : 'screen readers skip a folded story');
     }
   } catch (error) {
     if (!crashed) throw error;

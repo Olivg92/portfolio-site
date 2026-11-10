@@ -89,6 +89,31 @@ const invoker = tip && { popovertarget: tip.id, popovertargetaction: 'show' as c
     --tone: var(--red);
   }
 
+  /* On paper, a chip is its name: no pill, no logo. */
+  @media print {
+    .chip {
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--ink-2);
+      font-size: var(--text-s);
+    }
+
+    .chip :global(.logo) {
+      display: none;
+    }
+
+    /* A dot, without its glow or its pulse. */
+    .dot {
+      box-shadow: none;
+    }
+
+    .live::after {
+      display: none;
+    }
+  }
+
   .dot {
     position: relative;
     width: 7px;

@@ -74,3 +74,44 @@
     --gutter: 16px;
   }
 }
+
+/* On paper, or saved as a PDF, the night becomes a white page: the same
+   tokens turn light, each signal colour darkened to read on white, with no
+   sky and no glow, and type and space tighten so that the experience page
+   prints as a CV of three A4 pages. */
+@media print {
+  :root {
+    color-scheme: light;
+    --term-bg: #f3f4f6;
+    --night: #fff;
+    --card: #fff;
+    --sky-violet: #fff;
+    --sky-blue: #fff;
+    --ink: #111;
+    --ink-2: #333;
+    --muted: #5f6670;
+    --line: #8a94a3;
+    --line-soft: #d3d8de;
+    --line-faint: #e5e8ec;
+    --glass: transparent;
+    --cyan: #0b6178;
+    --green: #1b6e3f;
+    --amber: #8a5200;
+    --magenta: #8c2a6f;
+    --red: #b42318;
+    --text-s: 8pt;
+    --text-m: 9pt;
+    --text-l: 10pt;
+    --text-h2: 14pt;
+    --text-h1: 20pt;
+    --label: 6.5pt;
+    --space-5: 12px;
+    --space-6: 16px;
+    --space-7: 20px;
+    --space-8: 24px;
+    --space-9: 32px;
+    --gutter: 0px;
+    --glow-cyan: none;
+    --shadow-panel: none;
+  }
+}

@@ -94,4 +94,26 @@ const year = new Date().getFullYear();
   .meta a {
     color: var(--ink-2);
   }
+
+  /* On paper, the contact only: where to write, with the addresses. */
+  @media print {
+    .foot {
+      margin-top: var(--space-7);
+      padding-block: var(--space-5) 0;
+      break-inside: avoid;
+    }
+
+    .reach {
+      gap: var(--space-2);
+    }
+
+    .text {
+      font-size: var(--text-l);
+    }
+
+    .pages,
+    .meta {
+      display: none;
+    }
+  }
 </style>

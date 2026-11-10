@@ -272,7 +272,51 @@ code {
   }
 }
 
+/* On paper, or saved as a PDF: tokens.css turns the night into a white page,
+   so every component follows; here the sky and the glows go, and a block
+   moves on to the next page rather than breaking in two. */
 @media print {
+  @page {
+    size: A4;
+    margin: 14mm 15mm;
+  }
+
+  /* The paper tokens are light, so the page prints its own backgrounds, the
+     bullets and the timeline's points included, whatever the print dialog
+     says about background graphics. */
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    min-height: 0;
+    line-height: 1.4;
+  }
+
+  body::before,
+  body::after {
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* Chips read as words in a row, with a dot between them, which ends a
+     line rather than starts the next when the row wraps. */
+  .cluster > li:has(> .chip):has(+ li > .chip)::after {
+    content: '·';
+    margin-left: var(--space-2);
+    color: var(--muted);
+  }
+
   .reveal-on .reveal,
   .reveal-on .reveal * {
     opacity: 1 !important;
