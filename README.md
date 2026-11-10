@@ -7,7 +7,7 @@ shows.
 https://olivg92.github.io/portfolio-site/fr/ in French.
 
 The home page says who I am in two sentences, beside platform-eks-gitops drawn in isometric view,
-then shows the three projects. The guided tour of platform-eks-gitops walks through the project
+then shows the two projects. The guided tour of platform-eks-gitops walks through the project
 command by command. The experience page tells what I do at work as problems solved, then the
 tools, the path and the education.
 
@@ -134,7 +134,7 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app
 ```
 src/
 ├── i18n.ts               # every string, in both languages
-├── projects.ts           # the three projects: status, summary, stack
+├── projects.ts           # the two projects: status, summary, stack
 ├── experience.ts         # the words of the experience page, in both languages
 ├── tools.ts              # every tool on the site: what it is, and its kind
 ├── tour/
