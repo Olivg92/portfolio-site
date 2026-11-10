@@ -29,13 +29,17 @@ export async function browser() {
     child.on('exit', (code) => (failed ??= new Error(`${bin} stopped, with code ${code}`)));
     endpoint = `http://127.0.0.1:${port}`;
   }
-  for (let i = 0; ; i++) {
+  // On a busy CI runner, a cold Chrome can take more than 15 s to answer, so
+  // it gets a minute. A Chrome that fails to start still stops the wait at
+  // once, through `failed`.
+  const deadline = Date.now() + 60_000;
+  for (;;) {
     if (failed) throw failed;
     try {
       await fetch(`${endpoint}/json/version`);
       break;
     } catch (error) {
-      if (i === 75) throw new Error(`no Chrome answers at ${endpoint}: ${error.message}`);
+      if (Date.now() > deadline) throw new Error(`no Chrome answers at ${endpoint} after 60 s: ${error.message}`);
       await sleep(200);
     }
   }
