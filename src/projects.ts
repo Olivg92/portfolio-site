@@ -100,7 +100,7 @@ export const projects: Project[] = [
   },
   {
     name: 'portfolio-site',
-    status: 'building',
+    status: 'finished',
     summary: {
       en: 'This site. Static pages in two languages, readable without script, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
       fr: "Ce site. Des pages statiques en deux langues, lisibles sans script, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
