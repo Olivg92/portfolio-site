@@ -1,4 +1,4 @@
-// The three projects, in the order they are built: each one finished and
+// The two projects, in the order they are built: each one finished and
 // documented before the next starts. A project's words exist in both
 // languages, so a missing translation is a type error.
 import type { Lang } from './i18n';
@@ -12,7 +12,7 @@ const t = (en: string, fr: string) => ({ en, fr: fr.replace(/ ([:;?!])/g, `${NBS
 
 export type Project = {
   name: string;
-  status: 'finished' | 'building' | 'next';
+  status: 'finished' | 'building';
   summary: Record<Lang, string>;
   stack: ToolName[];
   /** What a tool does in this project, on its card, under what the tool is. */
@@ -135,21 +135,5 @@ export const projects: Project[] = [
       ),
     },
     code: links.source,
-  },
-  {
-    name: 'llm-platform-sre',
-    status: 'next',
-    summary: {
-      en: 'An LLM application run like any production service: a RAG API deployed on the platform above, with SLOs made for AI (end-to-end latency, provider errors, token cost per request), dashboards, runbooks and load tests.',
-      fr: "Une application LLM exploitée comme n'importe quel service de production\u00a0: une API RAG déployée sur la plateforme ci-dessus, avec des SLO pensés pour l'IA (latence de bout en bout, erreurs du fournisseur, coût en tokens par requête), des dashboards, des runbooks et des tests de charge.",
-    },
-    stack: [
-      'python',
-      'fastapi',
-      'qdrant',
-      'langfuse',
-      'prometheus',
-      'k6',
-    ],
   },
 ];
