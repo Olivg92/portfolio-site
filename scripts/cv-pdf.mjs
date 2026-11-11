@@ -1,8 +1,11 @@
 // Writes the CV, one PDF per language, from the experience page of a served
 // build, as Chrome's "Save as PDF" would: the page's print styles make it a
-// CV of three A4 pages at most, which this script checks. The files land in
-// <dist>/cv/, under the names src/cv.ts links to. CI runs it before the
-// dead-link check, the deployment before publishing:
+// CV of three A4 pages at most, which this script checks. It prints nothing
+// but the experience page itself (not Chrome's error page when the server
+// does not answer, nor a 404), and the links of the CV lead to the published
+// site, not to the server it was printed from. The files land in <dist>/cv/,
+// under the names src/cv.ts links to. CI runs it before the dead-link check,
+// the deployment before publishing:
 //   npm run build && npm run preview &
 //   node scripts/cv-pdf.mjs http://localhost:4321/ dist
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -23,9 +26,26 @@ try {
     // Reduced motion: nothing waits to come into view, whatever the print
     // styles already do about it.
     const page = await chrome.page({ width: 1200, height: 900, reducedMotion: true });
-    await page.goto(`${base}${lang === 'en' ? '' : 'fr/'}experience/`, 2000);
+    const path = `${lang === 'en' ? '' : 'fr/'}experience/`;
+    await page.goto(`${base}${path}`, 2000);
+    const loaded = await page.eval(`({
+      status: performance.getEntriesByType('navigation')[0]?.responseStatus ?? 0,
+      canonical: document.querySelector('link[rel=canonical]')?.href ?? '',
+    })`);
+    if (loaded.status !== 200 || !loaded.canonical.endsWith(`/${path}`)) {
+      throw new Error(`${base}${path}: ${loaded.status ? `HTTP ${loaded.status}` : 'no answer'}, not the experience page; no CV written`);
+    }
+    // A link to a page of the site, the name at the top for one, leads to
+    // the published site that the page's canonical address names.
+    await page.eval(`(() => {
+      const site = new URL('/', document.querySelector('link[rel=canonical]').href);
+      for (const a of document.querySelectorAll('a[href^="/"]')) a.href = new URL(a.getAttribute('href'), site).href;
+    })()`);
     await page.eval(`document.fonts.ready.then(() => { document.title = ${JSON.stringify(titles[lang])}; })`);
     const pdf = await page.pdf();
+    if (/\/URI\s*\(https?:\/\/(localhost|127\.0\.0\.1)/.test(pdf.toString('latin1'))) {
+      throw new Error(`${base}${path}: the CV links to the server it was printed from`);
+    }
     const sheets = (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) ?? []).length;
     const file = join(out, `olivier-guandalini-cv-${lang}.pdf`);
     writeFileSync(file, pdf);
