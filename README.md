@@ -71,6 +71,13 @@ tools, the path and the education.
   and no glow. A chip reads as its name, every story shows, the header gives the site's address
   and the contact its addresses. Every page prints in the same light, and the screen does not
   change.
+- **The CV as a PDF to download.** That printed page is also a file, one per language, linked
+  from the experience page and from the contact section of every page:
+  [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) saves it with Chrome from the served build, at
+  `/cv/olivier-guandalini-cv-en.pdf` and `-fr.pdf` ([`src/cv.ts`](src/cv.ts) names them), in CI
+  and before each deployment. It is tagged for screen readers, its headings are bookmarks, and
+  it fails at more than three pages. The files are built, not committed: `npm run dev` links to
+  a CV it does not have.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
@@ -112,6 +119,7 @@ Every pull request runs them, and a failure blocks the merge:
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
@@ -142,6 +150,7 @@ src/
 │   └── transcripts/      # what each command printed in a real run
 ├── logos.ts              # the logos of the tools, drawn inline
 ├── links.ts              # every address the site links to
+├── cv.ts                 # the names of the CV's PDFs
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
 │   ├── Home.astro        # the home page, shared by both languages
@@ -174,6 +183,7 @@ scripts/
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
 ├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
+├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page
 ├── og-images.mjs         # the pictures of link previews
 └── lib/cdp.mjs           # a minimal Chrome DevTools client
 public/og/                # the pictures, one per page and language
