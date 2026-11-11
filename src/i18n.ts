@@ -33,6 +33,8 @@ type Strings = {
   newTab: string;
   builtWith: string;
   takeTour: string;
+  /** The CV as a PDF: the button on the experience page, and in the footer. */
+  cv: { download: string; short: string };
   previewAlt: { home: string; tour: string; experience: string };
   experience: {
     nav: string;
@@ -115,6 +117,7 @@ export const ui: Record<Lang, Strings> = {
     newTab: '(opens in a new tab)',
     builtWith: 'Built with Astro, hosted on GitHub Pages',
     takeTour: 'Take the guided tour',
+    cv: { download: 'Download my CV (PDF)', short: 'My CV (PDF)' },
     previewAlt: {
       home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
       tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
@@ -202,6 +205,7 @@ export const ui: Record<Lang, Strings> = {
     newTab: "(s'ouvre dans un nouvel onglet)",
     builtWith: 'Construit avec Astro, hébergé sur GitHub Pages',
     takeTour: 'Faire la visite guidée',
+    cv: { download: 'Télécharger mon CV (PDF)', short: 'Mon CV (PDF)' },
     previewAlt: {
       home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
       tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
