@@ -117,6 +117,13 @@ jobs:
           cat /tmp/preview.log
           exit 1
 
+      # The CV, one PDF per language, printed from the experience page by the
+      # runner's Chrome into the served build, as the deployment does, so that
+      # the dead-link check below finds the files the pages link to. Three A4
+      # pages at most, or the step fails.
+      - name: CV as a PDF
+        run: node scripts/cv-pdf.mjs http://localhost:4321/ dist
+
       # Links within a page (#contact) must land on an element that exists.
       # Two kinds of links are skipped. The canonical and language links point
       # at the published site, which shows the previous version until this one
