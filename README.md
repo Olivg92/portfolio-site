@@ -3,8 +3,7 @@
 The portfolio of Olivier Guandalini, DevOps and SRE engineer: the projects, and what each one
 shows.
 
-**Live:** https://olivg92.github.io/portfolio-site/ in English, and
-https://olivg92.github.io/portfolio-site/fr/ in French.
+**Live:** https://oguandalini.com/ in English, and https://oguandalini.com/fr/ in French.
 
 The home page says who I am in two sentences, beside platform-eks-gitops drawn in isometric view,
 then shows the two projects. The guided tour of platform-eks-gitops walks through the project
@@ -88,7 +87,7 @@ With Node 22.23.4 or later (`.nvmrc` pins 24):
 
 ```bash
 npm ci
-npm run dev       # http://localhost:4321/portfolio-site/
+npm run dev       # http://localhost:4321/
 ```
 
 Without a recent Node, the same in a container:

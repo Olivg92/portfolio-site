@@ -105,13 +105,13 @@ jobs:
       - name: Links to other sites, in a new tab
         run: node scripts/check-new-tab.mjs dist
 
-      # The built site, served under the same path as on GitHub Pages, for the
-      # two checks below. It keeps running until the job ends.
+      # The built site, served at the root as on the domain, for the two
+      # checks below. It keeps running until the job ends.
       - name: Serve the build
         run: |
           npm run preview -- --port 4321 > /tmp/preview.log 2>&1 &
           for _ in $(seq 1 30); do
-            curl -fs -o /dev/null http://localhost:4321/portfolio-site/ && exit 0
+            curl -fs -o /dev/null http://localhost:4321/ && exit 0
             sleep 1
           done
           cat /tmp/preview.log
@@ -125,16 +125,16 @@ jobs:
       # from CI can only fail there.
       - name: Dead links
         run: >-
-          npx linkinator http://localhost:4321/portfolio-site/ --recurse --retry --verbosity error
+          npx linkinator http://localhost:4321/ --recurse --retry --verbosity error
           --check-fragments
-          --skip '^https://olivg92\.github\.io/portfolio-site/'
+          --skip '^https://oguandalini\.com/'
           --skip '^https://www\.linkedin\.com/'
 
       # The guided tour, used as a reader uses it, in the runner's Chrome:
       # clicks on its buttons and chapters, the end of the page, and on a
       # phone, each step's drawing framed whole, no word of it under 8 px.
       - name: Guided tour, clicked through
-        run: node scripts/check-tour.mjs http://localhost:4321/portfolio-site/
+        run: node scripts/check-tour.mjs http://localhost:4321/
 
       # The tool cards, used as a reader uses them, in Chrome and in WebKit,
       # the engine of Safari: a click or a tap opens the right card inside the
@@ -151,7 +151,7 @@ jobs:
           docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           sh -c "npm install --no-save playwright@${PLAYWRIGHT_VERSION}
-          && node scripts/check-cards.mjs http://localhost:4321/portfolio-site/"
+          && node scripts/check-cards.mjs http://localhost:4321/"
 
       # The solved problems of the Experience page, in the same two browsers:
       # folded on a phone, each unfolded and folded again by a tap; every
@@ -160,7 +160,7 @@ jobs:
         run: >-
           docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
-          node scripts/check-experience.mjs http://localhost:4321/portfolio-site/
+          node scripts/check-experience.mjs http://localhost:4321/
 
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.

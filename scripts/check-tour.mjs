@@ -7,10 +7,10 @@
 // - on a phone, where the drawing has a tighter layout of its own, every
 //   step is framed whole, Next after Next, and no word of it is under 8 px.
 // Run against a served build:
-//   node scripts/check-tour.mjs http://localhost:4321/portfolio-site/
+//   node scripts/check-tour.mjs http://localhost:4321/
 import { browser, sleep } from './lib/cdp.mjs';
 
-const base = (process.argv[2] ?? 'http://localhost:4321/portfolio-site/').replace(/\/?$/, '/');
+const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/?$/, '/');
 const failures = [];
 // In GitHub Actions, a failure is also an annotation, shown on the pull request.
 const report = (what) => console.log(process.env.GITHUB_ACTIONS ? `::error title=Guided tour::${what}` : `FAIL  ${what}`);

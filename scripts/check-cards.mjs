@@ -26,10 +26,10 @@
 // Run against a served build, with Playwright and its two browsers:
 //   npm install --no-save playwright@1.63.0
 //   npx playwright install --with-deps chromium webkit
-//   node scripts/check-cards.mjs http://localhost:4321/portfolio-site/
+//   node scripts/check-cards.mjs http://localhost:4321/
 import { chromium, devices, webkit } from 'playwright';
 
-const base = (process.argv[2] ?? 'http://localhost:4321/portfolio-site/').replace(/\/?$/, '/');
+const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/?$/, '/');
 const failures = [];
 // In GitHub Actions, a failure or a note is also an annotation, shown on the
 // pull request.
