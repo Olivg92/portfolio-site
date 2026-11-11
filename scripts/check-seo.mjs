@@ -2,8 +2,10 @@
 // the sitemap lists every page meant to be indexed, each with its other
 // language, and nothing else; every such page has a title, a description, its
 // canonical address and its language links; the structured data parses, the
-// home pages describe Olivier with his LinkedIn and GitHub, and nothing in it
-// names an employer. Reads the built pages, no browser needed:
+// home pages describe Olivier with his LinkedIn and GitHub, and it has no
+// worksFor, affiliation, employee or memberOf key, the properties that would
+// name an employer (the check cannot know a name the repository never holds).
+// Reads the built pages, no browser needed:
 //   npm run build && node scripts/check-seo.mjs dist
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -54,8 +56,10 @@ let graphs = 0;
 for (const file of pages) {
   const html = read(file);
   const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1] ?? '';
-  const metas = [...head.matchAll(/<meta\b[^>]*>/g)].map(([tag]) => tag);
-  const links = [...head.matchAll(/<link\b[^>]*>/g)].map(([tag]) => tag);
+  // A tag ends at the first '>' outside its quoted values: Astro leaves a '>'
+  // in a value as it is, which HTML allows.
+  const metas = [...head.matchAll(/<meta\b(?:[^>"]|"[^"]*")*>/g)].map(([tag]) => tag);
+  const links = [...head.matchAll(/<link\b(?:[^>"]|"[^"]*")*>/g)].map(([tag]) => tag);
   const noindex = metas.some((tag) => attribute(tag, 'name') === 'robots' && /noindex/.test(attribute(tag, 'content') ?? ''));
   const canonical = attribute(links.find((tag) => attribute(tag, 'rel') === 'canonical') ?? '', 'href');
 
@@ -79,8 +83,9 @@ for (const file of pages) {
     for (const lang of ['en', 'fr', 'x-default']) if (!languages.includes(lang)) fail(`${file} has no hreflang="${lang}" link`);
   }
 
-  // Structured data: it must parse, never name an employer, and the home
-  // pages must say who the site is about.
+  // Structured data: it must parse, have no key that would name an employer
+  // (worksFor, affiliation, employee or memberOf, under any prefix such as
+  // schema:), and the home pages must say who the site is about.
   const blocks = [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(([, json]) => json);
   const nodes = [];
   for (const block of blocks) {
@@ -88,7 +93,7 @@ for (const file of pages) {
       const data = JSON.parse(block);
       nodes.push(...(data['@graph'] ?? [data]));
       graphs++;
-      const keys = JSON.stringify(data).match(/"(worksFor|affiliation|employee|memberOf)"/);
+      const keys = JSON.stringify(data).match(/"(?:[^"]*[:/#])?(worksFor|affiliation|employees?|memberOf)"/);
       if (keys) fail(`${file}: the structured data has "${keys[1]}", which would name an employer`);
     } catch (error) {
       fail(`${file}: structured data that does not parse (${error.message})`);
@@ -117,4 +122,4 @@ if (failures.length) {
   console.error(`\n${failures.length} problem(s) for search engines`);
   process.exit(1);
 }
-console.log(`ok    robots.txt and ${listed.size} pages in the sitemap, each with its title, description, canonical and language links; ${graphs} structured data blocks, no employer`);
+console.log(`ok    robots.txt and ${listed.size} pages in the sitemap, each with its title, description, canonical and language links; ${graphs} structured data blocks, none with a worksFor, affiliation, employee or memberOf key`);

@@ -2,7 +2,8 @@
 // A link that looks like a button. Every action on the site goes somewhere,
 // so there is no <button> here. The arrow says where: down for a place on the
 // same page, up and to the right for another site, which opens in a new tab
-// so that this one stays open behind it; screen readers hear it said.
+// so that this one stays open behind it; screen readers hear it said. A file
+// to download, the CV, gets a download arrow.
 import type { HTMLAttributes } from 'astro/types';
 import Icon from './Icon.astro';
 import { ui, type Lang } from '../i18n';
@@ -15,7 +16,7 @@ interface Props extends HTMLAttributes<'a'> {
 
 const { href, variant = 'primary', class: className, ...rest } = Astro.props;
 const elsewhere = /^https?:/.test(href);
-const icon = href.startsWith('#') ? 'arrow-down' : elsewhere ? 'arrow-up-right' : undefined;
+const icon = Astro.props.download ? 'download' : href.startsWith('#') ? 'arrow-down' : elsewhere ? 'arrow-up-right' : undefined;
 const lang = (Astro.currentLocale ?? 'en') as Lang;
 const newTab = elsewhere ? { target: '_blank', rel: 'noopener' } : {};
 // Printed after the words of a link to another site: its address, short.

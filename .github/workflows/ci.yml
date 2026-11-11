@@ -107,8 +107,9 @@ jobs:
 
       # What search engines read: robots.txt and the sitemap it names, every
       # indexable page in it with both languages, its title, description and
-      # canonical address, and structured data that parses and names no
-      # employer. Read from the build.
+      # canonical address, and structured data that parses and has no key
+      # that would name an employer (worksFor, affiliation, employee,
+      # memberOf). Read from the build.
       - name: Sitemap, metadata and structured data
         run: node scripts/check-seo.mjs dist
 
@@ -123,6 +124,13 @@ jobs:
           done
           cat /tmp/preview.log
           exit 1
+
+      # The CV, one PDF per language, printed from the experience page by the
+      # runner's Chrome into the served build, as the deployment does, so that
+      # the dead-link check below finds the files the pages link to. Three A4
+      # pages at most, or the step fails.
+      - name: CV as a PDF
+        run: node scripts/cv-pdf.mjs http://localhost:4321/ dist
 
       # Links within a page (#contact) must land on an element that exists.
       # Two kinds of links are skipped. The canonical and language links point

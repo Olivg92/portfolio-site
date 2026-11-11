@@ -111,6 +111,17 @@ async function page(endpoint, { width, height, mobile = false, reducedMotion = f
       const { data } = await send('Page.captureScreenshot', { format, quality });
       return Buffer.from(data, 'base64');
     },
+    // The page as the print dialog saves it, on the paper size its CSS asks
+    // for, tagged for screen readers and with its headings as bookmarks.
+    async pdf() {
+      const { data } = await send('Page.printToPDF', {
+        preferCSSPageSize: true,
+        printBackground: true,
+        generateTaggedPDF: true,
+        generateDocumentOutline: true,
+      });
+      return Buffer.from(data, 'base64');
+    },
     async close() {
       await fetch(`${endpoint}/json/close/${tab.id}`);
       ws.close();

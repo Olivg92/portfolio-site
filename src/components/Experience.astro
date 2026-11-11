@@ -10,6 +10,7 @@ import Icon from './Icon.astro';
 import Panel from './Panel.astro';
 import ToolChip from './ToolChip.astro';
 import { experience } from '../experience';
+import { cvFile, cvPath } from '../cv';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -29,6 +30,9 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     <p class="eyebrow">{e.eyebrow}</p>
     <h1>{e.heading}</h1>
     <p class="lede">{experience.lede[lang]}</p>
+    <div class="cv">
+      <Button href={cvPath(lang)} download={cvFile(lang)}>{t.cv.download}</Button>
+    </div>
     <ul class="numbers" aria-label={e.numbers}>
       {
         experience.metrics.map((metric) => (
@@ -493,11 +497,13 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   /* On paper, or saved as a PDF: a CV of a few A4 pages. Every story shows,
      with nothing to press, each step's label running into its words; the
-     path and the education sit side by side; the hint about tools and the
-     links to the other pages go. The timeline is drawn whole, whether its
-     steps have come into view on screen or not. */
+     path and the education sit side by side; the hint about tools, the
+     button of the CV, which this paper is, and the links to the other pages
+     go. The timeline is drawn whole, whether its steps have come into view on
+     screen or not. */
   @media print {
-    .more > summary {
+    .more > summary,
+    .cv {
       display: none;
     }
 

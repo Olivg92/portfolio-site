@@ -5,6 +5,7 @@
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import Button from './Button.astro';
 import { links } from '../links';
+import { cvFile, cvPath } from '../cv';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -24,6 +25,7 @@ const year = new Date().getFullYear();
       <ul class="cluster">
         <li><Button href={links.linkedin}>LinkedIn</Button></li>
         <li><Button href={links.github} variant="ghost">GitHub</Button></li>
+        <li class="cv"><Button href={cvPath(lang)} variant="ghost" download={cvFile(lang)}>{t.cv.short}</Button></li>
       </ul>
     </div>
     <nav class="pages" aria-label={t.pages}>
@@ -95,8 +97,13 @@ const year = new Date().getFullYear();
     color: var(--ink-2);
   }
 
-  /* On paper, the contact only: where to write, with the addresses. */
+  /* On paper, the contact only: where to write, with the addresses, and not
+     the CV, which the paper already is. */
   @media print {
+    .cv {
+      display: none;
+    }
+
     .foot {
       margin-top: var(--space-7);
       padding-block: var(--space-5) 0;
