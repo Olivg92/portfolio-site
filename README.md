@@ -82,6 +82,13 @@ tools, the path and the education.
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
   committed in [`public/og/`](public/og/): they only change when the look of a page does.
+- **Found by search engines.** [`robots.txt`](src/pages/robots.txt.ts) names the sitemap,
+  which `@astrojs/sitemap` writes at each build: every page but the 404, each with its other
+  language. The home page describes its subject in JSON-LD ([`src/structured.ts`](src/structured.ts)):
+  a `ProfilePage` about a `Person`, with his job, what he knows, his schools and his LinkedIn
+  and GitHub, so that a search for the name can tie them to the site. As everywhere on the
+  site, no employer: no `worksFor`, no affiliation. Google Search Console and Bing Webmaster
+  Tools verify the domain by a DNS record, so nothing of theirs lives in this repository.
 - **Fonts served by the site itself.** Geist and Geist Mono come from their Fontsource packages
   through Astro's font settings: Latin subset only, preloaded, with fallback faces resized to
   Geist's metrics so the text does not move when the font arrives. No request leaves the site.
@@ -119,6 +126,7 @@ Every pull request runs them, and a failure blocks the merge:
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| What search engines read | [`scripts/check-seo.mjs`](scripts/check-seo.mjs), reading the build: `robots.txt` names a sitemap of this build; the sitemap lists every indexable page, each with both languages, and nothing else; each such page has a title, a description, a canonical address pointing at itself and its `hreflang` links; the 404 asks not to be indexed and stays out; the structured data parses, the home pages describe Olivier with his LinkedIn and GitHub, and no key in it would name an employer |
 | The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one |
@@ -151,6 +159,7 @@ src/
 ├── logos.ts              # the logos of the tools, drawn inline
 ├── links.ts              # every address the site links to
 ├── cv.ts                 # the names of the CV's PDFs
+├── structured.ts         # the JSON-LD of the home page: who the site is about
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
 │   ├── Home.astro        # the home page, shared by both languages
@@ -174,7 +183,8 @@ src/
 │   ├── platform-eks-gitops/index.astro  # the guided tour
 │   ├── experience/index.astro           # the experience page
 │   ├── fr/                # the same pages, in French
-│   └── 404.astro         # in both languages
+│   ├── 404.astro         # in both languages
+│   └── robots.txt.ts     # robots.txt, naming the sitemap
 └── styles/
     ├── tokens.css        # colours, type, sizes, spacing
     └── global.css        # background, type, links, layout helpers
@@ -183,6 +193,7 @@ scripts/
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
 ├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
+├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
 ├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page
 ├── og-images.mjs         # the pictures of link previews
 └── lib/cdp.mjs           # a minimal Chrome DevTools client
