@@ -3,13 +3,13 @@
 // introduction beside its isometric view, a step of the guided tour, and the
 // experience page's introduction with its numbers.
 // Run against a served build, then commit what changed in public/og/:
-//   node scripts/og-images.mjs http://localhost:4321/portfolio-site/
+//   node scripts/og-images.mjs http://localhost:4321/
 // A preview is fetched once and cached by whoever shows it, so the pictures
 // only need drawing again when the look of those pages changes.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { browser, sleep } from './lib/cdp.mjs';
 
-const base = (process.argv[2] ?? 'http://localhost:4321/portfolio-site/').replace(/\/?$/, '/');
+const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/?$/, '/');
 const OUT = new URL('../public/og/', import.meta.url);
 mkdirSync(OUT, { recursive: true });
 

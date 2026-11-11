@@ -2,10 +2,9 @@
 import { defineConfig, fontProviders } from 'astro/config';
 
 export default defineConfig({
-  // GitHub Pages serves a project repository under its name. When a domain
-  // replaces this address, `site` becomes the domain and `base` goes away.
-  site: 'https://olivg92.github.io',
-  base: '/portfolio-site',
+  // The site's own domain, served by GitHub Pages at its root. The address
+  // it had before, olivg92.github.io/portfolio-site/, redirects here.
+  site: 'https://oguandalini.com',
   // Every page is a folder with an index.html, so links end with a slash and
   // GitHub Pages never answers them with a redirect first.
   trailingSlash: 'always',

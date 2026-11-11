@@ -2,12 +2,12 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:4321/portfolio-site/",
-        "http://localhost:4321/portfolio-site/fr/",
-        "http://localhost:4321/portfolio-site/platform-eks-gitops/",
-        "http://localhost:4321/portfolio-site/fr/platform-eks-gitops/",
-        "http://localhost:4321/portfolio-site/experience/",
-        "http://localhost:4321/portfolio-site/fr/experience/"
+        "http://localhost:4321/",
+        "http://localhost:4321/fr/",
+        "http://localhost:4321/platform-eks-gitops/",
+        "http://localhost:4321/fr/platform-eks-gitops/",
+        "http://localhost:4321/experience/",
+        "http://localhost:4321/fr/experience/"
       ],
       "numberOfRuns": 1
     },
