@@ -42,6 +42,7 @@ jobs:
             curl -fs -o /dev/null http://localhost:4321/ && break
             sleep 1
           done
+          curl -fs -o /dev/null http://localhost:4321/ || { cat /tmp/preview.log; exit 1; }
           node scripts/cv-pdf.mjs http://localhost:4321/ dist
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
