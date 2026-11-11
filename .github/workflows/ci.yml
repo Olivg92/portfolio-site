@@ -107,8 +107,9 @@ jobs:
 
       # What search engines read: robots.txt and the sitemap it names, every
       # indexable page in it with both languages, its title, description and
-      # canonical address, and structured data that parses and names no
-      # employer. Read from the build.
+      # canonical address, and structured data that parses and has no key
+      # that would name an employer (worksFor, affiliation, employee,
+      # memberOf). Read from the build.
       - name: Sitemap, metadata and structured data
         run: node scripts/check-seo.mjs dist
 
