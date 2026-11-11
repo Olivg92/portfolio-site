@@ -76,6 +76,13 @@ jobs:
   site:
     name: build, links and Lighthouse
     runs-on: ubuntu-latest
+    # The whole job takes a few minutes. A step that hangs fails it here
+    # rather than holding the pull request for the six hours GitHub allows.
+    timeout-minutes: 30
+    env:
+      # The tag of the Playwright image the browser checks run in, and the
+      # version of the playwright package installed there to match it.
+      PLAYWRIGHT_VERSION: 1.63.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -133,21 +140,27 @@ jobs:
       # the engine of Safari: a click or a tap opens the right card inside the
       # screen, at the bottom of a phone's and no taller than its words, and
       # it closes again. Safari once stretched it over a phone's screen, which
-      # Chrome could not show. Playwright brings the two browsers; its version
-      # and the browsers it installs go together.
+      # Chrome could not show. The two browsers come from Playwright's own
+      # image, which ships them with every library they need, in the version
+      # of Playwright it is tagged with. Installing those libraries on the
+      # runner went through the Ubuntu mirror, which once stopped answering
+      # and left this step hanging. The image reaches the server the build
+      # runs on through the runner's network.
       - name: Tool cards, in Chrome and in WebKit
-        env:
-          PLAYWRIGHT_VERSION: 1.63.0
-        run: |
-          npm install --no-save "playwright@${PLAYWRIGHT_VERSION}"
-          npx playwright install --with-deps chromium webkit
-          node scripts/check-cards.mjs http://localhost:4321/portfolio-site/
+        run: >-
+          docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
+          sh -c "npm install --no-save playwright@${PLAYWRIGHT_VERSION}
+          && node scripts/check-cards.mjs http://localhost:4321/portfolio-site/"
 
       # The solved problems of the Experience page, in the same two browsers:
       # folded on a phone, each unfolded and folded again by a tap; every
       # story beside its title on a wide screen, as before, and on paper.
       - name: Solved problems, in Chrome and in WebKit
-        run: node scripts/check-experience.mjs http://localhost:4321/portfolio-site/
+        run: >-
+          docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
+          node scripts/check-experience.mjs http://localhost:4321/portfolio-site/
 
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
