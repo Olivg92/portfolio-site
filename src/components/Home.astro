@@ -9,6 +9,7 @@ import IsoPlatform from './IsoPlatform.astro';
 import ProjectCard from './ProjectCard.astro';
 import Terminal from './Terminal.astro';
 import { projects } from '../projects';
+import { jsonLd, profilePage } from '../structured';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -36,6 +37,12 @@ checking the local platform:
 ---
 
 <Base lang={lang} title={t.title} description={t.description}>
+  <script
+    is:inline
+    slot="head"
+    type="application/ld+json"
+    set:html={jsonLd(profilePage(lang, new URL(getRelativeLocaleUrl(lang), Astro.site), Astro.site!))}
+  />
   <section class="hero wrap" aria-labelledby="name">
     <div class="intro">
       <p class="eyebrow">{t.kicker}</p>
