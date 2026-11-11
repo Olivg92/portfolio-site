@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   // The site's own domain, served by GitHub Pages at its root. The address
@@ -16,6 +17,15 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  // The list of pages search engines read, sitemap-index.xml, named in
+  // robots.txt. Each page comes with its other language, as the pages' own
+  // hreflang links say. The 404 page stays out: it asks not to be indexed.
+  integrations: [
+    sitemap({
+      i18n: { defaultLocale: 'en', locales: { en: 'en', fr: 'fr' } },
+      filter: (page) => !new URL(page).pathname.startsWith('/404'),
+    }),
+  ],
   // Geist for text, Geist Mono for commands and labels, served by this site
   // rather than by a font CDN. The files come from the Fontsource packages,
   // Latin subset only: it covers English and French. Astro adds the preload

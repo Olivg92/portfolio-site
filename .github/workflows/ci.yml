@@ -105,6 +105,13 @@ jobs:
       - name: Links to other sites, in a new tab
         run: node scripts/check-new-tab.mjs dist
 
+      # What search engines read: robots.txt and the sitemap it names, every
+      # indexable page in it with both languages, its title, description and
+      # canonical address, and structured data that parses and names no
+      # employer. Read from the build.
+      - name: Sitemap, metadata and structured data
+        run: node scripts/check-seo.mjs dist
+
       # The built site, served at the root as on the domain, for the two
       # checks below. It keeps running until the job ends.
       - name: Serve the build
