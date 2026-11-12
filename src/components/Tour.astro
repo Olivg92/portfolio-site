@@ -463,8 +463,12 @@ const inline = (text: string) => text.split('`');
     color: var(--ink-2);
   }
 
+  /* A step's figure, shown with its words on a phone only, where the camera
+     leaves out the band at the top of the drawing that holds it. Set as the
+     home page's figures are: the value in Bricolage, lit, its caption in
+     Manrope. */
   .metric {
-    font: 500 var(--text-s) / 1.4 var(--font-mono);
+    font: 600 var(--text-s) / 1.4 var(--font-ui);
   }
 
   .cap .metric {
@@ -472,7 +476,9 @@ const inline = (text: string) => text.split('`');
   }
 
   .metric .value {
-    color: var(--cyan);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 800;
   }
 
   .target {
