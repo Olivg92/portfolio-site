@@ -57,8 +57,7 @@ and the education.
   card. On a touch screen the lights behind the page fade before the top and bottom edges, where
   Safari floats its bars and tints them with the page's colour; the sticky header draws its
   glass on a bar inside it, not on itself, for the same reason. From page to page, the page fades into
-  the next while the header stays put (cross-document view transitions, CSS only), and on a
-  screen with a mouse a panel lifts under the pointer.
+  the next while the header stays put (cross-document view transitions, CSS only).
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
@@ -187,7 +186,6 @@ src/
 │   ├── SiteFooter.astro  # the contact section, on every page
 │   ├── Button.astro      # a link styled as a button, primary or ghost
 │   ├── Chip.astro        # a short label: a technology with its logo, a status
-│   ├── Panel.astro       # a pane of glass for a block that stands alone
 │   ├── Terminal.astro    # a transcript, coloured as a terminal shows it
 │   ├── Logo.astro        # a tool's logo
 │   └── Icon.astro

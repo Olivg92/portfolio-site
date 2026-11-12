@@ -66,7 +66,7 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
      from page to page (global.css), so that it stays where it is while the
      page under it changes: a name on the header would make it the edge of
      what the bar's glass can see, and the glass would blur nothing.
-     backdrop-filter is written once, unprefixed, as the Panel's is: Chrome,
+     backdrop-filter is written once, unprefixed, as the tiles' is: Chrome,
      Firefox and Safari 18 or later read it. With the -webkit- version written
      next to it, the build kept only that one, which Chrome ignores. */
   .top {

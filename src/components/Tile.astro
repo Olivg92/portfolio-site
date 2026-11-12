@@ -19,7 +19,7 @@ interface Props extends HTMLAttributes<'div'> {
 }
 
 // `rest` carries the parent's scope attribute to the root, so its styles
-// reach the tile, as with Panel.
+// reach the tile.
 const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
 ---
 
@@ -28,10 +28,10 @@ const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
 </Tag>
 
 <style>
-  /* backdrop-filter is written once, unprefixed, as the header's and the
-     Panel's are: the build folds a -webkit- copy beside it into a single
-     declaration, the last written, so a -webkit- one last would leave Chrome
-     without the blur. Safari 18 and later read it unprefixed. */
+  /* backdrop-filter is written once, unprefixed, as the header's is: the
+     build folds a -webkit- copy beside it into a single declaration, the
+     last written, so a -webkit- one last would leave Chrome without the
+     blur. Safari 18 and later read it unprefixed. */
   .tile {
     position: relative;
     min-width: 0;
