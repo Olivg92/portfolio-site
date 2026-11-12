@@ -597,11 +597,12 @@ const inline = (text: string) => text.split('`');
   }
 
   /* The tour closes on a tile of frosted glass, the block of the home page,
-     at night. A tile's pale edge vanishes on the night's dark, so it takes
-     the line of the night's glass, as the header and the contact do; and
-     the contact's padding, so that the words of the two tiles, one above
-     the other, start on the same line. Two classes, to outweigh the tile's
-     own rule (Tile.astro). */
+     at night. A tile's edge is drawn in its own surface, pale by day; at
+     night that surface is nearly the page's dark, so the edge vanishes, and
+     it takes the line of the night's glass instead, as the header and the
+     contact do; and the contact's padding, so that the words of the two
+     tiles, one above the other, start on the same line. Two classes, to
+     outweigh the tile's own rule (Tile.astro). */
   .outro .closing {
     display: grid;
     justify-items: start;
