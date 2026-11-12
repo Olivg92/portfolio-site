@@ -20,7 +20,10 @@ const shots = [
     // The header goes; the first tiles fill the picture. `header.top`, as
     // the faces of the flagship's slabs are `.top` too.
     css: 'header.top, .skip { display: none !important; } .hero { padding-block: 24px 0 !important; }',
-    wait: 3500,
+    // The page at rest from its first frame: with less motion, the
+    // entrance does not play, so the picture never depends on its timing.
+    reducedMotion: true,
+    wait: 1500,
   },
   {
     name: 'tour',
@@ -43,7 +46,7 @@ const chrome = await browser();
 try {
   for (const lang of ['en', 'fr']) {
     for (const shot of shots) {
-      const page = await chrome.page({ width: 1200, height: 630 });
+      const page = await chrome.page({ width: 1200, height: 630, reducedMotion: shot.reducedMotion ?? false });
       await page.goto(`${base}${lang === 'en' ? '' : 'fr/'}${shot.path}`);
       if (shot.css) await page.style(shot.css);
       if (shot.step) {
