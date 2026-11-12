@@ -812,7 +812,8 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
      path and the education sit side by side; the hint about tools, the
      button of the CV, which this paper is, and the links to the other pages
      go. A fine rule between blocks rather than a frame around each, and a
-     page may turn between two steps of a story, never inside one. */
+     page may turn between two steps of a story, never inside one, nor
+     between the tools' title and its tools. */
   @media print {
     .more > summary,
     .cv,
@@ -835,6 +836,12 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
 
     .lead {
       gap: var(--space-3);
+    }
+
+    /* Closer caps: at the page's 0.1em, the text layer of a PDF printed by
+       Chrome's headless shell cut words after a P ("EXP ERIENCE"). */
+    .intro .eyebrow {
+      letter-spacing: 0.04em;
     }
 
     .intro h1 {
@@ -869,6 +876,10 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
     .history,
     .next {
       margin-top: var(--space-8);
+    }
+
+    .tools {
+      break-inside: avoid;
     }
 
     .also h2,
