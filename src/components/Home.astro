@@ -435,7 +435,9 @@ const clone = parts(demo);
     padding-top: var(--space-3);
   }
 
-  /* On a phone, the two calls are full width, one above the other. */
+  /* On a phone, the two calls are full width, one above the other. A label
+     wider than the screen wraps, centred, rather than push its button past
+     the tile; the line height is for that second line. */
   @media (max-width: 559px) {
     .ctas {
       align-self: stretch;
@@ -444,6 +446,20 @@ const clone = parts(demo);
     .ctas :global(.btn) {
       flex: 1 1 100%;
       justify-content: center;
+      padding-block: var(--space-2);
+      line-height: 1.2;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  /* Under 360 px (a 320 px phone, the reflow width of WCAG), "Message me on
+     LinkedIn" is wider than the tile with the button's usual padding: a
+     narrower padding keeps both calls on one line, the same width and
+     height, with the type unchanged. */
+  @media (max-width: 359px) {
+    .ctas :global(.btn) {
+      padding-inline: var(--space-3);
     }
   }
 
