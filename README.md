@@ -39,7 +39,11 @@ and the education.
   ([`src/tour/scene.ts`](src/tour/scene.ts)), and the one script of the site follows the
   scroll, on that page only. On a phone the drawing has a tighter layout of its own, the same
   platform with smaller chips and closer rows, framed on each step as on a wide screen, so that
-  no word of it is under 8 px. Without the script, the tour reads as a page.
+  no word of it is under 8 px. Without the script, the tour reads as a page. Around the
+  drawing, the tour's own words take the site's type, at night: where you are and each step's
+  label in Manrope caps lit by the accent, a step's figure on a phone in Bricolage, Previous and
+  Next drawn as the site's ghost buttons, and a tile of night glass to close the tour. The mono
+  stays with the drawing and the terminals.
 - **An experience page that names no employer.** Its words live in
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
@@ -97,10 +101,11 @@ and the education.
   site, no employer: no `worksFor`, no affiliation. Google Search Console and Bing Webmaster
   Tools verify the domain by a DNS record, so nothing of theirs lives in this repository.
 - **Fonts served by the site itself.** Bricolage Grotesque for headings, with its optical size
-  axis, Manrope for text, and Geist Mono for the terminal transcripts of the tour come from their
-  Fontsource packages through Astro's font settings: Latin subset only, Bricolage and Manrope
-  preloaded on every page and Geist Mono at night, with fallback faces resized to each font's
-  metrics so the text does not move when it arrives. No request leaves the site.
+  axis, Manrope for text, and Geist Mono for the terminal transcripts of the tour and the labels
+  of its drawing come from their Fontsource packages through Astro's font settings: Latin subset
+  only, Bricolage and Manrope preloaded on every page and Geist Mono at night, with fallback
+  faces resized to each font's metrics so the text does not move when it arrives. No request
+  leaves the site.
 - **Logos for both lights.** A brand mark carries two colours, deepened to a contrast of 3:1 on
   the pale page and lightened to 3:1 on the night ([`src/logos.ts`](src/logos.ts)): a chip picks
   the one of its hour, and the drawings that are always at night take the night's at build time.
