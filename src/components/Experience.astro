@@ -2,12 +2,18 @@
 // The Experience page, the same in both languages apart from its words: what
 // I do at work, told as problems solved, then the rest of the work, the tools
 // and where I use them, the path and the education. No script.
+//
+// Printed, or saved as a PDF, it is the CV: three A4 pages at most
+// (scripts/check-experience.mjs, scripts/cv-pdf.mjs). Its words are the PDF's
+// text, which a recruiter's software reads: a figure keeps the words it has
+// on screen ("~15 min"), with no spoken copy beside it.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
 import Icon from './Icon.astro';
 import Panel from './Panel.astro';
+import Tile from './Tile.astro';
 import ToolChip from './ToolChip.astro';
 import { experience } from '../experience';
 import { cvFile, cvPath } from '../cv';
@@ -23,23 +29,42 @@ const e = t.experience;
 // Words between backticks are code.
 const inline = (text: string) => text.split('`');
 const index = (i: number) => String(i + 1).padStart(2, '0');
+
+// A figure cut into what its tile styles: its digits, a sign (~ or +), and a
+// unit, smaller, which keeps the space before it, so that the figure still
+// reads "~15 min" to a screen reader and in the text of the PDF.
+const parts = (value: string) =>
+  value
+    .split(/(\d+)/)
+    .filter(Boolean)
+    .map((text) => ({ kind: /^\d/.test(text) ? 'value' : /\p{L}/u.test(text) ? 'unit' : 'sign', text }));
+
+// Words with a hyphen held whole: "on-prem" never breaks after its hyphen,
+// in the introduction or under a figure. Odd parts are those words.
+const whole = (text: string) => text.split(/(\S+-\S+)/);
 ---
 
 <Base lang={lang} title={e.title} description={e.description} path="experience/" preview="experience">
   <header class="intro wrap">
-    <p class="eyebrow">{e.eyebrow}</p>
-    <h1>{e.heading}</h1>
-    <p class="lede">{experience.lede[lang]}</p>
-    <div class="cv">
-      <Button href={cvPath(lang)} download={cvFile(lang)}>{t.cv.download}</Button>
+    <div class="lead">
+      <p class="eyebrow">{e.eyebrow}</p>
+      <h1>{e.heading}</h1>
+      <p class="lede">{whole(experience.lede[lang]).map((part, k) => (k % 2 ? <span class="whole">{part}</span> : part))}</p>
+      <div class="cv">
+        <Button href={cvPath(lang)} download={cvFile(lang)}>{t.cv.download}</Button>
+      </div>
     </div>
     <ul class="numbers" aria-label={e.numbers}>
       {
-        experience.metrics.map((metric) => (
-          <li>
-            <span class="value">{metric.value[lang]}</span>
-            <span class="caption">{metric.label[lang]}</span>
-          </li>
+        experience.metrics.map((metric, i) => (
+          <Tile as="li" class="stat" n={i}>
+            <p class:list={['big', { grad: metric.id === 'servers' }]}>
+              {parts(metric.value[lang]).map((part) => (
+                <span class={part.kind}>{part.text}</span>
+              ))}
+            </p>
+            <p class="caption">{whole(metric.label[lang]).map((part, k) => (k % 2 ? <span class="whole">{part}</span> : part))}</p>
+          </Tile>
         ))
       }
     </ul>
@@ -196,11 +221,18 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 </Base>
 
 <style>
+  /* The introduction: who, what, the CV, and four figures, each a tile. On
+     a laptop the figures stand two by two beside the words. */
   .intro {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-7) 0;
+  }
+
+  .lead {
     display: grid;
     justify-items: start;
     gap: var(--space-5);
-    padding-block: var(--space-8) var(--space-7);
   }
 
   .intro h1 {
@@ -208,45 +240,117 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     max-width: 13em;
   }
 
-  /* The numbers, as on the control room's panels: the figure in mono, lit,
-     its caption below. */
+  /* On a phone, closer to the header, as the home page's first tile is, so
+     that the first figures show above the fold of an iPhone. */
+  @media (max-width: 559px) {
+    .intro {
+      padding-block: var(--space-2) 0;
+      gap: var(--space-4);
+    }
+
+    .lead {
+      gap: var(--space-4);
+    }
+
+    .intro .lede {
+      font-size: var(--text-m);
+    }
+
+    /* With a larger default font, the button's words wrap rather than push
+       the page past a 320 px screen, as the home page's calls do. */
+    .cv :global(.btn) {
+      padding-block: var(--space-2);
+      line-height: 1.2;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
   .numbers {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
-    width: 100%;
-    margin: var(--space-4) 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .numbers li {
+  @media (min-width: 720px) {
+    .numbers {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .intro {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: end;
+      column-gap: var(--space-7);
+    }
+
+    .numbers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* A figure as on the home page: large, in the display face; its unit
+     smaller and grey. Its size is held to its tile's width too (36cqi: the
+     widest, "~15 min", takes about 2.6 em), so that it never runs past the
+     tile, whatever the screen or the reader's default font size. The tile
+     can be a size container: it holds no chip, so nothing in it opens a
+     card that the containment would catch. */
+  .tile.stat {
+    container-type: inline-size;
     display: grid;
     align-content: start;
     gap: var(--space-2);
-    padding: var(--space-4) var(--space-5);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius-m);
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
   }
 
-  .value {
-    color: var(--cyan);
-    font: 600 clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem) / 1.1 var(--font-mono);
-    letter-spacing: -0.02em;
-    text-shadow: var(--glow-cyan);
+  .big {
+    color: var(--ink);
+    font: 800 min(clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem), 36cqi) / 1 var(--font-display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .unit {
+    color: var(--muted);
+    font-size: 0.45em;
+    letter-spacing: 0;
+  }
+
+  /* The one figure in a gradient, as on the home page: every stop reads at
+     3:1 or more as large text, and `color` stays the accent, which is what
+     contrast checks read. Solid where colours are forced, and on paper. */
+  .grad {
+    color: var(--accent);
+    background: linear-gradient(
+      120deg,
+      var(--accent),
+      color-mix(in srgb, var(--violet) 55%, var(--accent)) 45%,
+      color-mix(in srgb, var(--cyan) 70%, var(--accent))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media (forced-colors: active) {
+    .grad {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
   }
 
   .caption {
-    color: var(--muted);
+    color: var(--ink-2);
     font-size: var(--text-s);
     line-height: 1.45;
   }
 
-  @media (min-width: 900px) {
-    .numbers {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  .whole {
+    white-space: nowrap;
   }
 
   .solved,
@@ -254,7 +358,17 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   .tools,
   .history,
   .next {
-    padding-block: var(--space-8) 0;
+    margin-top: var(--space-9);
+  }
+
+  @media (max-width: 559px) {
+    .solved,
+    .also,
+    .tools,
+    .history,
+    .next {
+      margin-top: var(--space-8);
+    }
   }
 
   .head {
@@ -519,6 +633,10 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       padding-block: 0;
     }
 
+    .lead {
+      gap: var(--space-3);
+    }
+
     .intro h1 {
       max-width: none;
       font-size: var(--text-h1);
@@ -530,13 +648,27 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       margin-top: var(--space-2);
     }
 
-    .numbers li {
+    .numbers .tile.stat {
       gap: var(--space-1);
       padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-m);
     }
 
-    .value {
+    .big {
       font-size: 14pt;
+    }
+
+    .grad {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+
+    .solved,
+    .also,
+    .tools,
+    .history,
+    .next {
+      margin-top: var(--space-8);
     }
 
     .hint {
