@@ -3,7 +3,19 @@
 // sit next to words that already say the same thing, so screen readers skip
 // them.
 interface Props {
-  name: 'arrow-down' | 'arrow-up-right' | 'chevron-down' | 'download';
+  name:
+    | 'arrow-down'
+    | 'arrow-up-right'
+    | 'chevron-down'
+    | 'download'
+    | 'arrow-right'
+    | 'briefcase'
+    | 'pin'
+    | 'globe'
+    | 'shield'
+    | 'flow'
+    | 'cloud'
+    | 'people';
 }
 
 const paths = {
@@ -11,6 +23,14 @@ const paths = {
   'arrow-up-right': 'M7 17 17 7M8 7h9v9',
   'chevron-down': 'm6 9 6 6 6-6',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+  'arrow-right': 'M5 12h14M13 6l6 6-6 6',
+  briefcase: 'M5 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
+  pin: 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM14.5 9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z',
+  globe: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
+  shield: 'M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6zM8.5 12l2.5 2.5 4.5-5',
+  flow: 'M4 7h10M4 12h16M4 17h7M16 4l3 3-3 3',
+  cloud: 'M7 18a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z',
+  people: 'M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM3 20a6 6 0 0 1 12 0M16 4.5a3 3 0 0 1 0 7M21 20a6 6 0 0 0-4-5.6',
 };
 
 const { name } = Astro.props;

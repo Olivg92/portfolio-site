@@ -165,9 +165,9 @@ code {
 
 /* A tool's brand mark (logos.ts), in a chip: deep enough for the pale page
    by day, light enough for the night, and the day's on paper, which is
-   white. Drawings that are always at night (the guided tour, the isometric
-   view) take the night's colour at build time instead, as a mark drawn
-   through <use> does not see the `night` class of the page. */
+   white. A drawing that is always at night (the guided tour) takes the
+   night's colour at build time instead, as a mark drawn through <use> does
+   not see the `night` class of the page. */
 .brand-mark {
   fill: var(--day);
 }

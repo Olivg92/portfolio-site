@@ -13,6 +13,9 @@ const t = (en: string, fr: string) => ({ en, fr: fr.replace(/ ([:;?!])/g, `${NBS
 export type Project = {
   name: string;
   status: 'finished' | 'building';
+  /** What the project is, in one plain sentence: the home page's flagship
+   *  tile, and the line above the summary on its card. */
+  pitch: Record<Lang, string>;
   summary: Record<Lang, string>;
   stack: ToolName[];
   /** What a tool does in this project, on its card, under what the tool is. */
@@ -27,9 +30,13 @@ export const projects: Project[] = [
   {
     name: 'platform-eks-gitops',
     status: 'finished',
+    pitch: t(
+      'A complete Kubernetes platform I built on my own, on a laptop then on AWS.',
+      "Une plateforme Kubernetes complète, que j'ai construite seul, sur un portable puis sur AWS.",
+    ),
     summary: {
-      en: 'A Kubernetes platform developed on a laptop with k3d, then validated on AWS EKS. Argo CD installs every component from git, no secret lives in the repository, the demo API has SLOs with burn-rate alerts, and one command tears the AWS side down.',
-      fr: "Une plateforme Kubernetes développée sur un portable avec k3d, puis validée sur AWS EKS. Argo CD installe chaque composant depuis git, aucun secret n'est dans le dépôt, l'API de démo a ses SLO et ses alertes de burn rate, et une seule commande détruit la partie AWS.",
+      en: 'Developed on k3d, validated on AWS EKS. Argo CD installs every component from git, no secret lives in the repository, the demo API has SLOs with burn-rate alerts, and one command tears the AWS side down.',
+      fr: "Développée sur k3d, validée sur AWS EKS. Argo CD installe chaque composant depuis git, aucun secret n'est dans le dépôt, l'API de démo a ses SLO et ses alertes de burn rate, et une seule commande détruit la partie AWS.",
     },
     stack: [
       'kubernetes',
@@ -101,9 +108,13 @@ export const projects: Project[] = [
   {
     name: 'portfolio-site',
     status: 'finished',
+    pitch: t(
+      'This site: two languages, fast and accessible, published automatically.',
+      'Ce site : deux langues, rapide et accessible, publié automatiquement.',
+    ),
     summary: {
-      en: 'This site. Static pages in two languages, readable without script, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
-      fr: "Ce site. Des pages statiques en deux langues, lisibles sans script, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
+      en: 'Static pages, readable without script, checked on every pull request (links, types, Lighthouse at 90 or more), then deployed to GitHub Pages with a short-lived OIDC token rather than a stored key.',
+      fr: "Des pages statiques, lisibles sans script, vérifiées à chaque pull request (liens, types, Lighthouse à 90 ou plus), puis déployées sur GitHub Pages avec un jeton OIDC éphémère plutôt qu'une clé stockée.",
     },
     stack: [
       'astro',

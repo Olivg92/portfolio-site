@@ -1,0 +1,61 @@
+---
+// A tile of frosted glass, the block the home page is made of. `as` picks the
+// element, so a tile keeps its meaning (an article, a section) and not only
+// its look; `n` is its place in its group, for an entrance that plays tile
+// after tile. Callers pass `n`, never `style`. A tile adds no reveal of its
+// own: a section's tiles get the `reveal` class from their caller, while the
+// first screen's never wait for the scroll.
+//
+// Overriding a tile from the parent: Astro scopes styles by attribute, so
+// `.tile` below weighs two classes, (0,2,0). A parent's rule on a tile's root
+// must name two classes or more (`.bento > .t-intro`, `.tile.card`,
+// `.tile.strength`); with one, the order of the bundled CSS decides.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'article' | 'section';
+  n?: number;
+}
+
+// `rest` carries the parent's scope attribute to the root, so its styles
+// reach the tile, as with Panel.
+const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['tile', className]} style={n === undefined ? undefined : `--n: ${n}`} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  /* backdrop-filter is written once, unprefixed, as the header's and the
+     Panel's are: the build folds a -webkit- copy beside it into a single
+     declaration, the last written, so a -webkit- one last would leave Chrome
+     without the blur. Safari 18 and later read it unprefixed. */
+  .tile {
+    position: relative;
+    min-width: 0;
+    padding: var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--surface) 85%, transparent);
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--surface) 66%, transparent);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(22px) saturate(1.5);
+  }
+
+  @media (max-width: 559px) {
+    .tile {
+      padding: 20px;
+    }
+  }
+
+  /* On paper, a frame around the block, kept whole on its page. */
+  @media print {
+    .tile {
+      background: none;
+      border-color: var(--line-soft);
+      box-shadow: none;
+      backdrop-filter: none;
+      break-inside: avoid;
+    }
+  }
+</style>
