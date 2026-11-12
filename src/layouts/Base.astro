@@ -19,9 +19,12 @@ interface Props {
   indexable?: boolean;
   /** The picture of a link preview, under public/og/, without the language. */
   preview?: 'home' | 'tour' | 'experience';
+  /** Day, the pale page, or night, the control room of the guided tour. */
+  theme?: 'day' | 'night';
 }
 
-const { lang, title, description, path = '', indexable = true, preview = 'home' } = Astro.props;
+const { lang, title, description, path = '', indexable = true, preview = 'home', theme = 'day' } = Astro.props;
+const night = theme === 'night';
 const absolute = (l: Lang) => new URL(getRelativeLocaleUrl(l, path), Astro.site).href;
 // What a link preview shows, on LinkedIn and elsewhere: the page's title and
 // description, and a picture drawn from the page (scripts/og-images.mjs).
@@ -31,14 +34,14 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} class:list={[{ night }]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#070c16" />
+    <meta name="color-scheme" content={night ? 'dark' : 'light'} />
+    <meta name="theme-color" content={night ? '#070c16' : '#eef1f8'} />
     <script is:inline>
       // Reveal on scroll (see global.css): only where motion is welcome and the
       // browser can watch what comes into view; each block is marked once.
@@ -118,12 +121,13 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
     }
     <link rel="icon" type="image/svg+xml" href={favicon} />
     <slot name="head" />
-    <Font cssVariable="--font-geist" preload />
-    <Font cssVariable="--font-geist-mono" preload />
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-manrope" preload />
+    <Font cssVariable="--font-geist-mono" preload={night} />
   </head>
   <body>
     <a class="skip" href="#main">{ui[lang].skip}</a>
-    <SiteHeader lang={lang} path={path} />
+    <SiteHeader lang={lang} path={path} sticky={!night} />
     <main id="main">
       <slot />
     </main>
@@ -137,11 +141,11 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
     position: absolute;
     top: var(--space-3);
     left: var(--gutter);
-    z-index: 10;
+    z-index: 30;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-pill);
     background: var(--cyan);
-    color: var(--night);
+    color: var(--bg);
     font-weight: 600;
     text-decoration: none;
     transform: translateY(-200%);
