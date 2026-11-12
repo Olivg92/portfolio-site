@@ -25,9 +25,13 @@ const NBSP = String.fromCharCode(0xa0);
 const units = (text: string) => text.replace(/(\d) (?=(?:%|Ko|KB|min)(?![a-z]))/g, `$1${NBSP}`);
 const t = (en: string, fr: string): Text => ({ en: units(en), fr: units(fr).replace(/ ([:;?!])/g, `${NBSP}$1`) });
 
+/** The figures, named so that the home page can pick its own by name: a
+ *  name it asks for and this file lacks fails the build. */
+export type MetricId = 'servers' | 'cluster' | 'java' | 'apprentices';
+
 type Experience = {
   lede: Text;
-  metrics: { value: Text; label: Text }[];
+  metrics: { id: MetricId; value: Text; label: Text }[];
   problems: Problem[];
   /** The rest of the work, in a line each; `ongoing` marks what is under way. */
   also: { ongoing: boolean; text: Text }[];
@@ -43,11 +47,13 @@ export const experience: Experience = {
     "Ingénieur DevOps et SRE chez un éditeur de logiciels, dans l'équipe infrastructure interne. Je fais tourner plus de 400 serveurs Linux on-prem, et je contribue depuis 2026 à la plateforme Kubernetes de l'entreprise : la création de ses clusters sur vSphere, en code, et le déploiement de leurs composants en GitOps.",
   ),
 
+  // The home page shows servers, cluster and apprentices as its figures; their
+  // spoken forms are in i18n.ts home.numbers: change both together.
   metrics: [
-    { value: t('400+', '400+'), label: t('on-prem Linux servers, configured by Ansible', 'serveurs Linux on-prem, configurés par Ansible') },
-    { value: t('~15 min', '~15 min'), label: t('to create a Kubernetes cluster', 'pour créer un cluster Kubernetes') },
-    { value: t('16', '16'), label: t('projects on one Ansible role for Java', 'projets sur un même rôle Ansible pour Java') },
-    { value: t('2', '2'), label: t('apprentices trained up to full autonomy', "alternants formés jusqu'à l'autonomie") },
+    { id: 'servers', value: t('400+', '400+'), label: t('on-prem Linux servers, configured by Ansible', 'serveurs Linux on-prem, configurés par Ansible') },
+    { id: 'cluster', value: t('~15 min', '~15 min'), label: t('to create a Kubernetes cluster', 'pour créer un cluster Kubernetes') },
+    { id: 'java', value: t('16', '16'), label: t('projects on one Ansible role for Java', 'projets sur un même rôle Ansible pour Java') },
+    { id: 'apprentices', value: t('2', '2'), label: t('apprentices trained up to full autonomy', "alternants formés jusqu'à l'autonomie") },
   ],
 
   problems: [
