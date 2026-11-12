@@ -1,10 +1,11 @@
 ---
-// A tile of frosted glass, the block the home page is made of. `as` picks the
-// element, so a tile keeps its meaning (an article, a section) and not only
-// its look; `n` is its place in its group, for an entrance that plays tile
-// after tile. Callers pass `n`, never `style`. A tile adds no reveal of its
-// own: a section's tiles get the `reveal` class from their caller, while the
-// first screen's never wait for the scroll.
+// A tile of frosted glass, the block the home and experience pages are made
+// of. `as` picks the element, so a tile keeps its meaning (a list item, an
+// article, a section) and not only its look; `n` is its place in its group,
+// for an entrance that plays tile after tile. Callers pass `n`, never
+// `style`. A tile adds no reveal of its own: a section's tiles get the
+// `reveal` class from their caller, while the first screen's never wait for
+// the scroll.
 //
 // Overriding a tile from the parent: Astro scopes styles by attribute, so
 // `.tile` below weighs two classes, (0,2,0). A parent's rule on a tile's root
@@ -13,7 +14,7 @@
 import type { HTMLAttributes } from 'astro/types';
 
 interface Props extends HTMLAttributes<'div'> {
-  as?: 'div' | 'article' | 'section';
+  as?: 'div' | 'article' | 'section' | 'li';
   n?: number;
 }
 
