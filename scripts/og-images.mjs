@@ -1,7 +1,7 @@
 // Draws the pictures that link previews show (LinkedIn, Slack, a message),
-// from the built site itself, 1200 by 630 in each language: the home page's
-// introduction beside its isometric view, a step of the guided tour, and the
-// experience page's introduction with its numbers.
+// from the built site itself, 1200 by 630 in each language: the first tiles
+// of the home page, a step of the guided tour, and the experience page's
+// introduction with its numbers.
 // Run against a served build, then commit what changed in public/og/:
 //   node scripts/og-images.mjs http://localhost:4321/
 // A preview is fetched once and cached by whoever shows it, so the pictures
@@ -17,8 +17,9 @@ const shots = [
   {
     name: 'home',
     path: '',
-    // The header goes; the introduction and the drawing fill the picture.
-    css: '.top, .skip { display: none !important; } .hero { min-height: 630px !important; padding-block: 0 !important; }',
+    // The header goes; the first tiles fill the picture. `header.top`, as
+    // the faces of the flagship's slabs are `.top` too.
+    css: 'header.top, .skip { display: none !important; } .hero { padding-block: 24px 0 !important; }',
     wait: 3500,
   },
   {

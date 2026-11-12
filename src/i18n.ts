@@ -135,7 +135,7 @@ export const ui: Record<Lang, Strings> = {
     cv: { download: 'Download my CV (PDF)', short: 'My CV (PDF)', cta: 'Download my CV' },
     jobTitle: 'DevOps and SRE engineer',
     previewAlt: {
-      home: 'Olivier Guandalini, DevOps and SRE engineer, beside platform-eks-gitops drawn in isometric view',
+      home: 'Olivier Guandalini, DevOps and SRE engineer in the Paris area: the first tiles of his home page, with his CV, 400+ Linux servers in production and his flagship project',
       tour: 'A step of the guided tour of platform-eks-gitops: the drawing of the platform beside what make local-up printed',
       experience: 'What Olivier Guandalini runs in production, in numbers: 400+ on-prem Linux servers, a Kubernetes cluster in about 15 minutes',
     },
@@ -264,7 +264,7 @@ export const ui: Record<Lang, Strings> = {
     cv: { download: 'Télécharger mon CV (PDF)', short: 'Mon CV (PDF)', cta: 'Télécharger mon CV' },
     jobTitle: 'Ingénieur DevOps et SRE',
     previewAlt: {
-      home: 'Olivier Guandalini, ingénieur DevOps et SRE, à côté de platform-eks-gitops en vue isométrique',
+      home: "Olivier Guandalini, ingénieur DevOps et SRE en région parisienne\u00a0: les premières tuiles de sa page d'accueil, avec son CV, 400+ serveurs Linux en production et son projet phare",
       tour: "Une étape de la visite guidée de platform-eks-gitops\u00a0: le schéma de la plateforme à côté de ce qu'a affiché make local-up",
       experience: "Ce qu'Olivier Guandalini fait tourner en production, en chiffres\u00a0: 400+ serveurs Linux on-prem, un cluster Kubernetes en 15 minutes environ",
     },
