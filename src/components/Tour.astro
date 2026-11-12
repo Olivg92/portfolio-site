@@ -388,12 +388,16 @@ const inline = (text: string) => text.split('`');
     display: inline;
   }
 
+  /* Where the reader is, in the caps of the site's labels rather than in the
+     terminal's mono: the drawing and the transcripts keep the mono, the
+     page's own words take Manrope. Its narrower caps also leave more of a
+     step's title before the ellipsis on a phone. */
   .where {
     margin-left: auto;
     min-width: 0;
-    color: var(--cyan);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.06em;
+    color: var(--accent);
+    font: 700 var(--label) / 1.4 var(--font-ui);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
