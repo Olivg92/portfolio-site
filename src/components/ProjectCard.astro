@@ -1,11 +1,12 @@
 ---
-// One project: where it stands, what it is, what it is built with, its
-// guided tour if it has one, and its code once there is some to read.
-// Anything passed inside, such as a terminal, shows below as proof.
+// One project, as a tile of the home page: where it stands, what it is in a
+// sentence, then in detail, what it is built with, its guided tour if it has
+// one, and its code once there is some to read. `n` is its place among the
+// projects.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
-import Panel from './Panel.astro';
+import Tile from './Tile.astro';
 import type { Project } from '../projects';
 import ToolChip from './ToolChip.astro';
 import { ui, type Lang } from '../i18n';
@@ -14,18 +15,20 @@ interface Props {
   project: Project;
   lang: Lang;
   class?: string;
+  n?: number;
 }
 
-const { project, lang, class: className } = Astro.props;
+const { project, lang, class: className, n } = Astro.props;
 const t = ui[lang];
 const tone = { finished: 'green', building: 'amber' } as const;
 const id = `project-${project.name}`;
 ---
 
-<Panel as="article" class:list={['card', className]} aria-labelledby={id}>
+<Tile as="article" class:list={['card', 'reveal', className]} n={n} aria-labelledby={id}>
   <div class="about">
     <Chip tone={tone[project.status]} dot live={project.status === 'building'}>{t.status[project.status]}</Chip>
     <h3 id={id}>{project.name}</h3>
+    <p class="pitch">{project.pitch[lang]}</p>
     <p class="summary">{project.summary[lang]}</p>
     <ul class="cluster cascade" aria-label={t.stack}>
       {
@@ -49,20 +52,20 @@ const id = `project-${project.name}`;
       )
     }
   </div>
-  <slot />
-</Panel>
+</Tile>
 
 <style>
-  .card {
+  /* Two classes, to weigh more than the tile's own padding (Tile.astro). */
+  .tile.card {
     display: grid;
-    gap: var(--space-7);
     align-content: start;
+    padding: clamp(var(--space-5), 3vw, var(--space-6));
   }
 
   .about {
     display: grid;
     justify-items: start;
-    gap: var(--space-5);
+    gap: var(--space-4);
     max-width: 46rem;
   }
 
@@ -71,21 +74,28 @@ const id = `project-${project.name}`;
     font-weight: 750;
   }
 
+  .pitch {
+    color: var(--ink);
+    font: 600 1.1rem / 1.4 var(--font-display);
+  }
+
   .summary {
     color: var(--ink-2);
+    font-size: var(--text-s);
   }
 
   .actions {
     gap: var(--space-3);
   }
 
-  /* As a project arrives: its status, its name and its summary, one after
-     the other. Its chips and its buttons come as they come into view
-     (global.css). */
+  /* As a project arrives: its status, its name, its pitch and its summary,
+     one after the other. Its chips and its buttons come as they come into
+     view (global.css). Each delay is a variable read by the one transition
+     rule: a delay of its own would lose to that rule's weight. */
   :global(.reveal-on) .about > :not(ul, .actions) {
     transition:
-      opacity 0.7s var(--ease-reveal),
-      translate 0.7s var(--ease-reveal);
+      opacity 0.7s var(--ease-reveal) var(--delay, 0s),
+      translate 0.7s var(--ease-reveal) var(--delay, 0s);
   }
 
   :global(.reveal-on) .card:not(:global(.is-in)) .about > :not(ul, .actions) {
@@ -94,10 +104,14 @@ const id = `project-${project.name}`;
   }
 
   .about > h3 {
-    transition-delay: 0.08s;
+    --delay: 0.08s;
+  }
+
+  .pitch {
+    --delay: 0.14s;
   }
 
   .summary {
-    transition-delay: 0.18s;
+    --delay: 0.2s;
   }
 </style>
