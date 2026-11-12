@@ -28,8 +28,9 @@ const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
 
 <style>
   /* backdrop-filter is written once, unprefixed, as the header's and the
-     Panel's are: with the -webkit- version beside it, the build kept only
-     that one, which Chrome ignores. Safari 18 and later read it unprefixed. */
+     Panel's are: the build folds a -webkit- copy beside it into a single
+     declaration, the last written, so a -webkit- one last would leave Chrome
+     without the blur. Safari 18 and later read it unprefixed. */
   .tile {
     position: relative;
     min-width: 0;
