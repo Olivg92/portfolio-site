@@ -9,7 +9,7 @@ The home page answers a recruiter in one screen of tiles (role, a plain sentence
 languages, the CV, figures, the flagship project and the tools), then shows strengths, career and
 the two projects. The guided tour of platform-eks-gitops walks through the project command by
 command. The experience page tells what I do at work as problems solved, then the tools, the path
-and the education.
+and the education, each block a tile, as on the home page.
 
 ## How it is built
 
@@ -43,11 +43,14 @@ and the education.
 - **An experience page that names no employer.** Its words live in
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
-  company figure, unannounced plan or security detail. On a phone, where the seven problems
+  company figure, unannounced plan or security detail. Each block is a tile of frosted glass, as
+  on the home page: the four figures beside the introduction, each problem numbered beside its
+  title, the rest of the work, the tools, the path and the education. The small labels are in
+  the text face; the mono face is kept for code. On a phone, where the seven problems
   took seven screens, each folds to its number, title and tools, and its story unfolds from a
   line at the foot of the card, growing and fading in, and folds back the same way: a native
   `<details>`, no script. A wide screen shows every story beside its title, as before, and so
-  does paper.
+  does paper. The page has no entrance of its own: its first screen is there at once.
 - **Motion that hides nothing.** Blocks rise into view as the page scrolls, and what they hold
   follows in order, as on a product page. A few lines of script in the layout mark each block as
   it comes into view, and CSS plays the animation; without script, or for anyone who asks for
@@ -140,7 +143,7 @@ Every pull request runs them, and a failure blocks the merge:
 | What search engines read | [`scripts/check-seo.mjs`](scripts/check-seo.mjs), reading the build: `robots.txt` names a sitemap of this build; the sitemap lists every indexable page, each with both languages, and nothing else; each such page has a title, a description, a canonical address pointing at itself and its `hreflang` links; the 404 asks not to be indexed and stays out; the structured data parses, the home pages describe Olivier with his LinkedIn and GitHub, and it has no `worksFor`, `affiliation`, `employee` or `memberOf` key, under any prefix |
 | The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
-| The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one |
+| The experience page: its solved problems folded on a phone, and the page at rest | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one; no entrance of its own: the title, its words, the CV and the four figures there and still from the first moment, the first figures above the fold of an iPhone, no tile fully transparent, nothing in 3D once still (Safari would paint it over the sticky header), no figure past its tile from 320 to 1000 px at 100 % and 125 % text; for a reader who asks for less motion nothing moves and everything is there, and so without script (in Chrome) |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
@@ -174,7 +177,7 @@ src/
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
 │   ├── Home.astro        # the home page: a grid of tiles, then strengths, career and projects
-│   ├── Tile.astro        # a tile of frosted glass, the block of the home page
+│   ├── Tile.astro        # a tile of frosted glass, the block of the home and experience pages
 │   ├── Slabs.astro       # the flagship project's three layers
 │   ├── ProjectCard.astro # one project, with its stack, its tour and its code
 │   ├── Experience.astro  # the experience page, shared by both languages
@@ -202,7 +205,7 @@ src/
 scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
-├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
+├── check-experience.mjs  # the experience page: folded and unfolded, and at rest, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
 ├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page
