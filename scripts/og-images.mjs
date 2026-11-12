@@ -33,8 +33,9 @@ const shots = [
   {
     name: 'experience',
     path: 'experience/',
-    // The header goes; the title, the introduction and the numbers fill it.
-    css: '.top, .skip { display: none !important; } .intro { padding-block: 56px 0 !important; }',
+    // The header goes; the introduction, centred, fills the picture: the
+    // title, the words, the CV and the four figures beside them.
+    css: 'header.top, .skip { display: none !important; } .intro { min-height: 630px; align-content: center; padding: 0 56px !important; }',
     wait: 1500,
   },
 ];
