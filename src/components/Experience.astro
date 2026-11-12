@@ -1,7 +1,9 @@
 ---
 // The Experience page, the same in both languages apart from its words: what
 // I do at work, told as problems solved, then the rest of the work, the tools
-// and where I use them, the path and the education. No script.
+// and where I use them, the path and the education. Each block is a tile of
+// frosted glass (Tile.astro), as on the home page. No script of its own, and
+// no entrance: its first screen is there at once.
 //
 // Printed, or saved as a PDF, it is the CV: three A4 pages at most
 // (scripts/check-experience.mjs, scripts/cv-pdf.mjs). Its words are the PDF's
@@ -12,7 +14,6 @@ import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
 import Icon from './Icon.astro';
-import Panel from './Panel.astro';
 import Tile from './Tile.astro';
 import ToolChip from './ToolChip.astro';
 import { experience } from '../experience';
@@ -129,26 +130,28 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
 
   <section class="also wrap" aria-labelledby="also-title">
     <h2 id="also-title" class="reveal">{e.alsoTitle}</h2>
-    <ul class="lines">
-      {
-        experience.also.map((item) => (
-          <li class="reveal">
-            {item.ongoing && (
-              <Chip tone="amber" live>
-                {e.ongoing}
-              </Chip>
-            )}
-            <span>{item.text[lang]}</span>
-          </li>
-        ))
-      }
-    </ul>
+    <Tile class="also-tile reveal" n={0}>
+      <ul class="lines">
+        {
+          experience.also.map((item) => (
+            <li>
+              {item.ongoing && (
+                <Chip tone="amber" live>
+                  {e.ongoing}
+                </Chip>
+              )}
+              <span>{item.text[lang]}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Tile>
   </section>
 
   <section class="tools wrap" aria-labelledby="tools-title">
     <h2 id="tools-title" class="reveal">{e.stackTitle}</h2>
     <div class="columns">
-      <Panel class="column" data-tone="green">
+      <Tile class="column reveal" n={0} data-tone="green">
         <h3>{e.atWork}</h3>
         <ul class="cluster cascade">
           {
@@ -159,8 +162,8 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
             ))
           }
         </ul>
-      </Panel>
-      <Panel class="column" data-tone="cyan">
+      </Tile>
+      <Tile class="column reveal" n={1} data-tone="cyan">
         <h3>{e.inProjects}</h3>
         <ul class="cluster cascade">
           {
@@ -171,54 +174,58 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
             ))
           }
         </ul>
-      </Panel>
+      </Tile>
     </div>
   </section>
 
   <div class="history wrap">
     <section aria-labelledby="path-title">
       <h2 id="path-title" class="reveal">{e.pathTitle}</h2>
-      <ol class="timeline">
-        {
-          experience.path.map((step) => (
-            <li class="reveal">
-              <p class="when">{step.when[lang]}</p>
-              <h3>{step.role[lang]}</h3>
-              <p>{step.where[lang]}</p>
-            </li>
-          ))
-        }
-      </ol>
+      <Tile class="history-tile reveal" n={0}>
+        <ol class="steps">
+          {
+            experience.path.map((step) => (
+              <li>
+                <p class="when">{step.when[lang]}</p>
+                <h3>{step.role[lang]}</h3>
+                <p class="where">{step.where[lang]}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </Tile>
     </section>
     <section aria-labelledby="education-title">
       <h2 id="education-title" class="reveal">{e.educationTitle}</h2>
-      <ol class="timeline">
-        {
-          experience.education.map((degree) => (
-            <li class="reveal">
-              <p class="when">{degree.when[lang]}</p>
-              <h3>{degree.degree[lang]}</h3>
-              <p>{degree.note[lang]}</p>
-            </li>
-          ))
-        }
-      </ol>
-      <p class="languages reveal">
-        <span class="eyebrow">{e.languages}</span>
-        <span>{experience.languages[lang]}</span>
-      </p>
+      <Tile class="history-tile reveal" n={1}>
+        <ol class="steps">
+          {
+            experience.education.map((degree) => (
+              <li>
+                <p class="when">{degree.when[lang]}</p>
+                <h3>{degree.degree[lang]}</h3>
+                <p class="where">{degree.note[lang]}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="languages">
+          <span class="cap">{e.languages}</span>
+          <span>{experience.languages[lang]}</span>
+        </p>
+      </Tile>
     </section>
   </div>
 
   <section class="next wrap" aria-labelledby="next-title">
-    <Panel class="next-panel">
+    <Tile class="next-tile reveal" n={0}>
       <h2 id="next-title">{e.nextTitle}</h2>
       <p class="lede">{e.nextText}</p>
       <div class="cluster actions">
         <Button href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.seeProjects}</Button>
         <Button href={getRelativeLocaleUrl(lang, 'platform-eks-gitops/')} variant="ghost">{t.takeTour}</Button>
       </div>
-    </Panel>
+    </Tile>
   </section>
 </Base>
 
@@ -445,8 +452,10 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
     border-left: 2px solid var(--line-soft);
   }
 
-  /* The labels of the story, as the tiles' small labels: grey caps. */
-  dt {
+  /* The labels of the story, as the tiles' small labels: grey caps. Scoped
+     here on purpose, never global: the guided tour has a `.cap` of its own. */
+  dt,
+  .cap {
     color: var(--muted);
     font: 700 var(--label) / 1.4 var(--font-ui);
     letter-spacing: 0.08em;
@@ -607,15 +616,208 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
     }
   }
 
+  .also h2,
+  .tools h2,
+  .history h2 {
+    margin-bottom: var(--space-5);
+  }
+
+  /* A word for a title ("Also", "Path", "Education") is set smaller than a
+     sentence, so that it does not stand like a poster over its tile. */
+  .also h2,
+  .history h2 {
+    font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
+  }
+
+  /* The rest of the work, a line each, in one tile; two columns on a wide
+     screen. */
+  .lines {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 900px) {
+    .lines {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-7);
+    }
+  }
+
+  /* Each line hangs from a small dot of the accent; what is under way says
+     so first, its chip on the same line as its words, and the chip's own
+     dot is then the line's only mark. */
+  .lines li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--ink-2);
+  }
+
+  .lines li::before {
+    content: '';
+    position: absolute;
+    top: 0.6em;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  .lines li:has(> :global(.chip))::before {
+    display: none;
+  }
+
+  .lines :global(.chip) {
+    margin-right: var(--space-2);
+  }
+
+  .columns {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 900px) {
+    .columns {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+
+  .tile.column {
+    --tone: var(--green);
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+  }
+
+  .tile.column[data-tone='cyan'] {
+    --tone: var(--cyan);
+  }
+
+  /* Where the tools are used, as a tile's small label, in the colour that
+     says it: green for production, cyan for the projects. */
+  .column h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--tone);
+    font: 700 var(--label) / 1.4 var(--font-ui);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .column h3::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 16%, transparent);
+  }
+
+  .history {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  /* Side by side on a wide screen, each tile as tall as the other. */
+  .history > section {
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  @media (min-width: 900px) {
+    .history {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+  }
+
+  /* The path and the education as the home page's career shows the path:
+     when, in the display face and lit, then the role or the degree, then
+     where or what. Stacked, as the tiles are half as wide as the home's;
+     when a tile has the whole width of a tablet, `when` takes a column of
+     its own, as on the home page. */
+  .steps {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'when'
+      'role'
+      'where';
+    row-gap: var(--space-1);
+  }
+
+  @media screen and (min-width: 560px) and (max-width: 899px) {
+    .steps li {
+      grid-template-columns: 8rem minmax(0, 1fr);
+      grid-template-areas:
+        'when role'
+        '. where';
+      column-gap: var(--space-5);
+    }
+  }
+
+  .when {
+    grid-area: when;
+    color: var(--accent);
+    font: 800 1rem / 1.4 var(--font-display);
+  }
+
+  .steps h3 {
+    grid-area: role;
+    font-size: var(--text-l);
+  }
+
+  .where {
+    grid-area: where;
+    color: var(--ink-2);
+  }
+
+  .languages {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-2);
+  }
+
+  .tile.next-tile {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+  }
+
+  .actions {
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
   /* On paper, or saved as a PDF: a CV of a few A4 pages. Every story shows,
      with nothing to press, each step's label running into its words; the
      path and the education sit side by side; the hint about tools, the
      button of the CV, which this paper is, and the links to the other pages
-     go. The timeline is drawn whole, whether its steps have come into view on
-     screen or not. */
+     go. A fine rule between blocks rather than a frame around each, and a
+     page may turn between two steps of a story, never inside one. */
   @media print {
     .more > summary,
-    .cv {
+    .cv,
+    .hint,
+    .actions {
       display: none;
     }
 
@@ -669,8 +871,9 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       margin-top: var(--space-8);
     }
 
-    .hint {
-      display: none;
+    .also h2,
+    .history h2 {
+      font-size: var(--text-h2);
     }
 
     .head {
@@ -683,17 +886,22 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       gap: var(--space-3);
     }
 
-    /* A fine rule between blocks rather than a frame around each, and a page
-       may turn between two steps of a story, never inside one. */
     .problems .tile.problem,
-    .tools .column,
-    .next .next-panel {
+    .also .tile.also-tile,
+    .tools .tile.column,
+    .history .tile.history-tile,
+    .next .tile.next-tile {
       padding: var(--space-4) 0 0;
       border: 0;
       border-top: 1px solid var(--line-soft);
       border-radius: 0;
       background: none;
       break-inside: auto;
+    }
+
+    .history .tile.history-tile {
+      padding-top: 0;
+      border-top: 0;
     }
 
     .rail,
@@ -732,9 +940,20 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       display: inline;
     }
 
+    .lines {
+      gap: var(--space-3);
+    }
+
     .lines li,
-    .timeline li {
+    .steps li {
       break-inside: avoid;
+    }
+
+    .lines li::before {
+      top: 0.45em;
+      width: 6px;
+      height: 6px;
+      box-shadow: none;
     }
 
     .history {
@@ -742,209 +961,22 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       gap: var(--space-6);
     }
 
-    .timeline::before {
-      scale: none !important;
+    .steps {
+      gap: var(--space-3);
     }
 
-    .timeline li::before {
-      background-color: var(--cyan) !important;
-      box-shadow: none !important;
+    .steps li {
+      row-gap: 0;
     }
 
-    .actions {
-      display: none;
+    .when {
+      font-size: var(--text-s);
     }
-  }
 
-  .also h2,
-  .tools h2,
-  .history h2 {
-    margin-bottom: var(--space-5);
-  }
-
-  .lines {
-    display: grid;
-    gap: var(--space-4);
-    max-width: 52rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* Each line hangs from a small lit square, the way a list shows on a
-     control panel. */
-  .lines li {
-    position: relative;
-    padding-left: var(--space-5);
-    color: var(--ink-2);
-  }
-
-  /* What is under way says so first, on the same line as its words. */
-  .lines :global(.chip) {
-    margin-right: var(--space-2);
-  }
-
-  .lines li::before {
-    content: '';
-    position: absolute;
-    top: 0.62em;
-    left: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 2px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
-  }
-
-  .columns {
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  .column {
-    --tone: var(--green);
-    display: grid;
-    align-content: start;
-    gap: var(--space-5);
-  }
-
-  .column[data-tone='cyan'] {
-    --tone: var(--cyan);
-  }
-
-  .column h3 {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    color: var(--tone);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .column h3::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: 0 0 10px currentColor;
-  }
-
-  @media (min-width: 900px) {
-    .columns {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    .languages {
+      margin-top: var(--space-4);
+      padding-top: 0;
+      border-top: 0;
     }
-  }
-
-  .history {
-    display: grid;
-    gap: var(--space-8);
-  }
-
-  @media (min-width: 900px) {
-    .history {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-7);
-    }
-  }
-
-  /* A line down the side, a lit point at each step. */
-  .timeline {
-    position: relative;
-    display: grid;
-    gap: var(--space-6);
-    margin: 0;
-    padding: 0 0 0 var(--space-5);
-    border-left: 1px solid var(--line-soft);
-    list-style: none;
-  }
-
-  .timeline li {
-    position: relative;
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .timeline li::before {
-    content: '';
-    position: absolute;
-    top: 0.2em;
-    left: calc(-1 * var(--space-5) - 4px);
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan);
-  }
-
-  /* Over the faint track, a lit line. */
-  .timeline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -1px;
-    width: 1px;
-    background: linear-gradient(var(--cyan), color-mix(in srgb, var(--cyan) 20%, transparent));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
-    transform-origin: top;
-  }
-
-  /* Once the first step is in, the lit line draws itself down, and each
-     point lights up as its step arrives. */
-  :global(.reveal-on) .timeline::before {
-    transition: scale 1.6s var(--ease-reveal) 0.2s;
-  }
-
-  :global(.reveal-on) .timeline:not(:has(> li:global(.is-in)))::before {
-    scale: 1 0;
-  }
-
-  :global(.reveal-on) .timeline li::before {
-    transition:
-      background-color 0.6s ease 0.4s,
-      box-shadow 0.6s ease 0.4s;
-  }
-
-  :global(.reveal-on) .timeline li:not(:global(.is-in))::before {
-    background-color: var(--line-soft);
-    box-shadow: none;
-  }
-
-  .when {
-    color: var(--cyan);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .timeline h3 {
-    font-size: var(--text-l);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.25;
-  }
-
-  .timeline p:not(.when) {
-    color: var(--ink-2);
-  }
-
-  .languages {
-    display: grid;
-    gap: var(--space-2);
-    margin-top: var(--space-6);
-    color: var(--ink-2);
-  }
-
-  .next-panel {
-    display: grid;
-    justify-items: start;
-    gap: var(--space-4);
-  }
-
-  .actions {
-    gap: var(--space-3);
-    margin-top: var(--space-2);
   }
 </style>
