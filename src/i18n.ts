@@ -280,7 +280,10 @@ export const ui: Record<Lang, Strings> = {
       },
       numbers: {
         servers: { cap: 'Production', spoken: 'Plus de 400', caption: 'serveurs Linux que je fais tourner' },
-        cluster: { cap: 'Automatisation', spoken: 'Environ 15 minutes', caption: 'pour créer un cluster Kubernetes, en code' },
+        // A soft hyphen, written \u00ad: in capitals, letter-spaced, the cap
+        // is wider than a figure tile under 370 px, and then breaks as
+        // AUTOMATI- SATION, in every browser, rather than run past the tile.
+        cluster: { cap: 'Automati\u00adsation', spoken: 'Environ 15 minutes', caption: 'pour créer un cluster Kubernetes, en code' },
         mentor: { cap: 'Transmission', spoken: '2', caption: "alternants formés jusqu'à l'autonomie" },
         clone: { cap: 'Démo', spoken: '4 minutes 33 secondes', caption: 'pour lancer ma plateforme de démo depuis zéro, tout au vert' },
       },
