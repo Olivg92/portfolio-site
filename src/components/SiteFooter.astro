@@ -21,6 +21,7 @@ const year = new Date().getFullYear();
   <div class="wrap">
     <div class="reach reveal">
       <h2 id="contact-title" class="eyebrow">{t.contact}</h2>
+      <p class="talk">{t.talk}</p>
       <p class="text">{t.contactText}</p>
       <ul class="cluster">
         <li><Button href={links.linkedin}>LinkedIn</Button></li>
@@ -46,27 +47,50 @@ const year = new Date().getFullYear();
 <style>
   .foot {
     margin-top: var(--space-9);
-    padding-block: var(--space-8) var(--space-6);
-    border-top: 1px solid var(--line-faint);
+    padding-block: 0 var(--space-6);
     scroll-margin-top: var(--space-5);
   }
 
+  /* The contact, as one large tile washed with the aurora's colours. */
   .reach {
     display: grid;
     gap: var(--space-4);
     justify-items: start;
+    padding: clamp(var(--space-6), 5vw, 56px);
+    border: 1px solid color-mix(in srgb, var(--surface) 85%, transparent);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--violet) 28%, var(--surface)),
+      color-mix(in srgb, var(--sky-blue) 24%, var(--surface)) 60%,
+      color-mix(in srgb, var(--sky-pink) 20%, var(--surface))
+    );
+    box-shadow: var(--shadow-panel);
+  }
+
+  :global(.night) .reach {
+    border-color: var(--line-soft);
   }
 
   .eyebrow {
     line-height: 1.6;
   }
 
+  .talk {
+    font: 800 clamp(2.75rem, 1.4rem + 5vw, 5.25rem) / 0.95 var(--font-display);
+    letter-spacing: -0.045em;
+  }
+
   .text {
-    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem);
-    font-weight: 650;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
+    max-width: 30em;
+    color: var(--ink-2);
+    font-size: var(--text-l);
+    line-height: 1.5;
     text-wrap: balance;
+  }
+
+  .reach .cluster {
+    margin-top: var(--space-3);
   }
 
   .pages {
@@ -112,9 +136,18 @@ const year = new Date().getFullYear();
 
     .reach {
       gap: var(--space-2);
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    .talk {
+      display: none;
     }
 
     .text {
+      color: var(--ink);
       font-size: var(--text-l);
     }
 
