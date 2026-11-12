@@ -168,9 +168,16 @@ const walk = async () => {
 };
 
 // Nothing on its way into place: no transition, nor animation that ends,
-// still running.
+// still running; nor a transition finished but not yet let go. WebKit's
+// build for tests may hold the frame that lets it go, and the tile it moved
+// then still reads a thousandth of a pixel off its place, a 2D move that the
+// check of tiles below would count (once in about twenty visits).
 const quiet = () =>
-  !document.getAnimations().some((animation) => animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity);
+  !document.getAnimations().some(
+    (animation) =>
+      (animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity) ||
+      (animation instanceof CSSTransition && animation.playState === 'finished'),
+  );
 
 // The page at rest. No entrance: the home page alone plays one. And no 3D:
 // Safari paints a tile in a 3D scene over the sticky header, whatever its
@@ -181,7 +188,14 @@ const quiet = () =>
 // reach yet (a story folded on a phone), and anything still moving. Says
 // which elements are bent, for the failure's message.
 const rest = () => {
-  const moving = (el) => el.getAnimations().some((animation) => animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity);
+  // Still moving, as in quiet(): a transition finished but not yet let go
+  // counts.
+  const moving = (el) =>
+    el.getAnimations().some(
+      (animation) =>
+        (animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity) ||
+        (animation instanceof CSSTransition && animation.playState === 'finished'),
+    );
   const angle = /^-?[\d.]+(deg|rad|grad|turn)$/;
   const flat = (style) =>
     style.perspective === 'none' &&
