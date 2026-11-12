@@ -469,10 +469,12 @@ const inline = (text: string) => text.split('`');
     color: var(--ink-2);
   }
 
-  /* A step's figure, shown with its words on a phone only, where the camera
-     leaves out the band at the top of the drawing that holds it. Set as the
-     home page's figures are: the value in Bricolage, lit, its caption in
-     Manrope. */
+  /* A step's figure, shown with its words wherever the drawing does not
+     show it: without script, where the drawing stays on the overview, and on
+     a phone, where the camera leaves out the band at the top of the drawing
+     that holds it. Only a wide screen with script hides it (`.js` below), as
+     the band shows it there. Set as the home page's figures are: the value
+     in Bricolage, lit, its caption in Manrope. */
   .metric {
     font: 600 var(--text-s) / 1.4 var(--font-ui);
   }
