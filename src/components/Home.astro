@@ -899,7 +899,9 @@ const clone = parts(demo);
 
   /* On paper, the first screen in two columns, without the calls to
      download what the paper already is; the gradient figure turns solid.
-     The CV itself is the experience page printed. */
+     The flagship's drawing does not print (Slabs.astro), so its words take
+     the tile's whole width rather than its first column. The CV itself is
+     the experience page printed. */
   @media print {
     .bento {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -910,6 +912,10 @@ const clone = parts(demo);
         'words words'
         'cluster mentor'
         'clone clone';
+    }
+
+    .bento > .t-visual {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .bento > .t-cv,
