@@ -605,10 +605,26 @@ const inline = (text: string) => text.split('`');
      outweigh the tile's own rule (Tile.astro). */
   .outro .closing {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: start;
     gap: var(--space-4);
     padding: clamp(var(--space-6), 5vw, 56px);
     border-color: var(--line-soft);
+  }
+
+  /* On a narrow phone (320 px, the reflow width of WCAG), the contact's
+     padding leaves less room than "Read the code on GitHub" takes on one
+     line. The column above stays inside the tile, and a label wider than it
+     wraps, centred, as the home page's calls do, rather than push its
+     button past the tile's edge and the page sideways; the line height is
+     for that second line. */
+  @media (max-width: 559px) {
+    .outro .closing :global(.btn) {
+      padding-block: var(--space-2);
+      line-height: 1.2;
+      white-space: normal;
+      text-align: center;
+    }
   }
 
   /* A phone: the drawing stays pinned at the top, framed on the step, and
