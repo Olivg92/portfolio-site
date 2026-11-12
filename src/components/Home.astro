@@ -505,9 +505,13 @@ const clone = parts(demo);
   }
 
   /* The figures, final in the HTML: the visible figure is hidden from screen
-     readers, which hear the words beside it instead. */
+     readers, which hear the words beside it instead. The column is held to
+     the tile's width: an `auto` one grows to the widest word that cannot
+     break, or to a figure that does not wrap, and on a 320 px phone carried
+     the cap and the caption past the tile's padding, and its edge. */
   .bento > .stat {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-content: start;
   }
 
