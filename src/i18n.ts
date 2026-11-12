@@ -18,12 +18,7 @@ type Strings = {
   projects: string;
   contact: string;
   pages: string;
-  kicker: string;
-  positioning: string;
   seeProjects: string;
-  sceneLabel: string;
-  stateBucket: string;
-  flows: { gitops: string; traffic: string; secrets: string };
   projectsTitle: string;
   projectsLede: string;
   status: { finished: string; building: string };
@@ -31,7 +26,6 @@ type Strings = {
   here: string;
   toolsHint: string;
   readCode: string;
-  measured: string;
   contactText: string;
   /** The large words of the contact section. */
   talk: string;
@@ -67,7 +61,6 @@ type Strings = {
   };
   experience: {
     nav: string;
-    mine: string;
     title: string;
     description: string;
     eyebrow: string;
@@ -125,14 +118,7 @@ export const ui: Record<Lang, Strings> = {
     projects: 'Projects',
     contact: 'Contact',
     pages: 'Site pages',
-    kicker: 'DevOps · SRE · Platform engineering',
-    positioning:
-      'DevOps and SRE engineer, I run critical infrastructure at scale: more than 400 Linux servers on-prem and Kubernetes clusters. On this site, the platforms I build on my own time, end to end: from Terraform to GitOps, SLOs and runbooks.',
     seeProjects: 'See the projects',
-    sceneLabel:
-      'platform-eks-gitops on AWS, in isometric view: in a VPC, two Spot nodes run the pods Argo CD installs from GitHub; a load balancer brings the traffic in from the internet; secrets come from AWS Secrets Manager; the cluster is managed by EKS, its Terraform state kept in S3.',
-    stateBucket: 'State bucket',
-    flows: { gitops: 'GitOps, from git', traffic: 'Traffic', secrets: 'Secrets' },
     projectsTitle: 'Two projects, built end to end on my own time',
     projectsLede: 'Each one finished before the next: anyone can run it in minutes, the decisions are written down, and every change is checked.',
     status: { finished: 'Finished', building: 'In progress' },
@@ -140,7 +126,6 @@ export const ui: Record<Lang, Strings> = {
     here: 'Here',
     toolsHint: 'Hover or tap a tool to see what it is, and what it does here.',
     readCode: 'Read the code on GitHub',
-    measured: 'Measured from a fresh clone: 4 minutes 33 seconds until this check is all green.',
     contactText: 'Write to me on LinkedIn. My code is on GitHub.',
     talk: 'Let’s talk.',
     source: 'Source of this site',
@@ -204,7 +189,6 @@ export const ui: Record<Lang, Strings> = {
     },
     experience: {
       nav: 'Experience',
-      mine: 'My experience',
       title: 'Experience · Olivier Guandalini',
       description:
         'Olivier Guandalini, DevOps and SRE engineer: 400+ on-prem Linux servers, Kubernetes clusters created as code, monitoring as code, an AI assistant taken to production. What I solved at work, case by case.',
@@ -263,14 +247,7 @@ export const ui: Record<Lang, Strings> = {
     projects: 'Projets',
     contact: 'Contact',
     pages: 'Pages du site',
-    kicker: 'DevOps · SRE · Platform engineering',
-    positioning:
-      "Ingénieur DevOps et SRE, je fais tourner une infrastructure critique à grande échelle\u00a0: plus de 400 serveurs Linux on-prem et des clusters Kubernetes. Sur ce site, les plateformes que je construis sur mon temps libre, de bout en bout\u00a0: de Terraform au GitOps, aux SLO et aux runbooks.",
     seeProjects: 'Voir les projets',
-    sceneLabel:
-      "platform-eks-gitops sur AWS, en vue isométrique\u00a0: dans un VPC, deux nœuds Spot font tourner les pods qu'Argo CD installe depuis GitHub\u00a0; un load balancer fait entrer le trafic d'internet\u00a0; les secrets viennent d'AWS Secrets Manager\u00a0; le cluster est géré par EKS, et son état Terraform est gardé dans S3.",
-    stateBucket: "Bucket d'état",
-    flows: { gitops: 'GitOps, depuis git', traffic: 'Trafic', secrets: 'Secrets' },
     projectsTitle: 'Deux projets, construits de bout en bout sur mon temps libre',
     projectsLede: "Chacun terminé avant le suivant\u00a0: n'importe qui peut le lancer en quelques minutes, les décisions sont écrites, et chaque changement est vérifié.",
     status: { finished: 'Terminé', building: 'En cours' },
@@ -278,7 +255,6 @@ export const ui: Record<Lang, Strings> = {
     here: 'Ici',
     toolsHint: "Survolez ou touchez un outil pour voir ce que c'est, et ce qu'il fait ici.",
     readCode: 'Lire le code sur GitHub',
-    measured: "Mesuré depuis un clone neuf\u00a0: 4 minutes 33 secondes jusqu'à ce contrôle tout au vert.",
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
     talk: 'Parlons-en.',
     source: 'Code source de ce site',
@@ -342,7 +318,6 @@ export const ui: Record<Lang, Strings> = {
     },
     experience: {
       nav: 'Expérience',
-      mine: 'Mon expérience',
       title: 'Expérience · Olivier Guandalini',
       description:
         "Olivier Guandalini, ingénieur DevOps et SRE\u00a0: 400+ serveurs Linux on-prem, des clusters Kubernetes créés en code, le monitoring en code, un assistant IA mis en production. Ce que j'ai résolu au travail, cas par cas.",

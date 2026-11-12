@@ -44,7 +44,7 @@ const readable = (color: string, on: 'day' | 'night') => {
 
 // A path in the colour of the hour: global.css fills `.brand-mark` with
 // --day, or --night inside an element marked `night`, wherever the logo is
-// drawn (a chip, the isometric view, the drawing of the guided tour).
+// drawn (a chip, its card, the drawing of the guided tour).
 const mark = (dayColor: string, nightColor: string) => `class="brand-mark" style="--day:${dayColor};--night:${nightColor}"`;
 
 const brand = (title: string, color: string, path: string): Mark => ({
@@ -108,11 +108,6 @@ export const logos = {
     viewBox: '0 0 64 64',
     body: '<g fill="none" fill-rule="evenodd"><path fill="#7aa116" d="M0 0h64v64H0z"/><path fill="#fff" d="m47.759 33.948.234-1.817c2.173 1.254 2.849 1.99 3.044 2.293-.324.061-1.205.085-3.278-.476M30.499 21c-10.374 0-17.117-2.512-17.5-4.304v-.185c.35-1.119 6.14-4.51 17.5-4.51 11.34 0 17.133 3.38 17.5 4.504v.111C47.725 18.446 40.962 21 30.5 21m15.319 12.362c-4.765-1.565-10.906-4.383-13.224-5.474a2.09 2.09 0 0 0-2.082-1.982A2.097 2.097 0 0 0 28.418 28c0 1.154.94 2.094 2.094 2.094.457 0 .877-.152 1.22-.4 2.4 1.128 8.887 4.104 13.826 5.686l-1.721 13.344C43.583 50.352 38.919 52 30.497 52c-8.425 0-13.092-1.648-13.342-3.249l-3.72-28.937C16.945 21.915 23.749 23 30.5 23c6.75 0 13.554-1.085 17.065-3.185zM50 16.5c0-3.069-8.34-6.5-19.5-6.5S11 13.431 11 16.5v.543l4.174 31.99C15.874 53.516 26.123 54 30.497 54c4.372 0 14.616-.484 15.32-4.993l1.684-13.06c1.277.332 2.31.51 3.115.508.99 0 1.657-.252 2.08-.758.35-.416.489-.94.389-1.476-.228-1.22-1.682-2.509-4.715-4.177l-.1-.055L50 17.044z"/></g>',
   },
-  iam: {
-    title: 'AWS IAM',
-    viewBox: '0 0 64 64',
-    body: '<g fill="none" fill-rule="evenodd"><path fill="#dd344c" d="M0 0h64v64H0z"/><path fill="#fff" d="M12 47h40V18H12zm42-30v31a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1V17a1 1 0 0 1 1-1h42a1 1 0 0 1 1 1M35 39h12v-2H35zm10-4h4v-2h-4zm-10 0h6v-2h-6zm-12.5 2.5a.5.5 0 1 0 1.002-.002.5.5 0 0 0-1.002.002m3 0a2.5 2.5 0 0 1-1.5 2.288V42h-2v-2.212a2.5 2.5 0 0 1-1.5-2.288c0-1.378 1.121-2.5 2.5-2.5s2.5 1.122 2.5 2.5M16 42.995 29.995 43l.001-2H27v-2h2.997l.001-2H27v-2h2.999L30 33.005 16.005 33zm2-11.994 10.001.003.001-5.004c0-1.024-.802-1.727-1.28-2.055-.875-.6-2.548-.945-3.72-.945H23c-2.127 0-4.997 1.232-4.998 3zm-3.707 13.7a1 1 0 0 1-.293-.707L14.005 32a1 1 0 0 1 1-1H16l.002-5c.001-3.089 3.874-5 6.998-5h.002c1.565 0 3.651.473 4.852 1.295 1.385.951 2.149 2.267 2.148 3.705l-.001 5.005.999.001a1 1 0 0 1 1 1L31.995 44a1 1 0 0 1-1 1L15 44.994a1 1 0 0 1-.707-.293M47 30h2v-2h-2zm-12 0h9v-2h-9z"/></g>',
-  },
   nlb: {
     title: 'Network Load Balancer',
     viewBox: '0 0 48 48',
@@ -158,8 +153,8 @@ export const logos = {
 export type LogoName = keyof typeof logos;
 
 /** A logo's drawing in the colours of one hour, fixed: for drawings that are
- *  always at night (the guided tour, the isometric view), where a mark drawn
- *  through <use> would not see the page's `night` class. */
+ *  always at night (the guided tour), where a mark drawn through <use>
+ *  would not see the page's `night` class. */
 export const logoBody = (name: LogoName, hour: 'day' | 'night') =>
   logos[name].body.replace(
     /class="brand-mark" style="--day:(#[0-9a-f]{6});--night:(#[0-9a-f]{6})"/g,
