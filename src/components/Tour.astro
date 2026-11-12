@@ -406,20 +406,23 @@ const inline = (text: string) => text.split('`');
     gap: var(--space-2);
   }
 
+  /* Previous and Next, drawn as the ghost Button (Button.astro) of the
+     intro and the outro: frosted glass edged with a line, lit by the accent
+     under the pointer. Smaller, as they share the HUD's row. */
   .step-btn {
     min-height: 36px;
     padding: 0 var(--space-4);
-    border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+    border: 1px solid var(--line-soft);
     border-radius: var(--radius-pill);
-    background: transparent;
+    background: var(--glass);
     color: var(--ink);
-    font: 500 0.84375rem / 1 var(--font-ui);
+    font: 700 0.875rem / 1 var(--font-ui);
     cursor: pointer;
+    transition: border-color 0.2s ease;
   }
 
   .step-btn:hover:not(:disabled) {
-    border-color: var(--cyan);
-    background: color-mix(in srgb, var(--cyan) 8%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
   .step-btn:disabled {
@@ -691,7 +694,8 @@ const inline = (text: string) => text.split('`');
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(.js) .progress span {
+    :global(.js) .progress span,
+    .step-btn {
       transition: none;
     }
   }
