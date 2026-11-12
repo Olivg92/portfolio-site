@@ -28,6 +28,8 @@ type Strings = {
   readCode: string;
   measured: string;
   contactText: string;
+  /** The large words of the contact section. */
+  talk: string;
   source: string;
   /** Read by screen readers after a link to another site. */
   newTab: string;
@@ -115,6 +117,7 @@ export const ui: Record<Lang, Strings> = {
     readCode: 'Read the code on GitHub',
     measured: 'Measured from a fresh clone: 4 minutes 33 seconds until this check is all green.',
     contactText: 'Write to me on LinkedIn. My code is on GitHub.',
+    talk: 'Let’s talk.',
     source: 'Source of this site',
     newTab: '(opens in a new tab)',
     builtWith: 'Built with Astro, hosted on GitHub Pages',
@@ -204,6 +207,7 @@ export const ui: Record<Lang, Strings> = {
     readCode: 'Lire le code sur GitHub',
     measured: "Mesuré depuis un clone neuf\u00a0: 4 minutes 33 secondes jusqu'à ce contrôle tout au vert.",
     contactText: 'Écrivez-moi sur LinkedIn. Mon code est sur GitHub.',
+    talk: 'Parlons-en.',
     source: 'Code source de ce site',
     newTab: "(s'ouvre dans un nouvel onglet)",
     builtWith: 'Construit avec Astro, hébergé sur GitHub Pages',

@@ -7,7 +7,7 @@
 //
 // Everything is computed here, at build time: the page receives plain SVG,
 // animated by CSS, and no script.
-import { logos, type LogoName } from '../logos';
+import { logoBody, logos, type LogoName } from '../logos';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -107,7 +107,7 @@ const face = (b: Block) => {
     const p3 = P(cx - side / 2, cy + side / 2, top);
     const m = [(p1[0] - p0[0]) / 100, (p1[1] - p0[1]) / 100, (p3[0] - p0[0]) / 100, (p3[1] - p0[1]) / 100, p0[0], p0[1]];
     const inner = b.logo
-      ? `<svg width="100" height="100" viewBox="${logos[b.logo].viewBox}">${logos[b.logo].body}</svg>`
+      ? `<svg width="100" height="100" viewBox="${logos[b.logo].viewBox}">${logoBody(b.logo, 'night')}</svg>`
       : `<text class="letters" x="50" y="62" text-anchor="middle">${esc(b.letters ?? '')}</text>`;
     out += `<g transform="matrix(${m.map((v) => v.toFixed(3)).join(' ')})">${inner}</g>`;
   }
@@ -215,7 +215,7 @@ const viewBox = [minX, minY, maxX - minX, maxY - minY].map((v) => v.toFixed(0)).
 const [floorX, floorY] = P(300, 280, 0);
 ---
 
-<figure class:list={['iso', className]}>
+<figure class:list={['iso', 'night', className]}>
   <svg viewBox={viewBox} role="img" aria-label={t.sceneLabel}>
     <defs>
       <filter id="iso-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -240,10 +240,17 @@ const [floorX, floorY] = P(300, 280, 0);
 </figure>
 
 <style>
+  /* Drawn at night, on a pane of the night: the page around may be by day. */
   .iso {
     margin: 0;
     display: grid;
     gap: var(--space-3);
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(80% 70% at 20% 0%, var(--sky-blue), transparent 70%),
+      radial-gradient(70% 60% at 100% 100%, var(--sky-violet), transparent 70%),
+      var(--bg);
   }
 
   svg {
@@ -260,72 +267,72 @@ const [floorX, floorY] = P(300, 280, 0);
   }
 
   .iso :global(.k-region .t) {
-    fill: color-mix(in srgb, var(--line) 9%, var(--night));
+    fill: color-mix(in srgb, var(--line) 9%, var(--bg));
     stroke: color-mix(in srgb, var(--cyan) 30%, transparent);
   }
   .iso :global(.k-region .l) {
-    fill: color-mix(in srgb, var(--line) 6%, var(--night));
+    fill: color-mix(in srgb, var(--line) 6%, var(--bg));
   }
   .iso :global(.k-region .r) {
-    fill: color-mix(in srgb, var(--line) 3%, var(--night));
+    fill: color-mix(in srgb, var(--line) 3%, var(--bg));
   }
 
   .iso :global(.k-vpc .t) {
-    fill: color-mix(in srgb, var(--green) 9%, var(--night));
+    fill: color-mix(in srgb, var(--green) 9%, var(--bg));
     stroke: color-mix(in srgb, var(--green) 45%, transparent);
   }
   .iso :global(.k-vpc .l) {
-    fill: color-mix(in srgb, var(--green) 7%, var(--night));
+    fill: color-mix(in srgb, var(--green) 7%, var(--bg));
   }
   .iso :global(.k-vpc .r) {
-    fill: color-mix(in srgb, var(--green) 4%, var(--night));
+    fill: color-mix(in srgb, var(--green) 4%, var(--bg));
   }
 
   .iso :global(.k-node .t) {
-    fill: color-mix(in srgb, var(--line) 15%, var(--night));
+    fill: color-mix(in srgb, var(--line) 15%, var(--bg));
     stroke: color-mix(in srgb, var(--line) 35%, transparent);
   }
   .iso :global(.k-node .l),
   .iso :global(.k-svc .l),
   .iso :global(.k-ext .l) {
-    fill: color-mix(in srgb, var(--line) 10%, var(--night));
+    fill: color-mix(in srgb, var(--line) 10%, var(--bg));
   }
   .iso :global(.k-node .r),
   .iso :global(.k-svc .r),
   .iso :global(.k-ext .r) {
-    fill: color-mix(in srgb, var(--line) 6%, var(--night));
+    fill: color-mix(in srgb, var(--line) 6%, var(--bg));
   }
 
   .iso :global(.k-pod .t) {
-    fill: color-mix(in srgb, var(--line) 24%, var(--night));
+    fill: color-mix(in srgb, var(--line) 24%, var(--bg));
     stroke: color-mix(in srgb, var(--line) 55%, transparent);
   }
   .iso :global(.k-pod .l) {
-    fill: color-mix(in srgb, var(--line) 15%, var(--night));
+    fill: color-mix(in srgb, var(--line) 15%, var(--bg));
   }
   .iso :global(.k-pod .r) {
-    fill: color-mix(in srgb, var(--line) 10%, var(--night));
+    fill: color-mix(in srgb, var(--line) 10%, var(--bg));
   }
 
   .iso :global(.k-svc .t) {
-    fill: color-mix(in srgb, var(--line) 17%, var(--night));
+    fill: color-mix(in srgb, var(--line) 17%, var(--bg));
     stroke: color-mix(in srgb, var(--line) 40%, transparent);
   }
 
   .iso :global(.k-ext .t) {
-    fill: color-mix(in srgb, var(--line) 20%, var(--night));
+    fill: color-mix(in srgb, var(--line) 20%, var(--bg));
     stroke: color-mix(in srgb, var(--cyan) 60%, transparent);
   }
 
   .iso :global(.k-nlb .t) {
-    fill: color-mix(in srgb, var(--amber) 14%, var(--night));
+    fill: color-mix(in srgb, var(--amber) 14%, var(--bg));
     stroke: color-mix(in srgb, var(--amber) 70%, transparent);
   }
   .iso :global(.k-nlb .l) {
-    fill: color-mix(in srgb, var(--amber) 10%, var(--night));
+    fill: color-mix(in srgb, var(--amber) 10%, var(--bg));
   }
   .iso :global(.k-nlb .r) {
-    fill: color-mix(in srgb, var(--amber) 6%, var(--night));
+    fill: color-mix(in srgb, var(--amber) 6%, var(--bg));
   }
 
   stop {
@@ -357,7 +364,7 @@ const [floorX, floorY] = P(300, 280, 0);
   .iso :global(.lbl),
   .iso :global(.tag) {
     paint-order: stroke;
-    stroke: var(--night);
+    stroke: var(--bg);
     stroke-width: 5px;
     stroke-linejoin: round;
   }

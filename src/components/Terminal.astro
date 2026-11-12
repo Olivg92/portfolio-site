@@ -43,7 +43,7 @@ const runs = (line: string): Run[] => {
 const lines = transcript.replace(/^\n+|\s+$/g, '').split('\n').map(runs);
 ---
 
-<figure class="term">
+<figure class="term night">
   <figcaption class="bar">{title}</figcaption>
   {/* Focusable, so a keyboard can scroll the lines that are wider than the screen.
       Kept on one line: inside <pre>, any space in the markup would show. */}
@@ -56,7 +56,7 @@ const lines = transcript.replace(/^\n+|\s+$/g, '').split('\n').map(runs);
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--cyan) 25%, transparent);
     border-radius: var(--radius-m);
-    background: color-mix(in srgb, var(--term-bg) 85%, transparent);
+    background: var(--term-bg);
     box-shadow:
       0 0 40px color-mix(in srgb, var(--cyan) 8%, transparent) inset,
       0 24px 60px -36px var(--term-bg);
