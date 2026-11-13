@@ -17,9 +17,9 @@
 //   a tile, never on the plate or the page under it; nothing moves in the
 //   layout (each tile, the name and each figure keep their place and size),
 //   the glow under the plate never brightens again once it fades, and nothing
-//   reaches past the sides of the screen, nor later as the blocks below rise
-//   into view (the tablet on its side, 1024 px, is where the turned plate
-//   comes closest to them);
+//   reaches past the sides of the screen, nor later as the tiles below stand
+//   up (the tablet on its side, 1024 px, is where the turned plate comes
+//   closest to them);
 // - it plays once per visit: a reload, or the home page in the other
 //   language, in the same tab, shows the page at rest at once; and never
 //   for a visitor who comes to a section of the page (/#projects) or from
@@ -29,6 +29,15 @@
 //   animations frozen on their first frame, as WebKit once left them, it
 //   still ends at rest; with fonts that never come it never plays, and a
 //   page opened behind another tab waits, paused, and plays once shown.
+// And the effects, on a wide screen with a mouse, in both languages: a plain
+// tile leans under the pointer, its edge lit, and stands flat once it
+// leaves; nothing that can be pressed (a chip, a call) moves by 3 px or more
+// under the pointer; a tile whose card is open stands straight; the two
+// link tiles rise and their shadow eases; the flagship's slabs come apart;
+// a tile never leans while its top is under the header, and stands flat at
+// once when the page scrolls; a tile below the first screen waits flat,
+// stands up as it comes into view, does not lean until it is up, and ends
+// flat; the sky leans away from the pointer and never moves on its own.
 // And on the other pages, no entrance: by day the sky of lights, still and
 // inside the screen, and by night (the guided tour) none at all.
 // Run against a served build, with Playwright and its two browsers:
@@ -36,7 +45,7 @@
 //   npx playwright install --with-deps chromium webkit
 //   node scripts/check-motion.mjs http://localhost:4321/
 // MOTION_ONLY=<pattern> runs only the visits whose label matches, such as
-// MOTION_ONLY=phone.
+// MOTION_ONLY=effects.
 import { chromium, devices, webkit } from 'playwright';
 
 const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/?$/, '/');
@@ -95,6 +104,22 @@ const watch = ([width, names]) => {
     held: 0,
     slipped: null,
   });
+  // An instant scroll, its event awaited by `landed` below: WebKit's build
+  // for tests delivers it at its next frame, which may come late.
+  window.jump = (top) => {
+    const from = scrollY;
+    window.scrolled = false;
+    addEventListener('scroll', () => (window.scrolled = true), { once: true });
+    scrollTo({ top, behavior: 'instant' });
+    if (scrollY === from) window.scrolled = true;
+  };
+  // `target` below, for the page's own use.
+  window.target = (el) => {
+    for (const animation of el.getAnimations({ subtree: true })) {
+      if (animation instanceof CSSTransition || animation.effect.getComputedTiming().iterations !== Infinity) animation.finish();
+    }
+    return getComputedStyle(el).transform;
+  };
   const now = () => Math.round(performance.now());
   const boxes = () =>
     [...document.querySelectorAll('.bento > .tile, #name, .bento .value[data-count], .bento .big')].map((el) => [
@@ -197,6 +222,17 @@ const atRest = (state) => !/\bentering/.test(state.classes) && state.threeD.leng
 const final = (state) => state.figures.length === 3 && state.figures.every(([text, count, width]) => text === count && width === '');
 const entered = (log) => log.some(([, classes]) => /\bentering\b/.test(classes));
 
+// Where an element is going rather than where it is: its transitions and
+// its finite animations sent to their end. WebKit's build for tests
+// sometimes holds them for seconds, so a look taken on the way would say
+// nothing of the rule.
+const target = (el) => {
+  for (const animation of el.getAnimations({ subtree: true })) {
+    if (animation instanceof CSSTransition || animation.effect.getComputedTiming().iterations !== Infinity) animation.finish();
+  }
+  return getComputedStyle(el).transform;
+};
+
 const settle = (page) =>
   page.waitForFunction(() => !/\bentering/.test(document.documentElement.className), null, { timeout: 8000, polling: 100 }).catch(() => {});
 
@@ -225,7 +261,7 @@ const visit = async (browser, options, run) => {
 };
 
 // Scrolls down the whole page, a little under a screen at a time, giving the
-// blocks below the first screen time to rise into view. Every scroll of these
+// tiles below the first screen time to stand up. Every scroll of these
 // checks is instant: the page scrolls smoothly otherwise, and a box read
 // during the glide would be anywhere.
 const scrollDown = async (page) => {
@@ -277,10 +313,10 @@ const entrance = (url, other, plate, check) => async (page) => {
   const faint = await page.evaluate(() => Number(getComputedStyle(document.querySelector('.ground')).opacity));
   check(faint <= 0.01 && !brightens, `the glow under the plate rests faint and never brightens again once it fades (${faint}; ${motion.glow.map((o) => o.toFixed(2)).join(' ')})`);
   check(state.seen === '1', 'the visit is marked as having seen it');
-  // The blocks below the first screen rise into view as the page scrolls.
+  // The tiles below the first screen stand up as the page scrolls.
   await scrollDown(page);
   const over = await page.evaluate(() => window.motion.over);
-  check(over <= 0, `nothing reaches past the sides of the screen, while it plays nor as the blocks below rise into view (${over} px)`);
+  check(over <= 0, `nothing reaches past the sides of the screen, while it plays nor as the tiles below stand up (${over} px)`);
 
   // Once per visit: a reload, then the other language, in the same tab.
   for (const [again, label] of [
@@ -294,6 +330,289 @@ const entrance = (url, other, plate, check) => async (page) => {
     const after = await page.evaluate(rest, names);
     check(!entered(log) && atRest(after) && final(after), `${label} in the same tab shows the page at rest at once`);
   }
+};
+
+// Scrolls a tile into view whole, its top below the header, so that it may
+// lean: as high as the page allows, but no higher than 130 px from the top.
+const place = (el) =>
+  jump(Math.min(scrollY + el.getBoundingClientRect().top - Math.max(130, innerHeight - el.offsetHeight - 40), document.documentElement.scrollHeight - innerHeight));
+
+// Waits until the page has had the scroll event of its last `jump`, the
+// pointer stirring at the edge and, now and then, a picture taken of a
+// corner, which make WebKit's build for tests draw.
+const landed = async (page) => {
+  for (let i = 0; i < 40 && !(await page.evaluate(() => window.scrolled)); i++) {
+    await page.mouse.move(4, 420 + (i % 2));
+    if (i % 5 === 4) await page.screenshot({ clip: { x: 0, y: 0, width: 8, height: 8 }, timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(25);
+  }
+};
+
+const effects = (url, check) => async (page) => {
+  await page.goto(url);
+  await settle(page);
+  // Chrome opens a card when the pointer rests on its chip (interestfor),
+  // and the tile then stands straight: these checks want the tilt, not the
+  // card.
+  await page.evaluate(() => document.querySelectorAll('[interestfor]').forEach((chip) => chip.removeAttribute('interestfor')));
+  // The pointer at the left edge of the screen, on no tile. Stirred a few
+  // times: WebKit's build for tests draws a frame, and so delivers a scroll
+  // or tells what came into view, mostly when something happens.
+  const away = async () => {
+    for (let i = 0; i < 4; i++) {
+      await page.mouse.move(4, 420 + (i % 2), { steps: 2 });
+      await page.waitForTimeout(50);
+    }
+  };
+
+  // First, before anything scrolls: below the first screen, a tile waits
+  // flat, stands up as it comes into view, does not lean until it is up,
+  // and ends flat.
+  const strength = page.locator('.tile.strength').nth(1);
+  const waiting = await strength.evaluate((el) => [el.classList.contains('is-in'), getComputedStyle(el).transform]);
+  await strength.evaluate((el) => jump(scrollY + el.getBoundingClientRect().top - 160));
+  await landed(page);
+  // WebKit's build for tests draws a frame, and so tells what came into
+  // view, mostly when something happens: the pointer stirs at the edge.
+  for (let i = 0; i < 80 && !(await strength.evaluate((el) => el.classList.contains('is-in'))); i++) await page.mouse.move(2, 300 + (i % 2));
+  const rising = await strength.evaluate((el) => el.getAnimations().some((a) => a.animationName === 'stand-up'));
+  const s = await strength.boundingBox();
+  await page.mouse.move(s.x + s.width / 2, s.y + s.height / 2, { steps: 2 });
+  // While it stands up, it does not lean.
+  const early = await strength.evaluate((el) => [el.getAnimations().some((a) => a.animationName === 'stand-up' && a.playState === 'running'), el.classList.contains('tilting')]);
+  for (let i = 0; i < 3; i++) {
+    await strength.evaluate((el) => {
+      for (const animation of el.getAnimations()) if (animation.animationName === 'stand-up') animation.finish();
+    });
+    await page.mouse.move(s.x + s.width / 2 + 6 + i, s.y + s.height / 2 + 6, { steps: 2 });
+  }
+  const up = await strength.evaluate((el) => el.classList.contains('tilting'));
+  await away();
+  const standing = await strength.evaluate((el) => [el.classList.contains('is-in'), target(el)]);
+  check(
+    !waiting[0] && !waiting[1].startsWith('matrix3d') && rising && !(early[0] && early[1]) && up && standing[0] && standing[1] === 'none',
+    `a tile below the first screen waits flat, stands up as it comes into view, leans only once up, and ends flat (${JSON.stringify([waiting, rising, early, up, standing])})`,
+  );
+
+  // From here on, every block of the page has arrived: one still on its
+  // way below the screen is lower by its reveal, which the page's height
+  // counts, and its arrival would move the page under the pointer (WebKit's
+  // build for tests may hold it for seconds, then clamp the scroll).
+  for (let i = 0; i < 3; i++) {
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll('.reveal, .reveal-part, .cascade')) el.classList.add('is-in');
+      for (const animation of document.getAnimations()) if (animation.effect.getComputedTiming().iterations !== Infinity) animation.finish();
+    });
+    await page.screenshot({ clip: { x: 0, y: 0, width: 8, height: 8 }, timeout: 5000 }).catch(() => {});
+  }
+
+  // A plain tile leans under the pointer, its edge lit, and stands flat
+  // once it leaves; it keeps its shadow.
+  await page.evaluate(() => jump(0));
+  await landed(page);
+  await away();
+  const servers = page.locator('.bento > .t-servers');
+  const box = await servers.boundingBox();
+  await page.mouse.move(box.x + box.width * 0.85, box.y + box.height * 0.2, { steps: 4 });
+  await page.waitForTimeout(400);
+  const leaning = await servers.evaluate((el) => [target(el), Number(getComputedStyle(el, '::after').opacity), el.classList.contains('tilting')]);
+  check(leaning[0].startsWith('matrix3d') && leaning[1] > 0.9 && leaning[2], `a plain tile leans under the pointer, its edge lit (${leaning[0].slice(0, 24)}…, light ${leaning[1]})`);
+  await away();
+  check((await servers.evaluate(target)) === 'none', 'and stands flat once the pointer leaves');
+
+  // Nothing that can be pressed moves by 3 px or more under the pointer: in
+  // the intro, its call farther from the tile's centre, and in a tile of
+  // chips, the chip farthest from it, where the tilt moves it most; the
+  // pointer on it, the tile leaning.
+  const pressables = [
+    ["the intro's farther call", '.bento > .t-intro', '.btn'],
+    ['the farthest chip of the stack', '.bento > .t-words', '[popovertarget]'],
+    ['the farthest chip of the first project', '#projects .tile.card', '[popovertarget]'],
+  ];
+  for (const [label, tileSelector, inside] of pressables) {
+    const tile = page.locator(tileSelector).first();
+    // Its arrival over first: a tile waiting below the screen is lower by
+    // its reveal, which the page's height counts, and WebKit's build for
+    // tests may start a transition only at a later frame. So it is marked,
+    // its motion sent to its end, again, and only then placed, its top
+    // below the header so that it may lean.
+    await tile.evaluate((el) => {
+      el.classList.add('is-in');
+      for (const part of el.querySelectorAll('.reveal-part, .cascade')) part.classList.add('is-in');
+    });
+    for (let i = 0; i < 3; i++) {
+      await away();
+      await tile.evaluate((el) => {
+        for (const animation of el.getAnimations({ subtree: true })) if (animation.effect.getComputedTiming().iterations !== Infinity) animation.finish();
+      });
+    }
+    await tile.evaluate(place);
+    await landed(page);
+    await away();
+    const index = await tile.evaluate((el, inside) => {
+      const centre = el.getBoundingClientRect();
+      const [cx, cy] = [centre.left + centre.width / 2, centre.top + centre.height / 2];
+      const all = [...el.querySelectorAll(inside)];
+      const distance = (node) => {
+        const b = node.getBoundingClientRect();
+        return Math.hypot(b.left + b.width / 2 - cx, b.top + b.height / 2 - cy);
+      };
+      return all.reduce((best, node, i) => (distance(node) > distance(all[best]) ? i : best), 0);
+    }, inside);
+    const element = tile.locator(inside).nth(index);
+    await away();
+    const aim = await element.boundingBox();
+    await page.mouse.move(aim.x + aim.width / 2, aim.y + aim.height / 2, { steps: 4 });
+    await page.waitForTimeout(150);
+    // How far the tile's lean carries each corner of it: the transform the
+    // browser applies, sent to its end, worked on the corner's place in the
+    // flat tile (offsets, which no transform, translate or scale changes),
+    // about the tile's centre, perspective included. Read so, the reveal's
+    // own motion, which WebKit's build for tests may hold for seconds,
+    // cannot count.
+    const [moved, leant] = await tile.evaluate(
+      (el, [index, inside]) => {
+        const transform = target(el);
+        const item = el.querySelectorAll(inside)[index];
+        let [x, y] = [0, 0];
+        let node = item;
+        for (; node && node !== el; node = node.offsetParent) [x, y] = [x + node.offsetLeft, y + node.offsetTop];
+        if (node !== el || transform === 'none') return [0, transform];
+        const [w, h] = [el.offsetWidth, el.offsetHeight];
+        const matrix = new DOMMatrix(transform);
+        let worst = 0;
+        for (const [cx, cy] of [
+          [x, y],
+          [x + item.offsetWidth, y],
+          [x, y + item.offsetHeight],
+          [x + item.offsetWidth, y + item.offsetHeight],
+        ]) {
+          const [px, py] = [cx + el.clientLeft - w / 2, cy + el.clientTop - h / 2];
+          const p = matrix.transformPoint(new DOMPoint(px, py, 0, 1));
+          worst = Math.max(worst, Math.abs(p.x / p.w - px), Math.abs(p.y / p.w - py));
+        }
+        return [worst, transform];
+      },
+      [index, inside],
+    );
+    check(leant.startsWith('matrix3d') && moved > 0.2 && moved < 3, `${label} moves by less than 3 px under the pointer, its tile leaning (${moved.toFixed(2)} px)`);
+  }
+
+  // A tile whose card is open stands straight.
+  const chip = page.locator('.bento > .t-words [popovertarget]').first();
+  await page.evaluate(() => jump(0));
+  await landed(page);
+  const chipBox = await chip.boundingBox();
+  await page.mouse.move(chipBox.x + chipBox.width / 2, chipBox.y + chipBox.height / 2, { steps: 4 });
+  await page.waitForTimeout(150);
+  await page.mouse.down();
+  await page.mouse.up();
+  const id = await chip.getAttribute('popovertarget');
+  await page.waitForFunction((id) => document.getElementById(id).matches(':popover-open'), id, { timeout: 3000, polling: 100 }).catch(() => {});
+  const open = await page.evaluate((id) => document.getElementById(id).matches(':popover-open'), id);
+  check(open && (await page.locator('.bento > .t-words').evaluate(target)) === 'none', 'a tile whose card is open stands straight');
+  await page.keyboard.press('Escape');
+  await away();
+
+  // The two link tiles rise and lean fully, their shadow easing into the
+  // lifted one: the two shadows list the same kinds of shadow, inset then
+  // outset, in the same order, or the browser could only jump from one to
+  // the other. Then the flagship's slabs come apart.
+  const kinds = (shadows) => shadows.split(/,(?![^(]*\))/).map((shadow) => shadow.includes('inset')).join();
+  for (const [label, selector] of [
+    ['the flagship', '.bento > .t-visual'],
+    ['the CV', '.bento > .t-cv'],
+  ]) {
+    const tile = page.locator(selector);
+    await tile.evaluate((el) => jump(scrollY + el.getBoundingClientRect().top - 200));
+    await landed(page);
+    await away();
+    const resting = await tile.evaluate((el) => getComputedStyle(el).boxShadow);
+    const b = await tile.boundingBox();
+    await page.mouse.move(b.x + b.width * 0.3, b.y + b.height / 2, { steps: 4 });
+    await page.waitForTimeout(150);
+    // Where the transform carries the tile's centre: up by its rise.
+    const [rise, lifted] = await tile.evaluate((el) => {
+      const transform = target(el);
+      const shadow = getComputedStyle(el).boxShadow;
+      if (transform === 'none') return [0, shadow];
+      const centre = new DOMMatrix(transform).transformPoint(new DOMPoint(0, 0, 0, 1));
+      return [centre.y / centre.w, shadow];
+    });
+    check(
+      rise < -2 && lifted !== resting && kinds(lifted) === kinds(resting),
+      `${label}'s tile rises under the pointer, its shadow easing into a deeper one (rise ${rise.toFixed(2)} px; ${kinds(resting)} → ${kinds(lifted)})`,
+    );
+    if (label === 'the flagship') {
+      await page.waitForTimeout(700);
+      const apart = await page.locator('.slabs .s3').evaluate(target);
+      await away();
+      await page.waitForTimeout(900);
+      const together = await page.locator('.slabs .s3').evaluate(target);
+      check(apart !== 'none' && together === 'none', 'the slabs come apart under the pointer, and close up after');
+    }
+    await away();
+  }
+
+  // A tile never leans while its top is under the header, and stands flat at
+  // once, with no ease, when the page scrolls under a still pointer: Safari
+  // would paint a tile in 3D over the header.
+  const card = page.locator('#projects .tile.card').first();
+  await card.evaluate(place);
+  await landed(page);
+  await away();
+  const c = await card.boundingBox();
+  await page.mouse.move(c.x + c.width * 0.6, c.y + c.height * 0.6, { steps: 4 });
+  await page.waitForTimeout(150);
+  const leanBefore = await card.evaluate((el) => [el.classList.contains('tilting'), target(el).startsWith('matrix3d')]);
+  const scrollFrom = await page.evaluate(() => scrollY);
+  await page.mouse.wheel(0, 240);
+  // A picture taken makes WebKit's build for tests draw, and so deliver the
+  // scroll; the pointer itself does not move.
+  for (let i = 0; i < 20 && (await page.evaluate((from) => scrollY === from, scrollFrom)); i++) await page.waitForTimeout(50);
+  await page.screenshot({ clip: { x: 0, y: 0, width: 8, height: 8 }, timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(100);
+  const scrolled = await page.evaluate(rest, names);
+  const stillTilting = await page.evaluate(() => document.querySelectorAll('.tile.tilting').length);
+  check(
+    leanBefore[0] && leanBefore[1] && scrolled.threeD.length === 0 && stillTilting === 0,
+    `a tile leaning under a still pointer stands flat at once when the page scrolls (${JSON.stringify(leanBefore)}, ${stillTilting} leaning${scrolled.threeD.length ? `, 3D: ${scrolled.threeD.join(', ')}` : ''})`,
+  );
+  const under = await card.evaluate((el) => {
+    jump(scrollY + el.getBoundingClientRect().top - document.querySelector('header.top').getBoundingClientRect().bottom + 60);
+    const b = el.getBoundingClientRect();
+    return [b.left + b.width * 0.6, b.top + b.height * 0.7];
+  });
+  await landed(page);
+  await page.mouse.move(under[0], under[1], { steps: 4 });
+  await page.waitForTimeout(200);
+  const hidden = await card.evaluate((el) => [target(el), el.classList.contains('tilting'), el.matches(':hover')]);
+  check(hidden[2] && hidden[0] === 'none' && !hidden[1], 'a tile whose top is under the header does not lean');
+  await away();
+
+  // The sky never moves on its own, stays inside the screen, and leans away
+  // from the pointer.
+  await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+  await page.mouse.move(1200, 700, { steps: 4 });
+  await page.waitForTimeout(150);
+  const sky = await page.evaluate(() => ({
+    lights: document.querySelectorAll('.aurora i').length,
+    moving: [...document.querySelectorAll('.aurora, .aurora *')].reduce((n, el) => n + el.getAnimations().filter((a) => !(a instanceof CSSTransition)).length, 0),
+    clip: getComputedStyle(document.querySelector('.aurora')).overflow,
+    lean: (() => {
+      const sky = document.querySelector('.aurora-in');
+      for (const a of sky.getAnimations()) a.finish();
+      return getComputedStyle(sky).translate;
+    })(),
+  }));
+  check(sky.lights === 4 && sky.moving === 0 && sky.clip === 'hidden', `the sky never moves on its own and is clipped at the edge of the screen (${sky.moving} animation(s))`);
+  check(sky.lean !== 'none' && sky.lean.startsWith('-'), `the sky leans away from the pointer (${sky.lean})`);
+
+  await away();
+  await page.waitForTimeout(1300);
+  const state = await page.evaluate(rest, names);
+  const over = await page.evaluate(() => window.motion.over);
+  check(state.threeD.length === 0 && over <= 0, `after all that, no 3D anywhere and nothing past the sides${state.threeD.length ? ` (${state.threeD.join(', ')})` : ''}`);
 };
 
 for (const { name, engine, phone } of engines) {
@@ -318,6 +637,16 @@ for (const { name, engine, phone } of engines) {
             const state = await page.evaluate(rest, names);
             const log = await page.evaluate(() => window.motion.log);
             check(!entered(log) && atRest(state) && final(state) && state.seen === null, 'with less motion, no entrance, and the visit not marked');
+            if (device !== 'wide screen') return;
+            const b = await page.locator('.bento > .t-servers').boundingBox();
+            await page.mouse.move(b.x + b.width * 0.85, b.y + b.height * 0.2, { steps: 4 });
+            await page.waitForTimeout(300);
+            const still = await page.evaluate(() => [
+              document.querySelector('.bento > .t-servers').getAnimations().length,
+              getComputedStyle(document.querySelector('.bento > .t-servers')).transform,
+              getComputedStyle(document.querySelector('.aurora-in')).translate,
+            ]);
+            check(still[1] === 'none' && still[2] === 'none', `with less motion, no tile leans and the sky stays put (${still.slice(1).join(', ')})`);
           },
         ]);
       }
@@ -426,6 +755,7 @@ for (const { name, engine, phone } of engines) {
           check(!entered(await direct.evaluate(() => window.motion.log)), 'the home page opened at #projects shows at rest');
         },
       ]);
+      tasks.push([`${name}, ${lang}, wide screen, effects:`, wide, (check) => effects(url, check)]);
     }
     // By day the sky of lights, by night (the guided tour) none, and no
     // entrance anywhere but the home page.
