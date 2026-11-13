@@ -247,6 +247,10 @@ const visit = async (browser, options, run) => {
   let crashed = false;
   let timer;
   page.on('crash', () => (crashed = true));
+  // Visits that open a second or third page (arriving from elsewhere) must
+  // count a crash there too, or a WebKit crash reads as a failure and stops
+  // the whole check instead of visiting again.
+  context.on('page', (other) => other.on('crash', () => (crashed = true)));
   const stuck = new Promise((resolve) => (timer = setTimeout(() => resolve('stuck'), 150000)));
   try {
     await context.addInitScript(watch, [options.viewport.width, names]);
