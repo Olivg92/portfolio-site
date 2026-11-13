@@ -1120,6 +1120,17 @@ const clone = parts(demo);
       animation: bloom 1.45s var(--ease-reveal) backwards;
     }
 
+    /* Turned, the plate reaches up to about 40 px past the right side of
+       a screen 1000 to about 1270 px wide while it stands up, which would
+       let the page scroll sideways, or flash a horizontal scrollbar, for
+       half a second. main spans the screen, so clipping it there hides
+       nothing that was in view. clip rather than hidden: it makes no
+       scroll container, so the sticky header and the plate's 3D are
+       untouched. */
+    :global(html.entering main) {
+      overflow-x: clip;
+    }
+
     :global(html.entering-wait) :is(.bento, .bento > .tile, .ground, #name, .rise),
     :global(html.entering-wait .aurora-in) {
       animation-play-state: paused;
@@ -1127,10 +1138,10 @@ const clone = parts(demo);
   }
 
   /* Below 1000 px the grid is two columns, two to three screens tall:
-     rather than turn, which would carry it past the sides of the screen,
-     it lies back like a sheet from its top edge and rises, its tiles still
-     landing one by one. Under 560 px the cluster's figure sits beside the
-     servers', and lands with it. */
+     turned, it would sweep far past the sides of the screen and out of
+     view, so it lies back like a sheet from its top edge and rises, its
+     tiles still landing one by one. Under 560 px the cluster's figure
+     sits beside the servers', and lands with it. */
   @media screen and (max-width: 999px) and (prefers-reduced-motion: no-preference) {
     :global(html.entering) .bento {
       transform-origin: 50% 0;

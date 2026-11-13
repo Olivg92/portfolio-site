@@ -177,7 +177,7 @@ jobs:
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           node scripts/check-experience.mjs http://localhost:4321/
 
-      # The entrance of the home page, in the same two browsers, on five
+      # The entrance of the home page, in the same two browsers, on six
       # screen sizes: it plays once per visit, for a visitor who lands on the
       # page, never with less motion; it moves nothing in the layout, leaves
       # no link fully transparent and nothing past the sides of the screen,

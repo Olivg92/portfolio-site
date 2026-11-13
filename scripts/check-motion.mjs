@@ -1,6 +1,7 @@
 // Watches the motion of the home page as a visitor gets it, in Chrome and in
-// WebKit, the engine of Safari, on a wide screen, a tablet, a phone upright
-// and on its side, and a 320 px phone, in both languages. The entrance:
+// WebKit, the engine of Safari, on a wide screen, a tablet upright and on
+// its side, a phone upright and on its side, and a 320 px phone, in both
+// languages. The entrance:
 // - on a first visit, the page holds the entrance from its first frame,
 //   starts it within 1.5 s, and is at rest again within 3 s of the start
 //   (2.4 s at most on its own timers); below 1000 px the plate lies back
@@ -14,7 +15,8 @@
 //   turns visible from 0; nothing moves in the layout (each tile, the name
 //   and each figure keep their place and size), the glow under the plate
 //   never brightens again once it fades, and nothing reaches past the sides
-//   of the screen, nor later as the blocks below rise into view;
+//   of the screen, nor later as the blocks below rise into view (the tablet
+//   on its side, 1024 px, is where the turned plate comes closest to them);
 // - it plays once per visit: a reload, or the home page in the other
 //   language, in the same tab, shows the page at rest at once; and never
 //   for a visitor who comes to a section of the page (/#projects) or from
@@ -55,10 +57,12 @@ const engines = [
   { name: 'WebKit', engine: webkit, phone: devices['iPhone 15'] },
 ];
 const wide = { viewport: { width: 1280, height: 800 } };
-// Where the plate turns (1000 px and wider) and where it lies back.
+// Where the plate turns (1000 px and wider) and where it lies back. On the
+// tablet on its side, 1024 px wide, the turned plate has the least room.
 const sizes = (phone) => [
   ['wide screen', wide],
   ['tablet', devices['iPad Mini']],
+  ['tablet on its side', devices['iPad Mini landscape']],
   ['phone', phone],
   ['phone on its side', touch(844, 390)],
   ['320 px phone', touch(320, 568)],
