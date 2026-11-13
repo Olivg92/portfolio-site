@@ -226,9 +226,11 @@ const clone = parts(demo);
       // fonts of the name and of the text are in. Only the first family of
       // each is waited for: the fallback beside it is a local font, missing
       // on a phone without Arial, and its error would end the wait at once.
-      // A font that does not come leaves the start to the 1.5 s, and the
-      // page at rest: the entrance never plays in a fallback font, whose
-      // figures would be held at the wrong widths.
+      // A font still on its way at 1.5 s leaves the page at rest: the
+      // entrance never plays in a fallback font about to be swapped out,
+      // whose figures would be held at the wrong widths. One that fails
+      // (blocked, missing) ends the wait at once, like a missing local
+      // font: the entrance then plays in the fallback, which stays.
       addEventListener(
         'home-hero',
         () => {
