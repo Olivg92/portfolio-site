@@ -96,6 +96,66 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
       }
     </script>
     {
+      /* By day only: the tiles' lights and lean, and the sky's lean on the
+         home page (the tour, at night, has no tile and no aurora). */
+      !night && (
+        <script is:inline>
+          // With a mouse, the pointer's place (Tile.astro and Home.astro use
+          // it): a light follows it on a tile, along the edge and under it,
+          // the tile leans a little towards it, and on the home page the sky
+          // leans the other way. Positions only: the styles decide what
+          // moves, and for anyone who asks for less motion nothing does but
+          // the light. A tile that leans is in 3D, and Safari paints a 3D
+          // box over the sticky header: so a tile leans (`tilting`) only
+          // while its top is below the header, never while the home page's
+          // entrance plays or while it stands up as it comes into view, and
+          // it stands flat at once, with no ease, as soon as the page
+          // scrolls. Pointer events come once a frame at most already.
+          if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            const root = document.documentElement;
+            let current = null;
+            const flat = (tile) => {
+              if (!tile.classList.contains('tilting')) return;
+              tile.style.transition = 'none';
+              tile.classList.remove('tilting');
+            };
+            addEventListener(
+              'pointermove',
+              (event) => {
+                if (event.pointerType !== 'mouse') return;
+                const sky = document.querySelector('.aurora-in');
+                if (sky) {
+                  sky.style.setProperty('--px', (event.clientX / innerWidth - 0.5).toFixed(3));
+                  sky.style.setProperty('--py', (event.clientY / innerHeight - 0.5).toFixed(3));
+                }
+                const tile = event.target instanceof Element ? event.target.closest('.tile') : null;
+                if (current && current !== tile) current.classList.remove('tilting');
+                current = tile;
+                if (!tile) return;
+                const box = tile.getBoundingClientRect();
+                const x = (event.clientX - box.left) / box.width;
+                const y = (event.clientY - box.top) / box.height;
+                tile.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+                tile.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+                const below = (document.querySelector('header.top')?.getBoundingClientRect().bottom ?? 0) <= box.top;
+                const busy =
+                  root.classList.contains('entering') ||
+                  tile.matches('.reveal-on .reveal:not(.is-in)') ||
+                  tile.getAnimations().some((animation) => animation.animationName === 'stand-up' && animation.playState !== 'finished');
+                if (!below || busy) return flat(tile);
+                tile.style.setProperty('--tx', `${((0.5 - y) * 6).toFixed(2)}deg`);
+                tile.style.setProperty('--ty', `${((x - 0.5) * 7).toFixed(2)}deg`);
+                tile.style.removeProperty('transition');
+                tile.classList.add('tilting');
+              },
+              { passive: true },
+            );
+            addEventListener('scroll', () => current && flat(current), { passive: true });
+          }
+        </script>
+      )
+    }
+    {
       indexable ? (
         <>
           <link rel="canonical" href={absolute(lang)} />

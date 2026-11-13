@@ -3,7 +3,7 @@
 // above: AWS at the bottom, Kubernetes on it, Argo CD on top. A picture only,
 // beside words that name the project, so screen readers skip it. Each slab is
 // its own group (`.s1` to `.s3`, from the bottom), and the drawing lets them
-// spread past its box, so that a later entrance can move them apart.
+// spread past its box, as they move apart when the pointer is on their tile.
 ---
 
 <svg class="slabs" viewBox="0 0 320 220" width="320" height="220" aria-hidden="true" focusable="false">
@@ -94,6 +94,15 @@
     height: auto;
     justify-self: center;
     overflow: visible;
+  }
+
+  /* The slabs can come apart (Home.astro moves them when the pointer or
+     the keyboard is on their tile), as the layers of the platform do in the
+     guided tour, with a slight bounce. */
+  @media (prefers-reduced-motion: no-preference) {
+    .slab {
+      transition: transform 0.7s cubic-bezier(0.3, 1.4, 0.5, 1);
+    }
   }
 
   @media print {

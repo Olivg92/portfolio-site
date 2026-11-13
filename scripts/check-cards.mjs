@@ -90,12 +90,12 @@ const clear = (chip, cardId) => {
 
 // A reader presses a chip once it has arrived: the home page's entrance
 // over, its block marked in view, if it was waiting for that, and done
-// rising or landing. A chip still on its way moves under the pointer, which
-// then presses the gap beside it. Checked frame by frame: awaiting the
-// animations' own promises sometimes crashes WebKit. The entrance is waited
-// for on a timer, as it ends on one: WebKit's build for tests draws few
-// frames while it plays. Endless animations (a live chip's ping) never end,
-// and are not waited for.
+// rising, landing or standing up. A chip still on its way moves under the
+// pointer, which then presses the gap beside it. Checked frame by frame:
+// awaiting the animations' own promises sometimes crashes WebKit. The
+// entrance is waited for on a timer, as it ends on one: WebKit's build for
+// tests draws few frames while it plays. Endless animations (a live chip's
+// ping) never end, and are not waited for.
 const arrived = async (chip) => {
   const frame = () => new Promise(requestAnimationFrame);
   const tick = () => new Promise((resolve) => setTimeout(resolve, 50));

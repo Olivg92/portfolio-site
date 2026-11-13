@@ -67,18 +67,27 @@ and the education, each block a tile, as on the home page.
   left frozen with the figures at 0: whatever happens, the page comes to rest, flat, each figure
   at the value the HTML holds, and 1.5 s after it is shown without a start it simply shows at
   rest. A visitor who comes to a section of the page, or from another of its pages, finds it at
-  rest. Lower down, blocks rise into view as the page scrolls, and what they hold follows in
-  order, as on a product page. A few lines of script in the layout mark each block as it comes
-  into view, and CSS plays the animation; without script, or for anyone who asks for less
-  motion, everything is simply there. At rest nothing is in 3D: Safari paints a box in 3D over
-  the sticky header, so the plate is 3D only while the entrance plays. A block on its way is
-  nearly transparent, never fully: Safari on iPhone drops the click of a tap during which a link
-  or a button turns visible from opacity 0, so a tap on a chip while the next blocks arrive
-  would only close the open card. On a touch screen the lights behind the page fade before the
-  top and bottom edges, where Safari floats its bars and tints them with the page's colour; the
+  rest. Lower down, blocks rise into view as the page scrolls, a tile standing up from its
+  bottom edge as it comes, and what they hold follows in order, as on a product page. A few
+  lines of script in the layout mark each block as it comes into view, and CSS plays the
+  animation. With a mouse, a light follows the pointer along the edge of a tile and under it,
+  and the tile leans a little towards it: about a degree where it holds something to press, so
+  that a chip or a call stays under the pointer, and not at all while one of its cards is open;
+  the flagship and the CV, each a link as a whole, also rise a little, and the flagship's three
+  slabs come apart, as in the guided tour. The tiles of the experience page catch the light,
+  lean and stand up the same way. On the home page the aurora behind leans away from the
+  pointer; it never moves on its own. Without script, or for anyone who asks for less motion,
+  everything is simply there and still, but for the light under the pointer. At rest nothing is
+  in 3D: Safari paints a box in 3D over the sticky header, so the plate is 3D only while the
+  entrance plays, and a tile only while it stands up or leans, which it does only while its top
+  is below the header, standing flat at once as the page scrolls. A block on its way is nearly
+  transparent, never fully: Safari on iPhone drops the click of a tap during which a link or a
+  button turns visible from opacity 0, so a tap on a chip while the next blocks arrive would
+  only close the open card. On a touch screen the lights behind the page fade before the top
+  and bottom edges, where Safari floats its bars and tints them with the page's colour; the
   sticky header draws its glass on a bar inside it, not on itself, for the same reason. From
   page to page, the page fades into the next while the header stays put (cross-document view
-  transitions, CSS only), and on a screen with a mouse a panel lifts under the pointer.
+  transitions, CSS only).
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
@@ -163,7 +172,7 @@ Every pull request runs them, and a failure blocks the merge:
 | The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most, with bookmarks, none of which reads its title twice |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The experience page: its solved problems folded on a phone, and the page at rest | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one; no entrance of its own: the title, its words, the CV and the four figures there and still from the first moment, with all they hold, the first figures above the fold of an iPhone, no tile fully transparent, nothing in 3D once still (Safari would paint it over the sticky header), no figure past its tile from 320 to 1000 px at 100 % and 125 % text; for a reader who asks for less motion nothing moves and everything is there, and so without script (in Chrome) |
-| The entrance of the home page | [`scripts/check-motion.mjs`](scripts/check-motion.mjs) with Playwright, in Chrome and in WebKit, on a wide screen, a tablet upright and on its side, a phone upright and on its side, and a 320 px phone, in both languages: on a first visit the entrance holds every animation of it on its first frame while it waits, starts within 1.5 s, the plate lying back below 1000 px, and is over within 3 s; it leaves the page at rest, with no entrance class and no 3D anywhere, every figure at the value of the HTML after counting up; while it plays, no link or button is at opacity 0, a press on one lands in a tile, never on the plate or the page under it, nothing moves in the layout, the glow under the plate never brightens again, and nothing reaches past the sides of the screen, then or as the page scrolls on, even on the tablet on its side, where the turned plate has the least room; a reload, the other language, a link to a section or from another page shows the page at rest at once; never with less motion; with its animations frozen and animation frames stubbed out, or fonts that never come, it still ends at rest, never having played; a page opened behind another tab waits, paused, and plays once shown |
+| The entrance and the effects of the home page | [`scripts/check-motion.mjs`](scripts/check-motion.mjs) with Playwright, in Chrome and in WebKit, on a wide screen, a tablet upright and on its side, a phone upright and on its side, and a 320 px phone, in both languages: on a first visit the entrance holds every animation of it on its first frame while it waits, starts within 1.5 s, the plate lying back below 1000 px, and is over within 3 s; it leaves the page at rest, with no entrance class and no 3D anywhere, every figure at the value of the HTML after counting up; while it plays, no link or button is at opacity 0, a press on one lands in a tile, never on the plate or the page under it, nothing moves in the layout, the glow under the plate never brightens again, and nothing reaches past the sides of the screen, then or as the page scrolls on, even on the tablet on its side, where the turned plate has the least room; a reload, the other language, a link to a section or from another page shows the page at rest at once; never with less motion; with its animations frozen and animation frames stubbed out, or fonts that never come, it still ends at rest, never having played; a page opened behind another tab waits, paused, and plays once shown; with a mouse, a plain tile leans under the pointer and stands flat once it leaves, nothing that can be pressed moves by 3 px, a tile whose card is open stands straight, the two link tiles rise with a shadow that eases, the slabs come apart, a tile never leans with its top under the header and stands flat at once as the page scrolls, a tile below the first screen stands up and leans only once up; the sky leans away from the pointer, never moves on its own, and is not drawn at night |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
@@ -227,7 +236,7 @@ scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
 ├── check-experience.mjs  # the experience page: folded and unfolded, and at rest, in Chrome and WebKit
-├── check-motion.mjs      # the home page's entrance, in Chrome and WebKit
+├── check-motion.mjs      # the home page's entrance and effects, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
 ├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page

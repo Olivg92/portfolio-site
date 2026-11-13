@@ -79,9 +79,12 @@
   --radius-xl: 28px;
   --radius-pill: 999px;
 
-  /* Depth: a raised button, a tile standing on the page. */
+  /* Depth: a raised button, a tile standing on the page, and a tile lifted
+     under the pointer (the same two shadows, so that one eases into the
+     other). */
   --glow-cyan: 0 12px 30px -14px #0b102066;
   --shadow-panel: 0 1px 0 0 #ffffff inset, 0 24px 60px -36px #0b102055;
+  --shadow-lift: 0 1px 0 0 #ffffff inset, 0 34px 70px -36px #0b102077;
 }
 
 /* The control room at night, for the guided tour and any element marked
@@ -162,5 +165,6 @@
     --gutter: 0px;
     --glow-cyan: none;
     --shadow-panel: none;
+    --shadow-lift: none;
   }
 }
