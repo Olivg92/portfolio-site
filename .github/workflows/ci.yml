@@ -168,10 +168,13 @@ jobs:
           sh -c "npm install --no-save playwright@${PLAYWRIGHT_VERSION}
           && node scripts/check-cards.mjs http://localhost:4321/"
 
-      # The solved problems of the Experience page, in the same two browsers:
-      # folded on a phone, each unfolded and folded again by a tap; every
-      # story beside its title on a wide screen, as before, and on paper.
-      - name: Solved problems, in Chrome and in WebKit
+      # The Experience page, in the same two browsers: the solved problems
+      # folded on a phone, each unfolded and folded again by a tap, every
+      # story beside its title on a wide screen and on paper; and the page at
+      # rest: no entrance of its own, its first screen there at once, nothing
+      # left in 3D once still, no figure past its tile, nothing moving for a
+      # reader who asks for less motion, everything there without script.
+      - name: Experience page, in Chrome and in WebKit
         run: >-
           docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"

@@ -9,7 +9,7 @@ The home page answers a recruiter in one screen of tiles (role, a plain sentence
 languages, the CV, figures, the flagship project and the tools), then shows strengths, career and
 the two projects. The guided tour of platform-eks-gitops walks through the project command by
 command. The experience page tells what I do at work as problems solved, then the tools, the path
-and the education.
+and the education, each block a tile, as on the home page.
 
 ## How it is built
 
@@ -47,11 +47,14 @@ and the education.
 - **An experience page that names no employer.** Its words live in
   [`src/experience.ts`](src/experience.ts), in both languages. Employers are described by their
   kind, and the page says how I work, never what belongs to the company: no host, product,
-  company figure, unannounced plan or security detail. On a phone, where the seven problems
+  company figure, unannounced plan or security detail. Each block is a tile of frosted glass, as
+  on the home page: the four figures beside the introduction, each problem numbered beside its
+  title, the rest of the work, the tools, the path and the education. The small labels are in
+  the text face; the mono face is kept for code. On a phone, where the seven problems
   took seven screens, each folds to its number, title and tools, and its story unfolds from a
   line at the foot of the card, growing and fading in, and folds back the same way: a native
   `<details>`, no script. A wide screen shows every story beside its title, as before, and so
-  does paper.
+  does paper. The page has no entrance of its own: its first screen is there at once.
 - **Motion that hides nothing.** The home page opens with an entrance, the first time a visitor
   lands on it in a tab: its first screen arrives as an exploded view, its tiles floating at
   different heights above a tilted plate; they land with a slight bounce, the plate stands up to
@@ -157,9 +160,9 @@ Every pull request runs them, and a failure blocks the merge:
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page; a chip is pressed once the home page's entrance is over and its block has landed |
 | What search engines read | [`scripts/check-seo.mjs`](scripts/check-seo.mjs), reading the build: `robots.txt` names a sitemap of this build; the sitemap lists every indexable page, each with both languages, and nothing else; each such page has a title, a description, a canonical address pointing at itself and its `hreflang` links; the 404 asks not to be indexed and stays out; the structured data parses, the home pages describe Olivier with his LinkedIn and GitHub, and it has no `worksFor`, `affiliation`, `employee` or `memberOf` key, under any prefix |
-| The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most |
+| The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most, with bookmarks, none of which reads its title twice |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
-| The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one |
+| The experience page: its solved problems folded on a phone, and the page at rest | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one; no entrance of its own: the title, its words, the CV and the four figures there and still from the first moment, with all they hold, the first figures above the fold of an iPhone, no tile fully transparent, nothing in 3D once still (Safari would paint it over the sticky header), no figure past its tile from 320 to 1000 px at 100 % and 125 % text; for a reader who asks for less motion nothing moves and everything is there, and so without script (in Chrome) |
 | The entrance of the home page | [`scripts/check-motion.mjs`](scripts/check-motion.mjs) with Playwright, in Chrome and in WebKit, on a wide screen, a tablet upright and on its side, a phone upright and on its side, and a 320 px phone, in both languages: on a first visit the entrance holds every animation of it on its first frame while it waits, starts within 1.5 s, the plate lying back below 1000 px, and is over within 3 s; it leaves the page at rest, with no entrance class and no 3D anywhere, every figure at the value of the HTML after counting up; while it plays, no link or button is at opacity 0, a press on one lands in a tile, never on the plate or the page under it, nothing moves in the layout, the glow under the plate never brightens again, and nothing reaches past the sides of the screen, then or as the page scrolls on, even on the tablet on its side, where the turned plate has the least room; a reload, the other language, a link to a section or from another page shows the page at rest at once; never with less motion; with its animations frozen and animation frames stubbed out, or fonts that never come, it still ends at rest, never having played; a page opened behind another tab waits, paused, and plays once shown |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
@@ -195,7 +198,7 @@ src/
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
 │   ├── Home.astro        # the home page: a grid of tiles, then strengths, career and projects
-│   ├── Tile.astro        # a tile of frosted glass, the block of the home page
+│   ├── Tile.astro        # a tile of frosted glass, the block of the home and experience pages
 │   ├── Slabs.astro       # the flagship project's three layers
 │   ├── ProjectCard.astro # one project, with its stack, its tour and its code
 │   ├── Experience.astro  # the experience page, shared by both languages
@@ -207,7 +210,6 @@ src/
 │   ├── SiteFooter.astro  # the contact section, on every page
 │   ├── Button.astro      # a link styled as a button, primary or ghost
 │   ├── Chip.astro        # a short label: a technology with its logo, a status
-│   ├── Panel.astro       # a pane of glass for a block that stands alone
 │   ├── Terminal.astro    # a transcript, coloured as a terminal shows it
 │   ├── Logo.astro        # a tool's logo
 │   └── Icon.astro
@@ -224,7 +226,7 @@ src/
 scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
-├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
+├── check-experience.mjs  # the experience page: folded and unfolded, and at rest, in Chrome and WebKit
 ├── check-motion.mjs      # the home page's entrance, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
