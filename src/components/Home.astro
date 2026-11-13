@@ -1079,15 +1079,22 @@ const clone = parts(demo);
      waits on its first frame. Each tile lands in its turn (--land, its --n
      unless a narrow screen places it elsewhere). */
   @media screen and (prefers-reduced-motion: no-preference) {
+    /* While a tile bounces it dips a few pixels below the plate's own
+       plane, and a 3D hit test then gives a press on its links to the
+       plate, an empty box (Safari on iPhone sends no click at all): only
+       the tiles take presses while it plays, and the gaps between them
+       hold nothing to press. */
     :global(html.entering) .bento {
       transform-style: preserve-3d;
       transform-origin: 50% 38%;
       animation: plate 1.5s backwards;
+      pointer-events: none;
     }
 
     :global(html.entering) .bento > .tile {
       --land: var(--n, 0);
       animation: drop 0.64s cubic-bezier(0.3, 1.45, 0.5, 1) calc(var(--land) * 40ms) backwards;
+      pointer-events: auto;
     }
 
     :global(html.entering) .ground {

@@ -12,11 +12,13 @@
 //   of the HTML, and it did count up on the way;
 // - while it plays, no link or button, nor anything around one, is at
 //   opacity 0, as Safari on iPhone drops the click of a tap on a link that
-//   turns visible from 0; nothing moves in the layout (each tile, the name
-//   and each figure keep their place and size), the glow under the plate
-//   never brightens again once it fades, and nothing reaches past the sides
-//   of the screen, nor later as the blocks below rise into view (the tablet
-//   on its side, 1024 px, is where the turned plate comes closest to them);
+//   turns visible from 0; a press on a link or a button of a tile reaches
+//   that tile, never the plate under it; nothing moves in the layout (each
+//   tile, the name and each figure keep their place and size), the glow
+//   under the plate never brightens again once it fades, and nothing
+//   reaches past the sides of the screen, nor later as the blocks below rise
+//   into view (the tablet on its side, 1024 px, is where the turned plate
+//   comes closest to them);
 // - it plays once per visit: a reload, or the home page in the other
 //   language, in the same tab, shows the page at rest at once; and never
 //   for a visitor who comes to a section of the page (/#projects) or from
@@ -70,11 +72,24 @@ const sizes = (phone) => [
 
 // Set up before the page's own scripts: a log of the classes of <html>, the
 // time each came and went, and, while the entrance plays, a sample every
-// 50 ms of what a visitor could tap, of the figures and of the glow; and,
-// all along, how far the page reaches past the sides of the screen. Timers,
-// as WebKit's build for tests draws few frames.
+// 50 ms of what a visitor could tap, of what a press on it would reach, of
+// the figures and of the glow; and, all along, how far the page reaches
+// past the sides of the screen. Timers, as WebKit's build for tests draws
+// few frames.
 const watch = (width) => {
-  const motion = (window.motion = { log: [], low: 1, values: [], glow: [], moved: false, start: null, end: null, shifts: [], atLoad: null, over: 0 });
+  const motion = (window.motion = {
+    log: [],
+    low: 1,
+    missed: null,
+    values: [],
+    glow: [],
+    moved: false,
+    start: null,
+    end: null,
+    shifts: [],
+    atLoad: null,
+    over: 0,
+  });
   const now = () => Math.round(performance.now());
   const boxes = () =>
     [...document.querySelectorAll('.bento > .tile, #name, .bento .value[data-count], .bento .big')].map((el) => [
@@ -86,6 +101,14 @@ const watch = (width) => {
   const sample = () => {
     for (const target of document.querySelectorAll('.bento :is(a[href], button)')) {
       for (let node = target; node; node = node.parentElement) motion.low = Math.min(motion.low, Number(getComputedStyle(node).opacity));
+      // A press in the middle of it, where it is drawn on the screen, lands
+      // in a tile: one tile may still float over another, but never may
+      // the plate itself, an empty box, take it.
+      const box = target.getBoundingClientRect();
+      const [x, y] = [box.left + box.width / 2, box.top + box.height / 2];
+      if (!box.width || x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
+      const hit = document.elementFromPoint(x, y);
+      if (hit?.closest('.bento') && !hit.closest('.bento > .tile')) motion.missed ??= `${target.textContent.trim().slice(0, 24)} at ${Math.round(performance.now() - motion.start.at)} ms`;
     }
     motion.values.push([...document.querySelectorAll('.bento .value[data-count]')].map((el) => el.textContent));
     const ground = document.querySelector('.ground');
@@ -218,6 +241,7 @@ const entrance = (url, other, plate, check) => async (page) => {
     `the figures counted up on the way (${[...new Set(motion.values.map((row) => row[0]))].slice(0, 6).join(', ')}…)`,
   );
   check(motion.low > 0, `no link or button, nor anything around one, at opacity 0 while it plays (lowest ${motion.low})`);
+  check(!motion.missed, `a press on a link or a button reaches its tile while it plays, never the plate under it${motion.missed ? ` (${motion.missed})` : ''}`);
   check(
     motion.start !== null && motion.end !== null && !motion.moved && JSON.stringify(motion.start.boxes) === JSON.stringify(motion.end.boxes),
     'nothing moves in the layout: tiles, name and figures keep their place and size',
