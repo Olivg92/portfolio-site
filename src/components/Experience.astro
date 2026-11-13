@@ -969,6 +969,12 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       box-shadow: none;
     }
 
+    /* No ring on paper, where the tile has no padding left: the page's edge
+       would cut it in half. */
+    .column h3::before {
+      box-shadow: none;
+    }
+
     .history {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-6);
