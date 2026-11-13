@@ -109,10 +109,13 @@ const watch = ([width, names]) => {
       // A press in the middle of it, where it is drawn on the screen, lands
       // in a tile: one tile may still float over another, but nothing else
       // may take it, neither the plate itself, an empty box, nor what lies
-      // under the plate once the plate lets presses through.
+      // under the plate once the plate lets presses through. A point in the
+      // last pixel at an edge is left out, as one past the edge is: Chrome
+      // rounds 767.7 of a 768 px screen to the row below it, off the
+      // screen, and finds nothing there.
       const box = target.getBoundingClientRect();
       const [x, y] = [box.left + box.width / 2, box.top + box.height / 2];
-      if (!box.width || x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
+      if (!box.width || x < 0 || y < 0 || x > innerWidth - 1 || y > innerHeight - 1) continue;
       const hit = document.elementFromPoint(x, y);
       const taker = hit ? `${hit.nodeName}${hit.id ? `#${hit.id}` : ''}${hit.classList.length ? `.${[...hit.classList].join('.')}` : ''}` : 'nothing';
       if (!hit?.closest('.bento > .tile')) motion.missed ??= `${target.textContent.trim().slice(0, 24)} at ${Math.round(performance.now() - motion.start.at)} ms, pressed at ${Math.round(x)}, ${Math.round(y)}, taken by ${taker}`;
