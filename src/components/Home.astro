@@ -4,8 +4,8 @@
 // the CV, years, place and languages, a few figures, the flagship project and
 // the tools. Then the strengths, the career and the two projects.
 //
-// Hooks of the entrance (styles at the end) and the effects to come, stable
-// names: the grid is `.bento`, its tiles `.tile` with `--n` and an area class
+// Hooks of the entrance and the effects (styles at the end), stable names:
+// the grid is `.bento`, its tiles `.tile` with `--n` and an area class
 // (`t-intro` … `t-cv`); `.rise` with `--d` for what rises after the name;
 // `#name` for the name; `.value[data-count]` for a figure that counts up;
 // `svg.slabs` and its `.slab.s1` to `.s3` for the flagship's drawing.
@@ -836,7 +836,9 @@ const clone = parts(demo);
 
   /* The CV, at night on the pale page: the night's tokens (the `night`
      class) give it a dark surface whose ink and focus ring keep their
-     contrast. Its glass is opaque, so it needs no blur. */
+     contrast. Its glass is opaque, so it needs no blur. Its shadow lists an
+     empty inset one first, as the tiles' do, so that it eases into its
+     shadow under the pointer. */
   .bento > .t-cv {
     display: grid;
     align-content: space-between;
@@ -844,7 +846,9 @@ const clone = parts(demo);
     border-color: var(--line-soft);
     background: var(--surface);
     backdrop-filter: none;
-    box-shadow: 0 24px 60px -36px color-mix(in srgb, var(--bg) 60%, transparent);
+    box-shadow:
+      0 0 0 0 transparent inset,
+      0 24px 60px -36px color-mix(in srgb, var(--bg) 60%, transparent);
   }
 
   .get {
@@ -1051,6 +1055,27 @@ const clone = parts(demo);
   .value[data-count] {
     display: inline-block;
     text-align: end;
+  }
+
+  /* With a mouse, the two tiles that are a link as a whole, the flagship
+     and the CV, lean fully and rise a little under the pointer, their
+     shadow growing beneath them (the CV's from the night's background, as
+     its own is). The other tiles keep their shadow. */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .bento > .t-visual,
+    .bento > .t-cv {
+      --tilt: 1;
+    }
+
+    .bento > .t-cv {
+      --shadow-lift: 0 0 0 0 transparent inset, 0 34px 70px -36px color-mix(in srgb, var(--bg) 70%, transparent);
+    }
+
+    :global(html:not(.entering)) .bento > .t-visual:global(.tilting):hover,
+    :global(html:not(.entering)) .bento > .t-cv:global(.tilting):hover {
+      transform: perspective(1000px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateY(-4px);
+      box-shadow: var(--shadow-lift);
+    }
   }
 
   /* The glow under the plate during the entrance, which ends at a
