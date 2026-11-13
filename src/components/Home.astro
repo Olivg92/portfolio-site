@@ -834,6 +834,13 @@ const clone = parts(demo);
     font-size: var(--text-s);
   }
 
+  /* Above the projects the hint sits on the aurora itself, not on a tile:
+     where the pink and violet lights pass behind it on a phone, the muted
+     grey fell to about 4:1. The second ink keeps it above 4.5:1 everywhere. */
+  .projects .hint {
+    color: var(--ink-2);
+  }
+
   /* The CV, at night on the pale page: the night's tokens (the `night`
      class) give it a dark surface whose ink and focus ring keep their
      contrast. Its glass is opaque, so it needs no blur. Its shadow lists an
