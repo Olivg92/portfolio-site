@@ -19,9 +19,12 @@ interface Props {
   indexable?: boolean;
   /** The picture of a link preview, under public/og/, without the language. */
   preview?: 'home' | 'tour' | 'experience';
+  /** Day, the pale page, or night, the control room of the guided tour. */
+  theme?: 'day' | 'night';
 }
 
-const { lang, title, description, path = '', indexable = true, preview = 'home' } = Astro.props;
+const { lang, title, description, path = '', indexable = true, preview = 'home', theme = 'day' } = Astro.props;
+const night = theme === 'night';
 const absolute = (l: Lang) => new URL(getRelativeLocaleUrl(l, path), Astro.site).href;
 // What a link preview shows, on LinkedIn and elsewhere: the page's title and
 // description, and a picture drawn from the page (scripts/og-images.mjs).
@@ -31,14 +34,14 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} class:list={[{ night }]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#070c16" />
+    <meta name="color-scheme" content={night ? 'dark' : 'light'} />
+    <meta name="theme-color" content={night ? '#070c16' : '#eef1f8'} />
     <script is:inline>
       // Reveal on scroll (see global.css): only where motion is welcome and the
       // browser can watch what comes into view; each block is marked once.
@@ -93,6 +96,66 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
       }
     </script>
     {
+      /* By day only: the tiles' lights and lean, and the sky's lean on the
+         home page (the tour, at night, has no tile and no aurora). */
+      !night && (
+        <script is:inline>
+          // With a mouse, the pointer's place (Tile.astro and Home.astro use
+          // it): a light follows it on a tile, along the edge and under it,
+          // the tile leans a little towards it, and on the home page the sky
+          // leans the other way. Positions only: the styles decide what
+          // moves, and for anyone who asks for less motion nothing does but
+          // the light. A tile that leans is in 3D, and Safari paints a 3D
+          // box over the sticky header: so a tile leans (`tilting`) only
+          // while its top is below the header, never while the home page's
+          // entrance plays or while it stands up as it comes into view, and
+          // it stands flat at once, with no ease, as soon as the page
+          // scrolls. Pointer events come once a frame at most already.
+          if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            const root = document.documentElement;
+            let current = null;
+            const flat = (tile) => {
+              if (!tile.classList.contains('tilting')) return;
+              tile.style.transition = 'none';
+              tile.classList.remove('tilting');
+            };
+            addEventListener(
+              'pointermove',
+              (event) => {
+                if (event.pointerType !== 'mouse') return;
+                const sky = document.querySelector('.aurora-in');
+                if (sky) {
+                  sky.style.setProperty('--px', (event.clientX / innerWidth - 0.5).toFixed(3));
+                  sky.style.setProperty('--py', (event.clientY / innerHeight - 0.5).toFixed(3));
+                }
+                const tile = event.target instanceof Element ? event.target.closest('.tile') : null;
+                if (current && current !== tile) current.classList.remove('tilting');
+                current = tile;
+                if (!tile) return;
+                const box = tile.getBoundingClientRect();
+                const x = (event.clientX - box.left) / box.width;
+                const y = (event.clientY - box.top) / box.height;
+                tile.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+                tile.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+                const below = (document.querySelector('header.top')?.getBoundingClientRect().bottom ?? 0) <= box.top;
+                const busy =
+                  root.classList.contains('entering') ||
+                  tile.matches('.reveal-on .reveal:not(.is-in)') ||
+                  tile.getAnimations().some((animation) => animation.animationName === 'stand-up' && animation.playState !== 'finished');
+                if (!below || busy) return flat(tile);
+                tile.style.setProperty('--tx', `${((0.5 - y) * 6).toFixed(2)}deg`);
+                tile.style.setProperty('--ty', `${((x - 0.5) * 7).toFixed(2)}deg`);
+                tile.style.removeProperty('transition');
+                tile.classList.add('tilting');
+              },
+              { passive: true },
+            );
+            addEventListener('scroll', () => current && flat(current), { passive: true });
+          }
+        </script>
+      )
+    }
+    {
       indexable ? (
         <>
           <link rel="canonical" href={absolute(lang)} />
@@ -118,12 +181,25 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
     }
     <link rel="icon" type="image/svg+xml" href={favicon} />
     <slot name="head" />
-    <Font cssVariable="--font-geist" preload />
-    <Font cssVariable="--font-geist-mono" preload />
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-manrope" preload />
+    <Font cssVariable="--font-geist-mono" preload={night} />
   </head>
   <body>
+    {
+      !night && (
+        <div class="aurora" aria-hidden="true">
+          <div class="aurora-in">
+            <i />
+            <i />
+            <i />
+            <i />
+          </div>
+        </div>
+      )
+    }
     <a class="skip" href="#main">{ui[lang].skip}</a>
-    <SiteHeader lang={lang} path={path} />
+    <SiteHeader lang={lang} path={path} sticky={!night} />
     <main id="main">
       <slot />
     </main>
@@ -137,11 +213,11 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
     position: absolute;
     top: var(--space-3);
     left: var(--gutter);
-    z-index: 10;
+    z-index: 30;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-pill);
     background: var(--cyan);
-    color: var(--night);
+    color: var(--bg);
     font-weight: 600;
     text-decoration: none;
     transform: translateY(-200%);

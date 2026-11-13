@@ -11,6 +11,13 @@ html {
   text-size-adjust: 100%;
 }
 
+/* By day the header stays at the top of the screen (SiteHeader.astro): a
+   link to a place on the page, or the focus moving there, stops below it
+   rather than under it. The guided tour, at night, has no sticky header. */
+html:not(.night) {
+  scroll-padding-top: 96px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -23,20 +30,78 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: var(--night);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: var(--text-m);
+  font-weight: 500;
   line-height: 1.6;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-/* The night sky behind every page: two glows, then a fine grain so the dark
-   is not flat. Both stay put while the page scrolls. */
-body::before,
-body::after {
+/* The lights behind every page, which stay put while it scrolls. By day, an
+   aurora (drawn by Base.astro): four soft lights, cyan and violet above,
+   pink and green below. Each light is a gradient that fades out well inside
+   its own box, and the frame clips them at the edge of the screen, so that
+   no edge shows when the home page's entrance or its pointer moves the sky
+   (Home.astro), and nothing reaches past the screen. They never move on
+   their own. By night (the guided tour), the sky as it was: two glows, then
+   a fine grain so the dark is not flat. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-in {
+  position: absolute;
+  inset: 0;
+}
+
+.aurora i {
+  position: absolute;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, var(--light), transparent 70%);
+}
+
+.aurora i:nth-child(1) {
+  --light: color-mix(in srgb, var(--sky-blue) 50%, transparent);
+  left: 0;
+  top: 0;
+  width: 140vmax;
+  height: 110vmax;
+}
+
+.aurora i:nth-child(2) {
+  --light: color-mix(in srgb, var(--sky-violet) 50%, transparent);
+  left: 100%;
+  top: 5%;
+  width: 130vmax;
+  height: 110vmax;
+}
+
+.aurora i:nth-child(3) {
+  --light: color-mix(in srgb, var(--sky-pink) 34%, transparent);
+  left: 65%;
+  top: 105%;
+  width: 120vmax;
+  height: 100vmax;
+}
+
+.aurora i:nth-child(4) {
+  --light: color-mix(in srgb, var(--sky-green) 28%, transparent);
+  left: 0;
+  top: 100%;
+  width: 110vmax;
+  height: 100vmax;
+}
+
+.night body::before,
+.night body::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -44,38 +109,49 @@ body::after {
   pointer-events: none;
 }
 
-body::before {
+.night body::before {
   background:
     radial-gradient(1100px 700px at 12% -8%, var(--sky-blue) 0%, transparent 62%),
     radial-gradient(900px 620px at 100% 108%, var(--sky-violet) 0%, transparent 60%);
 }
 
-body::after {
+.night body::after {
   opacity: 0.5;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* On a phone, Safari floats its bars over the top and the bottom of the page
-   and tints them with the page's background colour, flat. A glow under a bar
-   would show as a dark band, so on a touch screen the sky fades out before
-   both edges, and the strips the bars cover stay the same flat night as
-   their tint. */
+   and tints them with the page's background colour, flat. A light under a
+   bar would show as a band, so on a touch screen the lights fade out before
+   both edges, and the strips the bars cover stay the same flat colour as
+   their tint. The mask is on the frame, which does not move: the lights
+   move under it. */
 @media (pointer: coarse) {
-  body::before,
-  body::after {
+  .aurora,
+  .night body::before,
+  .night body::after {
     -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 200px, #000 calc(100% - 200px), transparent calc(100% - 56px));
     mask-image: linear-gradient(to bottom, transparent 56px, #000 200px, #000 calc(100% - 200px), transparent calc(100% - 56px));
   }
+}
+
+/* An element marked `night` (the guided tour, a terminal) takes the
+   night's tokens (tokens.css), and its text their ink. */
+.night {
+  color: var(--ink);
 }
 
 main {
   flex: 1;
 }
 
+/* Headings in Bricolage Grotesque, whose optical size follows the size of
+   the type: tight and dense when large, open when small. */
 h1,
 h2,
 h3 {
   margin: 0;
+  font-family: var(--font-display);
   line-height: 1.04;
   letter-spacing: -0.03em;
   text-wrap: balance;
@@ -84,13 +160,14 @@ h3 {
 h1 {
   font-size: var(--text-h1);
   font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
 }
 
 h2 {
   font-size: var(--text-h2);
-  font-weight: 750;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 p {
@@ -99,7 +176,7 @@ p {
 }
 
 a {
-  color: var(--cyan);
+  color: var(--accent);
   text-underline-offset: 0.2em;
   text-decoration-thickness: 1px;
 }
@@ -109,13 +186,13 @@ a:hover {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--cyan) 25%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
   color: var(--ink);
 }
 
@@ -132,7 +209,26 @@ a:hover {
 code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  color: var(--cyan);
+  color: var(--accent);
+}
+
+/* A tool's brand mark (logos.ts), in a chip: deep enough for the pale page
+   by day, light enough for the night, and the day's on paper, which is
+   white. A drawing that is always at night (the guided tour) takes the
+   night's colour at build time instead, as a mark drawn through <use> does
+   not see the `night` class of the page. */
+.brand-mark {
+  fill: var(--day);
+}
+
+.night .brand-mark {
+  fill: var(--night);
+}
+
+@media print {
+  .night .brand-mark {
+    fill: var(--day);
+  }
 }
 
 /* The width of every page, with the same margins on each side. */
@@ -143,14 +239,19 @@ code {
   padding-inline: var(--gutter);
 }
 
-/* The small label above a heading, in the voice of a terminal. */
+/* The small label above a heading: grey caps by day, as the prototype has
+   them, lit by night. */
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: var(--label);
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--cyan);
+  color: var(--muted);
+}
+
+.night .eyebrow {
+  color: var(--accent);
 }
 
 .lede {
@@ -282,8 +383,8 @@ code {
   }
 
   /* The paper tokens are light, so the page prints its own backgrounds, the
-     bullets and the timeline's points included, whatever the print dialog
-     says about background graphics. */
+     bullets and the dots of labels and chips included, whatever the print
+     dialog says about background graphics. */
   html {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -294,6 +395,7 @@ code {
     line-height: 1.4;
   }
 
+  .aurora,
   body::before,
   body::after {
     display: none;

@@ -1,0 +1,113 @@
+---
+// The flagship project's three layers, stacked as three slabs seen from
+// above: AWS at the bottom, Kubernetes on it, Argo CD on top. A picture only,
+// beside words that name the project, so screen readers skip it. Each slab is
+// its own group (`.s1` to `.s3`, from the bottom), and the drawing lets them
+// spread past its box, as they move apart when the pointer is on their tile.
+---
+
+<svg class="slabs" viewBox="0 0 320 220" width="320" height="220" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="slab-a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" class="sky-blue"></stop>
+      <stop offset="1" class="sky-violet"></stop>
+    </linearGradient>
+    <linearGradient id="slab-b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" class="sky-violet"></stop>
+      <stop offset="1" class="sky-pink"></stop>
+    </linearGradient>
+    <linearGradient id="slab-c" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" class="sky-green"></stop>
+      <stop offset="1" class="sky-blue"></stop>
+    </linearGradient>
+  </defs>
+  <g class="slab s1">
+    <path class="top" fill="url(#slab-a)" d="M60 150 160 100 260 150 160 200z"></path>
+    <path class="side l" d="M60 150v12l100 50v-12z"></path>
+    <path class="side r" d="M160 200v12l100-50v-12z"></path>
+  </g>
+  <g class="slab s2">
+    <path class="top" fill="url(#slab-b)" d="M78 110 160 69 242 110 160 151z"></path>
+    <path class="side l" d="M78 110v11l82 41v-11z"></path>
+    <path class="side r" d="M160 151v11l82-41v-11z"></path>
+  </g>
+  <g class="slab s3">
+    <path class="top" fill="url(#slab-c)" d="M100 72 160 42 220 72 160 102z"></path>
+    <path class="side l ink" d="M100 72v10l60 30v-10z"></path>
+    <path class="side r ink" d="M160 102v10l60-30v-10z"></path>
+  </g>
+</svg>
+
+<style>
+  /* The colours of the aurora, from the tokens like every colour. */
+  .sky-blue {
+    stop-color: var(--sky-blue);
+  }
+
+  .sky-violet {
+    stop-color: var(--sky-violet);
+  }
+
+  .sky-pink {
+    stop-color: var(--sky-pink);
+  }
+
+  .sky-green {
+    stop-color: var(--sky-green);
+  }
+
+  .s1 .top,
+  .s2 .top {
+    fill-opacity: 0.9;
+  }
+
+  /* The edges of each slab, lit on the left and shaded on the right; the
+     top slab, the palest, takes the ink rather than the accent. */
+  .side {
+    fill: var(--accent);
+  }
+
+  .l {
+    fill-opacity: 0.55;
+  }
+
+  .r {
+    fill-opacity: 0.35;
+  }
+
+  .side.ink {
+    fill: var(--ink);
+  }
+
+  .ink.l {
+    fill-opacity: 0.25;
+  }
+
+  .ink.r {
+    fill-opacity: 0.15;
+  }
+
+  .slabs {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    justify-self: center;
+    overflow: visible;
+  }
+
+  /* The slabs can come apart (Home.astro moves them when the pointer or
+     the keyboard is on their tile), as the layers of the platform do in the
+     guided tour, with a slight bounce. */
+  @media (prefers-reduced-motion: no-preference) {
+    .slab {
+      transition: transform 0.7s cubic-bezier(0.3, 1.4, 0.5, 1);
+    }
+  }
+
+  @media print {
+    .slabs {
+      display: none;
+    }
+  }
+</style>

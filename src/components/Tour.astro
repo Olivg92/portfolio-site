@@ -15,6 +15,7 @@ import { getRelativeLocaleUrl } from 'astro:i18n';
 import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Terminal from './Terminal.astro';
+import Tile from './Tile.astro';
 import TourScene from './TourScene.astro';
 import { chapters, steps } from '../tour/steps';
 import { PHONE_WIDTH, PHONE_HEIGHT } from '../tour/scene';
@@ -35,7 +36,7 @@ const firstOf = (id: string) => steps.findIndex((step) => step.chapter === id);
 const inline = (text: string) => text.split('`');
 ---
 
-<Base lang={lang} title={t.tour.title} description={t.tour.description} path="platform-eks-gitops/" preview="tour">
+<Base lang={lang} title={t.tour.title} description={t.tour.description} path="platform-eks-gitops/" preview="tour" theme="night">
   <header class="intro wrap">
     <p class="eyebrow">{t.tour.eyebrow}</p>
     <h1>{t.tour.heading}</h1>
@@ -77,7 +78,7 @@ const inline = (text: string) => text.split('`');
         steps.map((step, i) => (
           <article class="seg" id={step.id} data-step={i + 1} aria-labelledby={`${step.id}-title`}>
             <div class="cap">
-              <p class="num">
+              <p class="num eyebrow">
                 {chapterOf(step.chapter)?.name[lang]} · {t.tour.step} {pad(i + 1)}/{total}
               </p>
               <h2 id={`${step.id}-title`}>{step.title[lang]}</h2>
@@ -101,12 +102,14 @@ const inline = (text: string) => text.split('`');
   </section>
 
   <footer class="outro wrap">
-    <p class="eyebrow">{t.tour.outroTitle}</p>
-    <p class="lede">{t.tour.outroText}</p>
-    <div class="cluster actions">
-      <Button href={links.platform}>{t.readCode}</Button>
-      <Button href={`${getRelativeLocaleUrl(lang)}#projects`} variant="ghost">{t.tour.allProjects}</Button>
-    </div>
+    <Tile class="closing">
+      <p class="eyebrow">{t.tour.outroTitle}</p>
+      <p class="lede">{t.tour.outroText}</p>
+      <div class="cluster actions">
+        <Button href={links.platform}>{t.readCode}</Button>
+        <Button href={`${getRelativeLocaleUrl(lang)}#projects`} variant="ghost">{t.tour.allProjects}</Button>
+      </div>
+    </Tile>
   </footer>
 </Base>
 
@@ -388,12 +391,16 @@ const inline = (text: string) => text.split('`');
     display: inline;
   }
 
+  /* Where the reader is, in the caps of the site's labels rather than in the
+     terminal's mono: the drawing and the transcripts keep the mono, the
+     page's own words take Manrope. Its narrower caps also leave more of a
+     step's title before the ellipsis on a phone. */
   .where {
     margin-left: auto;
     min-width: 0;
-    color: var(--cyan);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.06em;
+    color: var(--accent);
+    font: 700 var(--label) / 1.4 var(--font-ui);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
@@ -402,20 +409,23 @@ const inline = (text: string) => text.split('`');
     gap: var(--space-2);
   }
 
+  /* Previous and Next, drawn as the ghost Button (Button.astro) of the
+     intro and the outro: frosted glass edged with a line, lit by the accent
+     under the pointer. Smaller, as they share the HUD's row. */
   .step-btn {
     min-height: 36px;
     padding: 0 var(--space-4);
-    border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+    border: 1px solid var(--line-soft);
     border-radius: var(--radius-pill);
-    background: transparent;
+    background: var(--glass);
     color: var(--ink);
-    font: 500 0.84375rem / 1 var(--font-ui);
+    font: 700 0.875rem / 1 var(--font-ui);
     cursor: pointer;
+    transition: border-color 0.2s ease;
   }
 
   .step-btn:hover:not(:disabled) {
-    border-color: var(--cyan);
-    background: color-mix(in srgb, var(--cyan) 8%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
   .step-btn:disabled {
@@ -442,11 +452,12 @@ const inline = (text: string) => text.split('`');
     padding-inline: var(--gutter);
   }
 
-  .num {
-    color: var(--cyan);
-    font: 500 0.71875rem / 1.4 var(--font-mono);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  /* A step's kicker is the page's eyebrow (global.css), lit by the night's
+     accent. Named under .cap, or `.cap p` below would give it the colour
+     of the text instead. */
+  .cap .num {
+    color: var(--accent);
+    line-height: 1.4;
   }
 
   .cap h2 {
@@ -458,8 +469,14 @@ const inline = (text: string) => text.split('`');
     color: var(--ink-2);
   }
 
+  /* A step's figure, shown with its words wherever the drawing does not
+     show it: without script, where the drawing stays on the overview, and on
+     a phone, where the camera leaves out the band at the top of the drawing
+     that holds it. Only a wide screen with script hides it (`.js` below), as
+     the band shows it there. Set as the home page's figures are: the value
+     in Bricolage, lit, its caption in Manrope. */
   .metric {
-    font: 500 var(--text-s) / 1.4 var(--font-mono);
+    font: 600 var(--text-s) / 1.4 var(--font-ui);
   }
 
   .cap .metric {
@@ -467,7 +484,9 @@ const inline = (text: string) => text.split('`');
   }
 
   .metric .value {
-    color: var(--cyan);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 800;
   }
 
   .target {
@@ -574,10 +593,38 @@ const inline = (text: string) => text.split('`');
   }
 
   .outro {
+    padding-block: var(--space-8) 0;
+  }
+
+  /* The tour closes on a tile of frosted glass, the block of the home page,
+     at night. A tile's edge is drawn in its own surface, pale by day; at
+     night that surface is nearly the page's dark, so the edge vanishes, and
+     it takes the line of the night's glass instead, as the header and the
+     contact do; and the contact's padding, so that the words of the two
+     tiles, one above the other, start on the same line. Two classes, to
+     outweigh the tile's own rule (Tile.astro). */
+  .outro .closing {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: start;
     gap: var(--space-4);
-    padding-block: var(--space-8) 0;
+    padding: clamp(var(--space-6), 5vw, 56px);
+    border-color: var(--line-soft);
+  }
+
+  /* On a narrow phone (320 px, the reflow width of WCAG), the contact's
+     padding leaves less room than "Read the code on GitHub" takes on one
+     line. The column above stays inside the tile, and a label wider than it
+     wraps, centred, as the home page's calls do, rather than push its
+     button past the tile's edge and the page sideways; the line height is
+     for that second line. */
+  @media (max-width: 559px) {
+    .outro .closing :global(.btn) {
+      padding-block: var(--space-2);
+      line-height: 1.2;
+      white-space: normal;
+      text-align: center;
+    }
   }
 
   /* A phone: the drawing stays pinned at the top, framed on the step, and
@@ -628,8 +675,8 @@ const inline = (text: string) => text.split('`');
       inset: 0;
       z-index: -1;
       border-bottom: 1px solid var(--line-faint);
-      background: var(--night);
-      box-shadow: 0 16px 32px -16px var(--night);
+      background: var(--bg);
+      box-shadow: 0 16px 32px -16px var(--bg);
     }
 
     :global(.js) .scene-box {
@@ -680,7 +727,8 @@ const inline = (text: string) => text.split('`');
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(.js) .progress span {
+    :global(.js) .progress span,
+    .step-btn {
       transition: none;
     }
   }

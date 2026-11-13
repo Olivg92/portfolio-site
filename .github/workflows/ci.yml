@@ -168,14 +168,36 @@ jobs:
           sh -c "npm install --no-save playwright@${PLAYWRIGHT_VERSION}
           && node scripts/check-cards.mjs http://localhost:4321/"
 
-      # The solved problems of the Experience page, in the same two browsers:
-      # folded on a phone, each unfolded and folded again by a tap; every
-      # story beside its title on a wide screen, as before, and on paper.
-      - name: Solved problems, in Chrome and in WebKit
+      # The Experience page, in the same two browsers: the solved problems
+      # folded on a phone, each unfolded and folded again by a tap, every
+      # story beside its title on a wide screen and on paper; and the page at
+      # rest: no entrance of its own, its first screen there at once, nothing
+      # left in 3D once still, no figure past its tile, nothing moving for a
+      # reader who asks for less motion, everything there without script.
+      - name: Experience page, in Chrome and in WebKit
         run: >-
           docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           node scripts/check-experience.mjs http://localhost:4321/
+
+      # The entrance and the effects of the home page, in the same two
+      # browsers, on six screen sizes: the entrance plays once per visit, for
+      # a visitor who lands on the page, never with less motion, held on its
+      # first frame while it waits; it moves nothing in the layout, leaves no
+      # link fully transparent nor a press on one to the plate or the page
+      # under it, and nothing past the sides of the screen, and ends at rest
+      # on its own timers, flat, each figure at the value of the HTML, even
+      # with its animations frozen or fonts that never come. With a mouse, a
+      # tile leans and stands flat again, never with its top under the
+      # header, nothing that can be pressed moves by 3 px, and the sky leans
+      # and never moves on its own. --ipc=host gives the browsers the shared
+      # memory Playwright asks for in a container: this check composites a 3D
+      # scene of frosted tiles, and every run that validated it had it.
+      - name: Entrance and effects of the home page, in Chrome and in WebKit
+        run: >-
+          docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
+          node scripts/check-motion.mjs http://localhost:4321/
 
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.

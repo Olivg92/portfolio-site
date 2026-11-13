@@ -1,64 +1,101 @@
 ---
-// The top of every page: the name, which leads home, the way to the
-// projects, to the experience and to the contact links, and the switch to
-// the same page in the other language.
+// The top of every page, a pill of frosted glass: the name, which leads
+// home, the way to the projects, to the experience and to the contact
+// links, the switch to the same page in the other language, and the CV.
+// It stays at the top of the screen as the page scrolls, except in the
+// guided tour, whose drawing holds the top there.
 import { getRelativeLocaleUrl } from 'astro:i18n';
+import Icon from './Icon.astro';
+import { cvFile, cvPath } from '../cv';
 import { languages, ui, type Lang } from '../i18n';
 
 interface Props {
   lang: Lang;
   /** The page's path without the language prefix, '' for the home page. */
   path: string;
+  /** Whether the header stays at the top of the screen. */
+  sticky?: boolean;
 }
 
-const { lang, path } = Astro.props;
+const { lang, path, sticky = true } = Astro.props;
 const t = ui[lang];
 const codes = Object.keys(languages) as Lang[];
 // Printed beside the name, for a reader holding the page: where the site is.
 const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^https?:\/\//, '');
 ---
 
-<header class="top wrap" data-address={address}>
-  <a class="brand" href={getRelativeLocaleUrl(lang)}>
-    <svg class="mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false">
-      <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" stroke-width="5"></circle>
-      <circle class="core" cx="32" cy="32" r="6.5"></circle>
-    </svg>
-    Olivier Guandalini
-  </a>
-  <div class="cluster tools">
-    <a class="link" href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.projects}</a>
-    <a class="link" href={getRelativeLocaleUrl(lang, 'experience/')} aria-current={path === 'experience/' ? 'page' : undefined}>
-      {t.experience.nav}
-    </a>
-    <a class="link" href="#contact">{t.contact}</a>
-    <nav class="langs" aria-label={t.language}>
-      {
-        codes.map((code) =>
-          code === lang ? (
-            <span class="lang" aria-current="true">{code.toUpperCase()}</span>
-          ) : (
-            <a class="lang" href={getRelativeLocaleUrl(code, path)} hreflang={code} lang={code}>
-              {code.toUpperCase()}
-            </a>
-          ),
-        )
-      }
-    </nav>
+<header class:list={['top', { sticky }]}>
+  <div class="wrap">
+    <div class="bar" data-address={address}>
+      <a class="brand" href={getRelativeLocaleUrl(lang)}>
+        <span class="dot" aria-hidden="true"></span>
+        Olivier Guandalini
+      </a>
+      <nav class="links" aria-label={t.pages}>
+        <a class="link" href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.projects}</a>
+        <a class="link" href={getRelativeLocaleUrl(lang, 'experience/')} aria-current={path === 'experience/' ? 'page' : undefined}>
+          {t.experience.nav}
+        </a>
+        <a class="link" href="#contact">{t.contact}</a>
+      </nav>
+      <nav class="langs" aria-label={t.language}>
+        {
+          codes.map((code) =>
+            code === lang ? (
+              <span class="lang" aria-current="true">{code.toUpperCase()}</span>
+            ) : (
+              <a class="lang" href={getRelativeLocaleUrl(code, path)} hreflang={code} lang={code}>
+                {code.toUpperCase()}
+              </a>
+            ),
+          )
+        }
+      </nav>
+      <a class="cv" href={cvPath(lang)} download={cvFile(lang)} aria-label={t.cv.download}>
+        CV
+        <Icon name="download" />
+      </a>
+    </div>
   </div>
 </header>
 
 <style>
-  /* Named for the move from page to page (global.css): the header stays
-     where it is while the page under it changes. */
+  /* The glass is drawn on the bar inside, never on the header itself:
+     Safari on iPhone tints its own bars with the colour of an element stuck
+     to the edge of the screen. The bar is also what is named for the move
+     from page to page (global.css), so that it stays where it is while the
+     page under it changes: a name on the header would make it the edge of
+     what the bar's glass can see, and the glass would blur nothing.
+     backdrop-filter is written once, unprefixed, as the tiles' is: Chrome,
+     Firefox and Safari 18 or later read it. With the -webkit- version written
+     next to it, the build kept only that one, which Chrome ignores. */
   .top {
+    z-index: 20;
+    padding-block: var(--space-4);
+  }
+
+  .sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  .bar {
     view-transition-name: site-header;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
-    gap: var(--space-4);
-    padding-block: var(--space-5);
+    gap: var(--space-5);
+    min-height: 60px;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--surface) 80%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--surface) 84%, transparent);
+    backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--ink) 30%, transparent);
+  }
+
+  :global(.night) .bar {
+    border-color: var(--line-soft);
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
   }
 
   .brand {
@@ -67,22 +104,28 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
     gap: var(--space-3);
     min-height: 44px;
     color: var(--ink);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font: 700 1.05rem / 1 var(--font-display);
+    letter-spacing: -0.02em;
     text-decoration: none;
+    white-space: nowrap;
   }
 
-  .mark {
-    color: var(--cyan);
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cyan) 50%, transparent));
+  /* A small disc of the aurora's colours: the mark of the site. */
+  .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: conic-gradient(var(--sky-blue), var(--violet), var(--sky-pink), var(--sky-green), var(--sky-blue));
   }
 
-  .core {
-    fill: var(--green);
+  :global(.night) .dot {
+    background: conic-gradient(var(--cyan), var(--violet), var(--magenta), var(--green), var(--cyan));
   }
 
-  .tools {
+  .links {
+    display: flex;
     gap: var(--space-5);
+    margin-left: auto;
   }
 
   .link {
@@ -90,21 +133,26 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
     align-items: center;
     min-height: 44px;
     color: var(--ink-2);
-    font-size: var(--text-s);
+    font-size: 0.95rem;
+    font-weight: 500;
     text-decoration: none;
   }
 
   .link:hover,
   .link[aria-current] {
-    color: var(--ink);
+    color: var(--accent);
   }
 
-  /* On a phone the name, the links and the switch would not fit on one line;
-     the projects follow the introduction, and the foot of every page links
-     the projects, the experience and the contact. */
-  @media (max-width: 559px) {
-    .link {
+  /* On a phone the name, the links, the switch and the CV would not fit on
+     one line; the projects follow the introduction, and the foot of every
+     page links the projects, the experience and the contact. */
+  @media (max-width: 759px) {
+    .links {
       display: none;
+    }
+
+    .langs {
+      margin-left: auto;
     }
   }
 
@@ -112,9 +160,8 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
   .langs {
     display: inline-flex;
     padding: 3px;
-    border: 1px solid var(--line-soft);
     border-radius: var(--radius-pill);
-    background: var(--glass);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
 
   .lang {
@@ -125,9 +172,9 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
     min-height: 36px;
     padding: 0 var(--space-3);
     border-radius: var(--radius-pill);
-    color: var(--muted);
-    font: 500 var(--label) / 1 var(--font-mono);
-    letter-spacing: 0.08em;
+    color: var(--ink-2);
+    font: 700 var(--label) / 1 var(--font-ui);
+    letter-spacing: 0.06em;
     text-decoration: none;
   }
 
@@ -136,17 +183,91 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
   }
 
   .lang[aria-current] {
-    background: color-mix(in srgb, var(--cyan) 16%, transparent);
-    color: var(--cyan);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+
+  :global(.night) .lang[aria-current] {
+    background: color-mix(in srgb, var(--cyan) 18%, transparent);
+    box-shadow: none;
+  }
+
+  .cv {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--surface);
+    font: 700 0.9rem / 1 var(--font-ui);
+    text-decoration: none;
+    transition: transform 0.25s var(--ease-reveal);
+  }
+
+  .cv:hover {
+    transform: translateY(-1px);
+  }
+
+  /* On a narrow phone, the CV leaves the bar: the contact section of every
+     page links it too. On the narrowest, the name and the switch tighten so
+     that the bar keeps to the screen. */
+  @media (max-width: 479px) {
+    .bar {
+      gap: var(--space-3);
+      padding-left: var(--space-4);
+    }
+
+    .cv {
+      display: none;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .bar {
+      gap: var(--space-2);
+      padding-left: var(--space-3);
+    }
+
+    .brand {
+      gap: var(--space-2);
+      font-size: 0.92rem;
+    }
+
+    .lang {
+      min-width: 38px;
+      padding: 0 var(--space-2);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cv {
+      transition: none;
+    }
   }
 
   /* On paper: the name, and the address of the site instead of its links. */
   @media print {
     .top {
+      position: static;
       padding-block: 0 var(--space-5);
     }
 
-    .tools {
+    .bar {
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .links,
+    .langs,
+    .cv,
+    .dot {
       display: none;
     }
 
@@ -154,14 +275,11 @@ const address = new URL(getRelativeLocaleUrl(lang), Astro.site).href.replace(/^h
       min-height: 0;
     }
 
-    .mark {
-      filter: none;
-    }
-
-    .top::after {
+    .bar::after {
       content: attr(data-address);
+      margin-left: auto;
       color: var(--muted);
-      font: 400 var(--text-s) / 1 var(--font-mono);
+      font: 400 var(--text-s) / 1 var(--font-ui);
     }
   }
 </style>

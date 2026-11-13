@@ -1,0 +1,216 @@
+---
+// A tile of frosted glass, the block the home and experience pages are made
+// of. `as` picks the element, so a tile keeps its meaning (a list item, an
+// article, a section) and not only its look; `n` is its place in its group,
+// for an entrance that plays tile after tile. Callers pass `n`, never
+// `style`. A tile adds no reveal of its own: a section's tiles get the
+// `reveal` class from their caller, while the first screen's never wait for
+// the scroll; a tile so marked also stands up as it comes into view. With a
+// mouse, its edge and its glass catch the light of the pointer, and it leans
+// a little towards it (see the styles).
+//
+// Overriding a tile from the parent: Astro scopes styles by attribute, so
+// `.tile` below weighs two classes, (0,2,0). A parent's rule on a tile's root
+// must name two classes or more (`.bento > .t-intro`, `.tile.card`,
+// `.tile.strength`); with one, the order of the bundled CSS decides.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'article' | 'section' | 'li';
+  n?: number;
+}
+
+// `rest` carries the parent's scope attribute to the root, so its styles
+// reach the tile.
+const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['tile', className]} style={n === undefined ? undefined : `--n: ${n}`} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  /* backdrop-filter is written once, unprefixed, as the header's is: the
+     build folds a -webkit- copy beside it into a single declaration, the
+     last written, so a -webkit- one last would leave Chrome without the
+     blur. Safari 18 and later read it unprefixed. The same goes for the mask
+     of the edge light below. */
+  .tile {
+    position: relative;
+    min-width: 0;
+    padding: var(--space-5);
+    border: 1px solid color-mix(in srgb, var(--surface) 85%, transparent);
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--surface) 66%, transparent);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(22px) saturate(1.5);
+  }
+
+  @media (max-width: 559px) {
+    .tile {
+      padding: 20px;
+    }
+  }
+
+  /* Below the first screen, a tile stands up as it comes into view, on top
+     of the reveal of global.css (it rises, grows a little and fades in):
+     marked in view, it lies back on its bottom edge, and stands up over a
+     second, the tiles of a row one after the other (--n). Waiting, it is
+     flat, and once up, flat again: it is 3D only while it stands up, and
+     pivoting on its bottom edge it never grows past its own width. Where
+     tiles are stacked one per row, on a phone, each comes into view on its
+     own and none waits for another. Only where the reveal runs, so never
+     without script or with less motion. */
+  :global(.reveal-on) .tile:global(.reveal) {
+    --stagger: calc(min(var(--n, 0), 3) * 90ms);
+    transition:
+      opacity 0.9s var(--ease-reveal) var(--stagger),
+      translate 0.9s var(--ease-reveal) var(--stagger),
+      scale 0.9s var(--ease-reveal) var(--stagger);
+  }
+
+  @media (max-width: 559px) {
+    :global(.reveal-on) .tile:global(.reveal) {
+      --stagger: 0s;
+    }
+  }
+
+  :global(.reveal-on) .tile:global(.reveal.is-in) {
+    animation: stand-up 1s var(--ease-reveal) var(--stagger) backwards;
+  }
+
+  @keyframes stand-up {
+    from {
+      transform: perspective(1000px) rotateX(24deg);
+      transform-origin: 50% 100%;
+    }
+
+    to {
+      transform-origin: 50% 100%;
+    }
+  }
+
+  /* With a mouse, two lights follow the pointer (its place, --mx and --my,
+     comes from the layout's script): a soft glow under it, between the
+     tile's glass and its words (the tile isolates what it holds, for the
+     CV's tile has no blur to do it), and a line of light along the edge,
+     nearest the pointer, brightest in the surface's colour. They wait at a
+     thousandth of opacity, as everything on the site does, never at 0. Not
+     motion, so they stay for anyone who asks for less; on a touch screen,
+     which has no pointer to follow, they are not drawn at all. */
+  @media (hover: hover) and (pointer: fine) {
+    .tile {
+      --glint: var(--surface);
+      isolation: isolate;
+    }
+
+    .tile:global(.night) {
+      --glint: var(--ink);
+    }
+
+    .tile::before,
+    .tile::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: var(--reveal-faint);
+      transition: opacity 0.35s ease;
+    }
+
+    .tile::before {
+      z-index: -1;
+      background: radial-gradient(
+        380px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in srgb, var(--violet) 26%, transparent),
+        color-mix(in srgb, var(--sky-blue) 10%, transparent) 40%,
+        transparent 70%
+      );
+    }
+
+    .tile:global(.night)::before {
+      background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--violet) 45%, transparent), transparent 70%);
+    }
+
+    .tile::after {
+      padding: 1.5px;
+      background: radial-gradient(
+        260px circle at var(--mx, 50%) var(--my, 50%),
+        var(--glint),
+        color-mix(in srgb, var(--violet) 85%, transparent) 25%,
+        color-mix(in srgb, var(--sky-blue) 45%, transparent) 45%,
+        transparent 70%
+      );
+      mask:
+        linear-gradient(var(--ink) 0 0) content-box,
+        linear-gradient(var(--ink) 0 0);
+      mask-composite: exclude;
+    }
+
+    .tile:hover::before,
+    .tile:hover::after {
+      opacity: 1;
+    }
+  }
+
+  /* And the tile leans towards the pointer, a few degrees (--tx, --ty), in
+     perspective, only while the layout's script marks it `tilting`: never
+     at rest, never without script, never while its top is under the sticky
+     header, which Safari would let a 3D box cover. A tile that holds
+     something to press, a chip, a button or a link, leans a third as much,
+     about a degree, so that what is under the pointer stays there (the two
+     tiles that are a link as a whole lean fully, Home.astro); so does one
+     that holds a chip that is only a label, as the experience page's
+     "Also" does, like the tiles beside it. One whose card is open stands
+     straight, as the card is placed where its chip would be on a flat
+     tile. Not during the home page's entrance, which moves the tiles
+     itself. The transitions of a tile below the first screen are listed in
+     full, its reveal's with them, as a list of its own would replace
+     global.css's and the stand-up's above (this rule comes after it, with
+     the same weight). */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .tile {
+      transition:
+        transform 0.5s var(--ease-reveal),
+        box-shadow 0.35s var(--ease-reveal);
+    }
+
+    :global(.reveal-on) .tile:global(.reveal) {
+      transition:
+        opacity 0.9s var(--ease-reveal) var(--stagger, 0s),
+        translate 0.9s var(--ease-reveal) var(--stagger, 0s),
+        scale 0.9s var(--ease-reveal) var(--stagger, 0s),
+        transform 0.5s var(--ease-reveal),
+        box-shadow 0.35s var(--ease-reveal);
+    }
+
+    .tile:has(:global(a[href])),
+    .tile:has(:global(button)),
+    .tile:has(:global(.chip)) {
+      --tilt: 0.3;
+    }
+
+    :global(html:not(.entering)) .tile:global(.tilting):hover:not(:has(:global(:popover-open))) {
+      transform: perspective(1000px) rotateX(calc(var(--tx, 0deg) * var(--tilt, 1))) rotateY(calc(var(--ty, 0deg) * var(--tilt, 1)));
+    }
+  }
+
+  /* On paper, a frame around the block, kept whole on its page, standing
+     straight whatever the screen was doing. */
+  @media print {
+    .tile {
+      background: none;
+      border-color: var(--line-soft);
+      box-shadow: none;
+      backdrop-filter: none;
+      break-inside: avoid;
+      transform: none !important;
+    }
+
+    .tile::before,
+    .tile::after {
+      display: none;
+    }
+  }
+</style>

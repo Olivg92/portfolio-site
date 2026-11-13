@@ -1,13 +1,20 @@
 ---
 // The Experience page, the same in both languages apart from its words: what
 // I do at work, told as problems solved, then the rest of the work, the tools
-// and where I use them, the path and the education. No script.
+// and where I use them, the path and the education. Each block is a tile of
+// frosted glass (Tile.astro), as on the home page. No script of its own, and
+// no entrance: its first screen is there at once.
+//
+// Printed, or saved as a PDF, it is the CV: three A4 pages at most
+// (scripts/check-experience.mjs, scripts/cv-pdf.mjs). Its words are the PDF's
+// text, which a recruiter's software reads: a figure keeps the words it has
+// on screen ("~15 min"), with no spoken copy beside it.
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Chip from './Chip.astro';
 import Icon from './Icon.astro';
-import Panel from './Panel.astro';
+import Tile from './Tile.astro';
 import ToolChip from './ToolChip.astro';
 import { experience } from '../experience';
 import { cvFile, cvPath } from '../cv';
@@ -23,23 +30,42 @@ const e = t.experience;
 // Words between backticks are code.
 const inline = (text: string) => text.split('`');
 const index = (i: number) => String(i + 1).padStart(2, '0');
+
+// A figure cut into what its tile styles: its digits, a sign (~ or +), and a
+// unit, smaller, which keeps the space before it, so that the figure still
+// reads "~15 min" to a screen reader and in the text of the PDF.
+const parts = (value: string) =>
+  value
+    .split(/(\d+)/)
+    .filter(Boolean)
+    .map((text) => ({ kind: /^\d/.test(text) ? 'value' : /\p{L}/u.test(text) ? 'unit' : 'sign', text }));
+
+// Words with a hyphen held whole: "on-prem" never breaks after its hyphen,
+// in the introduction or under a figure. Odd parts are those words.
+const whole = (text: string) => text.split(/(\S+-\S+)/);
 ---
 
 <Base lang={lang} title={e.title} description={e.description} path="experience/" preview="experience">
   <header class="intro wrap">
-    <p class="eyebrow">{e.eyebrow}</p>
-    <h1>{e.heading}</h1>
-    <p class="lede">{experience.lede[lang]}</p>
-    <div class="cv">
-      <Button href={cvPath(lang)} download={cvFile(lang)}>{t.cv.download}</Button>
+    <div class="lead">
+      <p class="eyebrow">{e.eyebrow}</p>
+      <h1>{e.heading}</h1>
+      <p class="lede">{whole(experience.lede[lang]).map((part, k) => (k % 2 ? <span class="whole">{part}</span> : part))}</p>
+      <div class="cv">
+        <Button href={cvPath(lang)} download={cvFile(lang)}>{t.cv.download}</Button>
+      </div>
     </div>
     <ul class="numbers" aria-label={e.numbers}>
       {
-        experience.metrics.map((metric) => (
-          <li>
-            <span class="value">{metric.value[lang]}</span>
-            <span class="caption">{metric.label[lang]}</span>
-          </li>
+        experience.metrics.map((metric, i) => (
+          <Tile as="li" class="stat" n={i}>
+            <p class:list={['big', { grad: metric.id === 'servers' }]}>
+              {parts(metric.value[lang]).map((part) => (
+                <span class={part.kind}>{part.text}</span>
+              ))}
+            </p>
+            <p class="caption">{whole(metric.label[lang]).map((part, k) => (k % 2 ? <span class="whole">{part}</span> : part))}</p>
+          </Tile>
         ))
       }
     </ul>
@@ -56,15 +82,15 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       {
         experience.problems.map((problem, i) => (
           <li id={problem.id}>
-            <Panel as="article" class="problem" aria-labelledby={`${problem.id}-title`}>
+            <Tile as="article" class="problem reveal" n={0} aria-labelledby={`${problem.id}-title`}>
               <div class="rail">
                 <span class="index" aria-hidden="true">
                   {index(i)}
                 </span>
                 <h3 id={`${problem.id}-title`}>{problem.title[lang]}</h3>
                 <ul class="cluster cascade" aria-label={t.stack}>
-                  {problem.stack.map((name, i) => (
-                    <li style={`--i: ${i}`}>
+                  {problem.stack.map((name, k) => (
+                    <li style={`--i: ${k}`}>
                       <ToolChip name={name} context={problem.id} lang={lang} />
                     </li>
                   ))}
@@ -76,7 +102,9 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
                     <span class="show">{e.showDetails}</span>
                     <span class="hide">{e.hideDetails}</span>
                   </span>
-                  <span class="ring"><Icon name="chevron-down" /></span>
+                  <span class="ring">
+                    <Icon name="chevron-down" />
+                  </span>
                 </summary>
                 <dl class="story">
                   <div class="reveal-part">
@@ -93,7 +121,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
                   </div>
                 </dl>
               </details>
-            </Panel>
+            </Tile>
           </li>
         ))
       }
@@ -102,26 +130,28 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   <section class="also wrap" aria-labelledby="also-title">
     <h2 id="also-title" class="reveal">{e.alsoTitle}</h2>
-    <ul class="lines">
-      {
-        experience.also.map((item) => (
-          <li class="reveal">
-            {item.ongoing && (
-              <Chip tone="amber" live>
-                {e.ongoing}
-              </Chip>
-            )}
-            <span>{item.text[lang]}</span>
-          </li>
-        ))
-      }
-    </ul>
+    <Tile class="also-tile reveal" n={0}>
+      <ul class="lines">
+        {
+          experience.also.map((item) => (
+            <li>
+              {item.ongoing && (
+                <Chip tone="amber" live>
+                  {e.ongoing}
+                </Chip>
+              )}
+              <span>{item.text[lang]}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Tile>
   </section>
 
   <section class="tools wrap" aria-labelledby="tools-title">
     <h2 id="tools-title" class="reveal">{e.stackTitle}</h2>
     <div class="columns">
-      <Panel class="column" data-tone="green">
+      <Tile class="column reveal" n={0} data-tone="green">
         <h3>{e.atWork}</h3>
         <ul class="cluster cascade">
           {
@@ -132,8 +162,8 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
             ))
           }
         </ul>
-      </Panel>
-      <Panel class="column" data-tone="cyan">
+      </Tile>
+      <Tile class="column reveal" n={1} data-tone="cyan">
         <h3>{e.inProjects}</h3>
         <ul class="cluster cascade">
           {
@@ -144,63 +174,74 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
             ))
           }
         </ul>
-      </Panel>
+      </Tile>
     </div>
   </section>
 
   <div class="history wrap">
     <section aria-labelledby="path-title">
       <h2 id="path-title" class="reveal">{e.pathTitle}</h2>
-      <ol class="timeline">
-        {
-          experience.path.map((step) => (
-            <li class="reveal">
-              <p class="when">{step.when[lang]}</p>
-              <h3>{step.role[lang]}</h3>
-              <p>{step.where[lang]}</p>
-            </li>
-          ))
-        }
-      </ol>
+      <Tile class="history-tile reveal" n={0}>
+        <ol class="steps">
+          {
+            experience.path.map((step) => (
+              <li>
+                <p class="when">{step.when[lang]}</p>
+                <h3>{step.role[lang]}</h3>
+                <p class="where">{step.where[lang]}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </Tile>
     </section>
     <section aria-labelledby="education-title">
       <h2 id="education-title" class="reveal">{e.educationTitle}</h2>
-      <ol class="timeline">
-        {
-          experience.education.map((degree) => (
-            <li class="reveal">
-              <p class="when">{degree.when[lang]}</p>
-              <h3>{degree.degree[lang]}</h3>
-              <p>{degree.note[lang]}</p>
-            </li>
-          ))
-        }
-      </ol>
-      <p class="languages reveal">
-        <span class="eyebrow">{e.languages}</span>
-        <span>{experience.languages[lang]}</span>
-      </p>
+      <Tile class="history-tile reveal" n={1}>
+        <ol class="steps">
+          {
+            experience.education.map((degree) => (
+              <li>
+                <p class="when">{degree.when[lang]}</p>
+                <h3>{degree.degree[lang]}</h3>
+                <p class="where">{degree.note[lang]}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="languages">
+          <span class="cap">{e.languages}</span>
+          <span>{experience.languages[lang]}</span>
+        </p>
+      </Tile>
     </section>
   </div>
 
   <section class="next wrap" aria-labelledby="next-title">
-    <Panel class="next-panel">
+    <Tile class="next-tile reveal" n={0}>
       <h2 id="next-title">{e.nextTitle}</h2>
       <p class="lede">{e.nextText}</p>
       <div class="cluster actions">
         <Button href={`${getRelativeLocaleUrl(lang)}#projects`}>{t.seeProjects}</Button>
         <Button href={getRelativeLocaleUrl(lang, 'platform-eks-gitops/')} variant="ghost">{t.takeTour}</Button>
       </div>
-    </Panel>
+    </Tile>
   </section>
 </Base>
 
 <style>
+  /* The introduction: who, what, the CV, and four figures, each a tile. On
+     a laptop the figures stand two by two beside the words. */
   .intro {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-7) 0;
+  }
+
+  .lead {
     display: grid;
     justify-items: start;
     gap: var(--space-5);
-    padding-block: var(--space-8) var(--space-7);
   }
 
   .intro h1 {
@@ -208,45 +249,117 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     max-width: 13em;
   }
 
-  /* The numbers, as on the control room's panels: the figure in mono, lit,
-     its caption below. */
+  /* On a phone, closer to the header, as the home page's first tile is, so
+     that the first figures show above the fold of an iPhone. */
+  @media (max-width: 559px) {
+    .intro {
+      padding-block: var(--space-2) 0;
+      gap: var(--space-4);
+    }
+
+    .lead {
+      gap: var(--space-4);
+    }
+
+    .intro .lede {
+      font-size: var(--text-m);
+    }
+
+    /* With a larger default font, the button's words wrap rather than push
+       the page past a 320 px screen, as the home page's calls do. */
+    .cv :global(.btn) {
+      padding-block: var(--space-2);
+      line-height: 1.2;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
   .numbers {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
-    width: 100%;
-    margin: var(--space-4) 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .numbers li {
+  @media (min-width: 720px) {
+    .numbers {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .intro {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: end;
+      column-gap: var(--space-7);
+    }
+
+    .numbers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* A figure as on the home page: large, in the display face; its unit
+     smaller and grey. Its size is held to its tile's width too (36cqi: the
+     widest, "~15 min", takes about 2.6 em), so that it never runs past the
+     tile, whatever the screen or the reader's default font size. The tile
+     can be a size container: it holds no chip, so nothing in it opens a
+     card that the containment would catch. */
+  .tile.stat {
+    container-type: inline-size;
     display: grid;
     align-content: start;
     gap: var(--space-2);
-    padding: var(--space-4) var(--space-5);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius-m);
-    background: color-mix(in srgb, var(--card) 70%, transparent);
   }
 
-  .value {
-    color: var(--cyan);
-    font: 600 clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem) / 1.1 var(--font-mono);
-    letter-spacing: -0.02em;
-    text-shadow: var(--glow-cyan);
+  .big {
+    color: var(--ink);
+    font: 800 min(clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem), 36cqi) / 1 var(--font-display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .unit {
+    color: var(--muted);
+    font-size: 0.45em;
+    letter-spacing: 0;
+  }
+
+  /* The one figure in a gradient, as on the home page: every stop reads at
+     3:1 or more as large text, and `color` stays the accent, which is what
+     contrast checks read. Solid where colours are forced, and on paper. */
+  .grad {
+    color: var(--accent);
+    background: linear-gradient(
+      120deg,
+      var(--accent),
+      color-mix(in srgb, var(--violet) 55%, var(--accent)) 45%,
+      color-mix(in srgb, var(--cyan) 70%, var(--accent))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media (forced-colors: active) {
+    .grad {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
   }
 
   .caption {
-    color: var(--muted);
+    color: var(--ink-2);
     font-size: var(--text-s);
     line-height: 1.45;
   }
 
-  @media (min-width: 900px) {
-    .numbers {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  .whole {
+    white-space: nowrap;
   }
 
   .solved,
@@ -254,25 +367,34 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   .tools,
   .history,
   .next {
-    padding-block: var(--space-8) 0;
+    margin-top: var(--space-9);
+  }
+
+  @media (max-width: 559px) {
+    .solved,
+    .also,
+    .tools,
+    .history,
+    .next {
+      margin-top: var(--space-8);
+    }
   }
 
   .head {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
     margin-bottom: var(--space-6);
   }
 
   /* The chips open a card: said once, quietly, above them. */
   .hint {
     color: var(--muted);
-    font: 500 var(--label) / 1.6 var(--font-mono);
-    letter-spacing: 0.04em;
+    font-size: var(--text-s);
   }
 
   .problems {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-3);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -282,29 +404,39 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     scroll-margin-top: var(--space-5);
   }
 
-  /* A problem reads as a case file: its title and tools on the side, the
-     story told in three steps, the last one lit, since it is what changed. */
-  .problem {
+  /* A problem reads as a case file: its number and title, its tools below,
+     the story told in three steps, the last one lit, since it is what
+     changed. Two classes, to weigh more than the tile's own rule. */
+  .tile.problem {
     display: grid;
     gap: var(--space-5);
+    padding: clamp(20px, 3vw, var(--space-6));
   }
 
+  /* The number sits on the title's first line, a quiet mark in the accent;
+     the tools take the whole width below. */
   .rail {
     display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-content: start;
+    align-items: baseline;
     justify-items: start;
-    gap: var(--space-4);
+    gap: var(--space-4) var(--space-3);
+  }
+
+  .rail > ul {
+    grid-column: 1 / -1;
   }
 
   .index {
-    color: var(--cyan);
-    font: 500 var(--label) / 1 var(--font-mono);
-    letter-spacing: 0.12em;
+    color: var(--accent);
+    font: 800 1rem / 1 var(--font-display);
+    font-variant-numeric: tabular-nums;
   }
 
   .rail h3 {
     font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
-    font-weight: 750;
+    font-weight: 800;
   }
 
   .story {
@@ -317,13 +449,16 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     display: grid;
     gap: var(--space-2);
     padding-left: var(--space-4);
-    border-left: 1px solid var(--line-soft);
+    border-left: 2px solid var(--line-soft);
   }
 
-  dt {
+  /* The labels of the story, as the tiles' small labels: grey caps. Scoped
+     here on purpose, never global: the guided tour has a `.cap` of its own. */
+  dt,
+  .cap {
     color: var(--muted);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
+    font: 700 var(--label) / 1.4 var(--font-ui);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
@@ -342,27 +477,11 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   .result dd {
     color: var(--ink);
-    font-weight: 600;
+    font-weight: 650;
   }
 
-  /* As a case arrives: its number and title. Then the problem, what I did
-     and the result, each as it comes into view (reveal-part), one after
-     the other when they arrive together. */
-  :global(.reveal-on) .problem .rail > :not(ul) {
-    transition:
-      opacity 0.7s var(--ease-reveal),
-      translate 0.7s var(--ease-reveal);
-  }
-
-  :global(.reveal-on) .problem:not(:global(.is-in)) .rail > :not(ul) {
-    opacity: var(--reveal-faint);
-    translate: 0 16px;
-  }
-
-  .rail > h3 {
-    transition-delay: 0.08s;
-  }
-
+  /* The problem, what I did and the result, each as it comes into view
+     (reveal-part), one after the other when they arrive together. */
   .story > div:nth-child(2) {
     transition-delay: 0.12s;
   }
@@ -372,7 +491,7 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   }
 
   @media (min-width: 900px) {
-    .problem {
+    .tile.problem {
       grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
       gap: var(--space-7);
     }
@@ -380,8 +499,8 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   /* On a phone, the story stacks under its title, and the seven problems
      would take seven screens: each shows its number, title and tools, and
-     its story unfolds from a line at the foot of the card, worded like the
-     story's own steps, its chevron in a lit ring. */
+     its story unfolds from a line at the foot of the card, its chevron in a
+     ring lit with the aurora. */
   .more > summary {
     display: flex;
     align-items: center;
@@ -390,10 +509,8 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     min-height: 48px;
     padding-top: var(--space-4);
     border-top: 1px solid var(--line-soft);
-    color: var(--cyan);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    color: var(--accent);
+    font: 700 0.95rem / 1.3 var(--font-ui);
     list-style: none;
     cursor: pointer;
     transition: margin-bottom 0.45s var(--ease-reveal);
@@ -407,11 +524,13 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   .ring {
     display: grid;
     place-items: center;
+    flex: none;
     width: 32px;
     height: 32px;
-    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
     border-radius: 50%;
-    box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 18%, transparent);
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--violet) 14%, transparent);
     transition:
       background-color 0.2s ease,
       border-color 0.2s ease;
@@ -430,8 +549,8 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
   /* Only under a mouse: on a phone, the hover would stay after the tap. */
   @media (hover: hover) {
     .more > summary:hover .ring {
-      border-color: var(--cyan);
-      background: color-mix(in srgb, var(--cyan) 10%, transparent);
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface));
     }
   }
 
@@ -446,12 +565,14 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
 
   /* The story unfolds: it opens to its height as it fades in, and folds
      back the same way. Its row grows from 0fr to 1fr, which every engine
-     animates, and its words stay shown until the folding ends. */
+     animates, and its words stay shown until the folding ends. Folded, it
+     waits at the page's faintest opacity, as everything does here, never at
+     0; it holds no link or button, and is not drawn at all once folded. */
   .more::details-content {
     display: grid;
     grid-template-rows: 0fr;
     overflow: hidden;
-    opacity: 0;
+    opacity: var(--reveal-faint);
     transition:
       grid-template-rows 0.45s var(--ease-reveal),
       opacity 0.35s ease,
@@ -495,15 +616,208 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     }
   }
 
+  .also h2,
+  .tools h2,
+  .history h2 {
+    margin-bottom: var(--space-5);
+  }
+
+  /* A word for a title ("Also", "Path", "Education") is set smaller than a
+     sentence, so that it does not stand like a poster over its tile. */
+  .also h2,
+  .history h2 {
+    font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
+  }
+
+  /* The rest of the work, a line each, in one tile; two columns on a wide
+     screen. */
+  .lines {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 900px) {
+    .lines {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-7);
+    }
+  }
+
+  /* Each line hangs from a small dot of the accent; what is under way says
+     so first, its chip on the same line as its words, and the chip's own
+     dot is then the line's only mark. */
+  .lines li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--ink-2);
+  }
+
+  .lines li::before {
+    content: '';
+    position: absolute;
+    top: 0.6em;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  .lines li:has(> :global(.chip))::before {
+    display: none;
+  }
+
+  .lines :global(.chip) {
+    margin-right: var(--space-2);
+  }
+
+  .columns {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 900px) {
+    .columns {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+
+  .tile.column {
+    --tone: var(--green);
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+  }
+
+  .tile.column[data-tone='cyan'] {
+    --tone: var(--cyan);
+  }
+
+  /* Where the tools are used, as a tile's small label, in the colour that
+     says it: green for production, cyan for the projects. */
+  .column h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--tone);
+    font: 700 var(--label) / 1.4 var(--font-ui);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .column h3::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 16%, transparent);
+  }
+
+  .history {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  /* Side by side on a wide screen, each tile as tall as the other. */
+  .history > section {
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  @media (min-width: 900px) {
+    .history {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+  }
+
+  /* The path and the education as the home page's career shows the path:
+     when, in the display face and lit, then the role or the degree, then
+     where or what. Stacked, as the tiles are half as wide as the home's;
+     when a tile has the whole width of a tablet, `when` takes a column of
+     its own, as on the home page. */
+  .steps {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'when'
+      'role'
+      'where';
+    row-gap: var(--space-1);
+  }
+
+  @media screen and (min-width: 560px) and (max-width: 899px) {
+    .steps li {
+      grid-template-columns: 8rem minmax(0, 1fr);
+      grid-template-areas:
+        'when role'
+        '. where';
+      column-gap: var(--space-5);
+    }
+  }
+
+  .when {
+    grid-area: when;
+    color: var(--accent);
+    font: 800 1rem / 1.4 var(--font-display);
+  }
+
+  .steps h3 {
+    grid-area: role;
+    font-size: var(--text-l);
+  }
+
+  .where {
+    grid-area: where;
+    color: var(--ink-2);
+  }
+
+  .languages {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-2);
+  }
+
+  .tile.next-tile {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+  }
+
+  .actions {
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
   /* On paper, or saved as a PDF: a CV of a few A4 pages. Every story shows,
      with nothing to press, each step's label running into its words; the
      path and the education sit side by side; the hint about tools, the
      button of the CV, which this paper is, and the links to the other pages
-     go. The timeline is drawn whole, whether its steps have come into view on
-     screen or not. */
+     go. A fine rule between blocks rather than a frame around each, and a
+     page may turn between two steps of a story, never inside one. */
   @media print {
     .more > summary,
-    .cv {
+    .cv,
+    .hint,
+    .actions {
       display: none;
     }
 
@@ -519,6 +833,16 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       padding-block: 0;
     }
 
+    .lead {
+      gap: var(--space-3);
+    }
+
+    /* Closer caps: at the page's 0.1em, the text layer of a PDF printed by
+       Chrome's headless shell cut words after a P ("EXP ERIENCE"). */
+    .intro .eyebrow {
+      letter-spacing: 0.04em;
+    }
+
     .intro h1 {
       max-width: none;
       font-size: var(--text-h1);
@@ -530,17 +854,39 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       margin-top: var(--space-2);
     }
 
-    .numbers li {
+    .numbers .tile.stat {
       gap: var(--space-1);
       padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-m);
     }
 
-    .value {
+    .big {
       font-size: 14pt;
     }
 
-    .hint {
-      display: none;
+    .grad {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+
+    .solved,
+    .also,
+    .tools,
+    .history,
+    .next {
+      margin-top: var(--space-8);
+    }
+
+    /* The tools open a page, so that their title never ends the one before
+       without them. Keeping them whole with break-inside: avoid did the same,
+       but Chrome then wrote the French bookmark of that title twice. */
+    .tools {
+      break-before: page;
+    }
+
+    .also h2,
+    .history h2 {
+      font-size: var(--text-h2);
     }
 
     .head {
@@ -549,21 +895,26 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
     }
 
     .problems,
-    .problem {
+    .tile.problem {
       gap: var(--space-3);
     }
 
-    /* A fine rule between blocks rather than a frame around each, and a page
-       may turn between two steps of a story, never inside one. */
-    .problems .problem,
-    .tools .column,
-    .next .next-panel {
+    .problems .tile.problem,
+    .also .tile.also-tile,
+    .tools .tile.column,
+    .history .tile.history-tile,
+    .next .tile.next-tile {
       padding: var(--space-4) 0 0;
       border: 0;
       border-top: 1px solid var(--line-soft);
       border-radius: 0;
       background: none;
       break-inside: auto;
+    }
+
+    .history .tile.history-tile {
+      padding-top: 0;
+      border-top: 0;
     }
 
     .rail,
@@ -580,12 +931,17 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       break-after: avoid;
     }
 
+    .index {
+      font-size: var(--text-s);
+    }
+
     .rail h3 {
       font-size: 12pt;
     }
 
     .story > div {
       display: block;
+      border-left-width: 1px;
     }
 
     dt {
@@ -597,9 +953,26 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       display: inline;
     }
 
+    .lines {
+      gap: var(--space-3);
+    }
+
     .lines li,
-    .timeline li {
+    .steps li {
       break-inside: avoid;
+    }
+
+    .lines li::before {
+      top: 0.45em;
+      width: 6px;
+      height: 6px;
+      box-shadow: none;
+    }
+
+    /* No ring on paper, where the tile has no padding left: the page's edge
+       would cut it in half. */
+    .column h3::before {
+      box-shadow: none;
     }
 
     .history {
@@ -607,209 +980,22 @@ const index = (i: number) => String(i + 1).padStart(2, '0');
       gap: var(--space-6);
     }
 
-    .timeline::before {
-      scale: none !important;
+    .steps {
+      gap: var(--space-3);
     }
 
-    .timeline li::before {
-      background-color: var(--cyan) !important;
-      box-shadow: none !important;
+    .steps li {
+      row-gap: 0;
     }
 
-    .actions {
-      display: none;
+    .when {
+      font-size: var(--text-s);
     }
-  }
 
-  .also h2,
-  .tools h2,
-  .history h2 {
-    margin-bottom: var(--space-5);
-  }
-
-  .lines {
-    display: grid;
-    gap: var(--space-4);
-    max-width: 52rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* Each line hangs from a small lit square, the way a list shows on a
-     control panel. */
-  .lines li {
-    position: relative;
-    padding-left: var(--space-5);
-    color: var(--ink-2);
-  }
-
-  /* What is under way says so first, on the same line as its words. */
-  .lines :global(.chip) {
-    margin-right: var(--space-2);
-  }
-
-  .lines li::before {
-    content: '';
-    position: absolute;
-    top: 0.62em;
-    left: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 2px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
-  }
-
-  .columns {
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  .column {
-    --tone: var(--green);
-    display: grid;
-    align-content: start;
-    gap: var(--space-5);
-  }
-
-  .column[data-tone='cyan'] {
-    --tone: var(--cyan);
-  }
-
-  .column h3 {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    color: var(--tone);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .column h3::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: 0 0 10px currentColor;
-  }
-
-  @media (min-width: 900px) {
-    .columns {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    .languages {
+      margin-top: var(--space-4);
+      padding-top: 0;
+      border-top: 0;
     }
-  }
-
-  .history {
-    display: grid;
-    gap: var(--space-8);
-  }
-
-  @media (min-width: 900px) {
-    .history {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-7);
-    }
-  }
-
-  /* A line down the side, a lit point at each step. */
-  .timeline {
-    position: relative;
-    display: grid;
-    gap: var(--space-6);
-    margin: 0;
-    padding: 0 0 0 var(--space-5);
-    border-left: 1px solid var(--line-soft);
-    list-style: none;
-  }
-
-  .timeline li {
-    position: relative;
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .timeline li::before {
-    content: '';
-    position: absolute;
-    top: 0.2em;
-    left: calc(-1 * var(--space-5) - 4px);
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan);
-  }
-
-  /* Over the faint track, a lit line. */
-  .timeline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -1px;
-    width: 1px;
-    background: linear-gradient(var(--cyan), color-mix(in srgb, var(--cyan) 20%, transparent));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
-    transform-origin: top;
-  }
-
-  /* Once the first step is in, the lit line draws itself down, and each
-     point lights up as its step arrives. */
-  :global(.reveal-on) .timeline::before {
-    transition: scale 1.6s var(--ease-reveal) 0.2s;
-  }
-
-  :global(.reveal-on) .timeline:not(:has(> li:global(.is-in)))::before {
-    scale: 1 0;
-  }
-
-  :global(.reveal-on) .timeline li::before {
-    transition:
-      background-color 0.6s ease 0.4s,
-      box-shadow 0.6s ease 0.4s;
-  }
-
-  :global(.reveal-on) .timeline li:not(:global(.is-in))::before {
-    background-color: var(--line-soft);
-    box-shadow: none;
-  }
-
-  .when {
-    color: var(--cyan);
-    font: 500 var(--label) / 1.4 var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .timeline h3 {
-    font-size: var(--text-l);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.25;
-  }
-
-  .timeline p:not(.when) {
-    color: var(--ink-2);
-  }
-
-  .languages {
-    display: grid;
-    gap: var(--space-2);
-    margin-top: var(--space-6);
-    color: var(--ink-2);
-  }
-
-  .next-panel {
-    display: grid;
-    justify-items: start;
-    gap: var(--space-4);
-  }
-
-  .actions {
-    gap: var(--space-3);
-    margin-top: var(--space-2);
   }
 </style>

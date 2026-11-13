@@ -5,7 +5,7 @@
 // in the page's language, as plain SVG, in two layouts: one for a wide
 // screen, and one for a phone, the same elements tightened for the small
 // frame a phone pins at the top of the screen.
-import { logos, type LogoName } from '../logos';
+import { logoBody, logos, type LogoName } from '../logos';
 import type { Lang } from '../i18n';
 import { steps } from './steps';
 
@@ -462,7 +462,7 @@ export function tourScene(lang: Lang) {
     `${all.map((n) => `#tour-scene[data-step="${n}"] .arrow.s${n} .pk`).join(', ')} { opacity: 1; }`,
     '#tour-scene[data-step="10"] .d10 { opacity: 0.2; }',
     ...[1, 3, 4, 5, 9, 10, 12, 18].map((n) => `#tour-scene[data-step="${n}"] .h${n} > rect:first-child { stroke: var(--amber); stroke-opacity: 1; stroke-width: 1.8; filter: url(#tour-glow); }`),
-    '#tour-scene[data-step="10"] .h10 .chip-r { fill: color-mix(in srgb, var(--amber) 14%, var(--night)); }',
+    '#tour-scene[data-step="10"] .h10 .chip-r { fill: color-mix(in srgb, var(--amber) 14%, var(--bg)); }',
     '#tour-scene[data-step="10"] .h10 .chip-t { fill: var(--amber); font-weight: 700; }',
     '#tour-scene[data-step="17"] .hok17 > rect:first-child { stroke: var(--green); stroke-opacity: 1; stroke-width: 1.8; filter: url(#tour-glow); }',
     '#tour-scene[data-step="12"] .g12 > rect:first-child, #tour-scene[data-step="13"] .g13 > rect:first-child { fill: none; stroke-dasharray: 7 5; }',
@@ -476,7 +476,7 @@ export function tourScene(lang: Lang) {
   ].join('\n');
 
   const symbols =
-    [...used].map((name) => `<symbol id="tl-${name}" viewBox="${logos[name].viewBox}">${logos[name].body}</symbol>`).join('') +
+    [...used].map((name) => `<symbol id="tl-${name}" viewBox="${logos[name].viewBox}">${logoBody(name, 'night')}</symbol>`).join('') +
     '<symbol id="tl-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/></g></symbol>';
   // The glow of a flow's line spans a fixed region of the drawing: one
   // measured on the line, which a vertical line gives no width, would hide it.

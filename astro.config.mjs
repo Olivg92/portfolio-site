@@ -26,22 +26,39 @@ export default defineConfig({
       filter: (page) => !new URL(page).pathname.startsWith('/404'),
     }),
   ],
-  // Geist for text, Geist Mono for commands and labels, served by this site
-  // rather than by a font CDN. The files come from the Fontsource packages,
-  // Latin subset only: it covers English and French. Astro adds the preload
-  // links, and fallback faces sized like Geist so the text does not jump when
-  // the font arrives.
+  // Bricolage Grotesque for headings, Manrope for text, Geist Mono for the
+  // terminal transcripts of the guided tour, served by this site rather than
+  // by a font CDN. The files come from the Fontsource packages, Latin subset
+  // only: it covers English and French. Bricolage comes with its optical size
+  // axis, which draws large headings tighter than small ones. Astro adds the
+  // preload links, and fallback faces sized like each font so the text does
+  // not jump when it arrives.
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'Geist',
-      cssVariable: '--font-geist',
+      name: 'Bricolage Grotesque',
+      cssVariable: '--font-bricolage',
       fallbacks: ['system-ui', 'sans-serif'],
       options: {
         variants: [
           {
-            src: ['@fontsource-variable/geist/files/geist-latin-wght-normal.woff2'],
-            weight: '100 900',
+            src: ['@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2'],
+            weight: '200 800',
+            style: 'normal',
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'Manrope',
+      cssVariable: '--font-manrope',
+      fallbacks: ['system-ui', 'sans-serif'],
+      options: {
+        variants: [
+          {
+            src: ['@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2'],
+            weight: '200 800',
             style: 'normal',
           },
         ],

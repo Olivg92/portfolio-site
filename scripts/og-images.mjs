@@ -1,7 +1,7 @@
 // Draws the pictures that link previews show (LinkedIn, Slack, a message),
-// from the built site itself, 1200 by 630 in each language: the home page's
-// introduction beside its isometric view, a step of the guided tour, and the
-// experience page's introduction with its numbers.
+// from the built site itself, 1200 by 630 in each language: the first tiles
+// of the home page, a step of the guided tour, and the experience page's
+// introduction with its numbers.
 // Run against a served build, then commit what changed in public/og/:
 //   node scripts/og-images.mjs http://localhost:4321/
 // A preview is fetched once and cached by whoever shows it, so the pictures
@@ -17,9 +17,13 @@ const shots = [
   {
     name: 'home',
     path: '',
-    // The header goes; the introduction and the drawing fill the picture.
-    css: '.top, .skip { display: none !important; } .hero { min-height: 630px !important; padding-block: 0 !important; }',
-    wait: 3500,
+    // The header goes; the first tiles fill the picture. `header.top`, as
+    // the faces of the flagship's slabs are `.top` too.
+    css: 'header.top, .skip { display: none !important; } .hero { padding-block: 24px 0 !important; }',
+    // The page at rest from its first frame: with less motion, the
+    // entrance does not play, so the picture never depends on its timing.
+    reducedMotion: true,
+    wait: 1500,
   },
   {
     name: 'tour',
@@ -32,8 +36,9 @@ const shots = [
   {
     name: 'experience',
     path: 'experience/',
-    // The header goes; the title, the introduction and the numbers fill it.
-    css: '.top, .skip { display: none !important; } .intro { padding-block: 56px 0 !important; }',
+    // The header goes; the introduction, centred, fills the picture: the
+    // title, the words, the CV and the four figures beside them.
+    css: 'header.top, .skip { display: none !important; } .intro { min-height: 630px; align-content: center; padding: 0 56px !important; }',
     wait: 1500,
   },
 ];
@@ -42,7 +47,7 @@ const chrome = await browser();
 try {
   for (const lang of ['en', 'fr']) {
     for (const shot of shots) {
-      const page = await chrome.page({ width: 1200, height: 630 });
+      const page = await chrome.page({ width: 1200, height: 630, reducedMotion: shot.reducedMotion ?? false });
       await page.goto(`${base}${lang === 'en' ? '' : 'fr/'}${shot.path}`);
       if (shot.css) await page.style(shot.css);
       if (shot.step) {
