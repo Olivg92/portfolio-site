@@ -13,10 +13,10 @@
 //   of the HTML, and it did count up on the way;
 // - while it plays, no link or button, nor anything around one, is at
 //   opacity 0, as Safari on iPhone drops the click of a tap on a link that
-//   turns visible from 0; a press on a link or a button of a tile reaches
-//   that tile, never the plate under it; nothing moves in the layout (each
-//   tile, the name and each figure keep their place and size), the glow
-//   under the plate never brightens again once it fades, and nothing
+//   turns visible from 0; a press on a link or a button of a tile lands in
+//   a tile, never on the plate or the page under it; nothing moves in the
+//   layout (each tile, the name and each figure keep their place and size),
+//   the glow under the plate never brightens again once it fades, and nothing
 //   reaches past the sides of the screen, nor later as the blocks below rise
 //   into view (the tablet on its side, 1024 px, is where the turned plate
 //   comes closest to them);
@@ -107,13 +107,15 @@ const watch = ([width, names]) => {
     for (const target of document.querySelectorAll('.bento :is(a[href], button)')) {
       for (let node = target; node; node = node.parentElement) motion.low = Math.min(motion.low, Number(getComputedStyle(node).opacity));
       // A press in the middle of it, where it is drawn on the screen, lands
-      // in a tile: one tile may still float over another, but never may
-      // the plate itself, an empty box, take it.
+      // in a tile: one tile may still float over another, but nothing else
+      // may take it, neither the plate itself, an empty box, nor what lies
+      // under the plate once the plate lets presses through.
       const box = target.getBoundingClientRect();
       const [x, y] = [box.left + box.width / 2, box.top + box.height / 2];
       if (!box.width || x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
       const hit = document.elementFromPoint(x, y);
-      if (hit?.closest('.bento') && !hit.closest('.bento > .tile')) motion.missed ??= `${target.textContent.trim().slice(0, 24)} at ${Math.round(performance.now() - motion.start.at)} ms`;
+      const taker = hit ? `${hit.nodeName}${hit.id ? `#${hit.id}` : ''}${hit.classList.length ? `.${[...hit.classList].join('.')}` : ''}` : 'nothing';
+      if (!hit?.closest('.bento > .tile')) motion.missed ??= `${target.textContent.trim().slice(0, 24)} at ${Math.round(performance.now() - motion.start.at)} ms, pressed at ${Math.round(x)}, ${Math.round(y)}, taken by ${taker}`;
     }
     motion.values.push([...document.querySelectorAll('.bento .value[data-count]')].map((el) => el.textContent));
     const ground = document.querySelector('.ground');
@@ -256,7 +258,7 @@ const entrance = (url, other, plate, check) => async (page) => {
     `the figures counted up on the way (${[...new Set(motion.values.map((row) => row[0]))].slice(0, 6).join(', ')}…)`,
   );
   check(motion.low > 0, `no link or button, nor anything around one, at opacity 0 while it plays (lowest ${motion.low})`);
-  check(!motion.missed, `a press on a link or a button reaches its tile while it plays, never the plate under it${motion.missed ? ` (${motion.missed})` : ''}`);
+  check(!motion.missed, `a press on a link or a button lands in a tile while it plays, never on the plate or the page under it${motion.missed ? ` (${motion.missed})` : ''}`);
   check(
     motion.start !== null && motion.end !== null && !motion.moved && JSON.stringify(motion.start.boxes) === JSON.stringify(motion.end.boxes),
     'nothing moves in the layout: tiles, name and figures keep their place and size',
