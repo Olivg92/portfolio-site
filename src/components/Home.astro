@@ -4,8 +4,8 @@
 // the CV, years, place and languages, a few figures, the flagship project and
 // the tools. Then the strengths, the career and the two projects.
 //
-// Hooks kept for the entrance and the effects to come, under stable names:
-// the grid is `.bento`, its tiles `.tile` with `--n` and an area class
+// Hooks of the entrance (styles at the end) and the effects to come, stable
+// names: the grid is `.bento`, its tiles `.tile` with `--n` and an area class
 // (`t-intro` … `t-cv`); `.rise` with `--d` for what rises after the name;
 // `#name` for the name; `.value[data-count]` for a figure that counts up;
 // `svg.slabs` and its `.slab.s1` to `.s3` for the flagship's drawing.
@@ -112,7 +112,150 @@ const clone = parts(demo);
     type="application/ld+json"
     set:html={jsonLd(profilePage(lang, new URL(getRelativeLocaleUrl(lang), Astro.site), Astro.site!))}
   />
+  <script is:inline slot="head">
+    // The entrance of the home page (see its styles below), the first look a
+    // visitor gets at it: once per visit (a tab), never for anyone who asks
+    // for less motion, and without script the page is simply at rest. It
+    // runs in the head, so that the first frame drawn is already the first
+    // of the entrance, and holds it there, paused, until the first screen,
+    // the styles and the fonts are in (the script after the first screen
+    // says when) and the page is visible. Timers only, never animation
+    // frames: WebKit does not always draw a frame for a page whose
+    // animations are paused, and a prototype stayed frozen there with its
+    // figures at 0. Whatever happens, the page comes to rest, flat, each
+    // figure at the value the HTML holds: 1.5 s after it is first visible
+    // without a start, it lets go; started, it ends with its animations,
+    // 2.4 s later at most. The visit counts as seen as soon as the page has
+    // been shown, played or not, so that it never plays after the visitor
+    // has read the page; and a visitor who comes to a section of it
+    // (/#projects) or from another page of the site has seen it already.
+    (() => {
+      const root = document.documentElement;
+      const key = 'home-entrance';
+      if (!matchMedia('screen and (prefers-reduced-motion: no-preference)').matches) return;
+      const mark = () => {
+        try {
+          sessionStorage.setItem(key, '1');
+        } catch {}
+      };
+      try {
+        if (sessionStorage.getItem(key)) return;
+      } catch {
+        return;
+      }
+      let from = '';
+      try {
+        from = new URL(document.referrer).origin;
+      } catch {}
+      if (location.hash.length > 1 || from === location.origin) return mark();
+      root.classList.add('entering', 'entering-wait');
+      let state = 'waiting';
+      let ready = false;
+      let release;
+      let ticker;
+      let began;
+      const figures = () => [...document.querySelectorAll('.bento .value[data-count]')];
+      const finish = () => {
+        state = 'done';
+        clearTimeout(release);
+        clearInterval(ticker);
+        mark();
+        root.classList.remove('entering', 'entering-wait');
+        for (const figure of figures()) {
+          figure.textContent = figure.dataset.count;
+          figure.style.removeProperty('min-width');
+        }
+      };
+      // Each figure counts up from 0 to the value the HTML holds, one after
+      // the other in the order of their tiles, its width held at that
+      // value's, so that nothing beside it moves.
+      const count = () => {
+        const list = figures();
+        const widths = list.map((figure) => getComputedStyle(figure).width);
+        list.forEach((figure, i) => {
+          figure.style.minWidth = widths[i];
+          figure.textContent = '0';
+        });
+        ticker = setInterval(() => {
+          let done = true;
+          list.forEach((figure, i) => {
+            const p = Math.min(1, Math.max(0, (performance.now() - began - 350 - 50 * i) / 1000));
+            figure.textContent = String(Math.round(Number(figure.dataset.count) * (1 - (1 - p) ** 3)));
+            if (p < 1) done = false;
+          });
+          if (done) clearInterval(ticker);
+        }, 16);
+      };
+      // Its animations start on the first frame drawn after the start, which
+      // may come late: if one is still on its way at 1.7 s, the end waits for
+      // it, until 2.4 s after the start at most.
+      const names = ['plate', 'plate-phone', 'drop', 'ground', 'shine', 'rise', 'bloom'];
+      const end = () => {
+        const left = Math.max(
+          0,
+          ...document
+            .getAnimations()
+            .filter((animation) => names.includes(animation.animationName) && animation.playState === 'running')
+            .map((animation) => animation.effect.getComputedTiming().endTime - (animation.currentTime ?? 0)),
+        );
+        const room = began + 2400 - performance.now();
+        if (left > 0 && room > 0) setTimeout(finish, Math.min(left + 20, room));
+        else finish();
+      };
+      const start = () => {
+        if (state !== 'waiting' || !ready || document.visibilityState !== 'visible') return;
+        // Scrolled while it waited: the visitor is reading already.
+        if (scrollY > 0) return finish();
+        state = 'playing';
+        began = performance.now();
+        clearTimeout(release);
+        mark();
+        root.classList.remove('entering-wait');
+        count();
+        setTimeout(end, 1700);
+      };
+      // The 1.5 s count from when the page is first visible: a page opened
+      // behind another tab waits there, paused, for the visitor to come.
+      const arm = () => {
+        if (release || state !== 'waiting' || document.visibilityState !== 'visible') return;
+        release = setTimeout(() => state === 'waiting' && finish(), 1500);
+      };
+      // Ready once the script after the first screen has run, which the
+      // browser runs only once the styles are in (WebKit fires
+      // DOMContentLoaded before them, at the end of a long page), and the
+      // fonts of the name and of the text are in. Only the first family of
+      // each is waited for: the fallback beside it is a local font, missing
+      // on a phone without Arial, and its error would end the wait at once.
+      // A font still on its way at 1.5 s leaves the page at rest: the
+      // entrance never plays in a fallback font about to be swapped out,
+      // whose figures would be held at the wrong widths. One that fails
+      // (blocked, missing) ends the wait at once, like a missing local
+      // font: the entrance then plays in the fallback, which stays.
+      addEventListener(
+        'home-hero',
+        () => {
+          const face = (element) => {
+            const style = getComputedStyle(element);
+            return `${style.fontWeight} 16px ${style.fontFamily.split(',')[0]}`;
+          };
+          const fonts = document.fonts ? [document.getElementById('name'), document.body].map((element) => document.fonts.load(face(element)).catch(() => {})) : [];
+          Promise.all(fonts).then(() => {
+            ready = true;
+            start();
+          });
+        },
+        { once: true },
+      );
+      document.addEventListener('visibilitychange', () => {
+        arm();
+        start();
+      });
+      arm();
+      addEventListener('pagehide', finish);
+    })();
+  </script>
   <section class="hero bento wrap" aria-labelledby="name">
+    <div class="ground" aria-hidden="true"></div>
     <Tile class="t-intro" n={0}>
       <p class="role"><span class="monogram" aria-hidden="true">OG</span>{t.jobTitle}</p>
       <h1 id="name"><span class="line">Olivier</span> <span class="line">Guandalini</span></h1>
@@ -221,6 +364,12 @@ const clone = parts(demo);
       <a class="other" href={cvPath(other)} download={cvFile(other)} hreflang={other}>{t.home.cvOther}</a>
     </Tile>
   </section>
+  <script is:inline>
+    // The first screen is in, and so are the styles: a browser runs a script
+    // only once the stylesheets above it are in. The entrance, if it waits
+    // (the head's script), may start.
+    dispatchEvent(new Event('home-hero'));
+  </script>
 
   <section id="strengths" class="strengths wrap" aria-labelledby="strengths-title">
     <div class="head reveal">
@@ -895,6 +1044,208 @@ const clone = parts(demo);
   .school .go :global(.icon) {
     vertical-align: -3px;
     margin-left: 6px;
+  }
+
+  /* A figure that counts up keeps its width: its digits are set right in
+     a box held at the width of the final value while they count. */
+  .value[data-count] {
+    display: inline-block;
+    text-align: end;
+  }
+
+  /* The glow under the plate during the entrance, which ends at a
+     thousandth of its light and stays there until the entrance is over;
+     none at rest. */
+  .ground {
+    display: none;
+    position: absolute;
+    inset: 6% 3%;
+    border-radius: 60px;
+    pointer-events: none;
+    opacity: var(--reveal-faint);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent), transparent);
+    filter: blur(26px);
+  }
+
+  /* The entrance, about 1.5 s, once per visit (the script in the head sets
+     `entering`): the first screen starts as an exploded isometric view, the
+     plate of tiles turned and laid down over a glow, each tile floating
+     above it at its own height; the tiles land one after the other with a
+     slight bounce, the plate stands up to face the visitor, a light runs
+     through the name, the words below it rise and the figures count up.
+     Transforms and opacity, and the light in the name, over a page already
+     in place: the layout never moves. The plate is a 3D scene only while it
+     plays (Safari paints the tiles of a 3D scene over the sticky header):
+     the class goes once it is over, and the page is flat. Nothing in it
+     starts below a fifth of its opacity. While `entering-wait` holds, it
+     waits on its first frame. Each tile lands in its turn (--land, its --n
+     unless a narrow screen places it elsewhere). */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    /* While a tile bounces it dips a few pixels below the plate's own
+       plane, and a 3D hit test then gives a press on its links to the
+       plate, an empty box (Safari on iPhone sends no click at all): only
+       the tiles take presses while it plays, and the gaps between them
+       hold nothing to press. */
+    :global(html.entering) .bento {
+      transform-style: preserve-3d;
+      transform-origin: 50% 38%;
+      animation: plate 1.5s backwards;
+      pointer-events: none;
+    }
+
+    :global(html.entering) .bento > .tile {
+      --land: var(--n, 0);
+      animation: drop 0.64s cubic-bezier(0.3, 1.45, 0.5, 1) calc(var(--land) * 40ms) backwards;
+      pointer-events: auto;
+    }
+
+    :global(html.entering) .ground {
+      display: block;
+      transform: translateZ(-2px);
+      animation: ground 1.5s ease-out both;
+    }
+
+    :global(html.entering) #name {
+      background: linear-gradient(100deg, var(--ink) 0 34%, var(--violet) 43%, var(--sky-blue) 50%, var(--sky-pink) 57%, var(--ink) 66% 100%) 0 0 / 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 0.9s ease-in-out 0.62s backwards;
+    }
+
+    /* Where colours are forced, the name stays solid. */
+    @media (forced-colors: active) {
+      :global(html.entering) #name {
+        background: none;
+        -webkit-text-fill-color: currentColor;
+      }
+    }
+
+    :global(html.entering) .rise {
+      animation: rise 0.8s var(--ease-reveal) var(--d, 0.4s) backwards;
+    }
+
+    :global(html.entering .aurora-in) {
+      animation: bloom 1.45s var(--ease-reveal) backwards;
+    }
+
+    /* Turned, the plate reaches up to about 40 px past the right side of
+       a screen 1000 to about 1270 px wide while it stands up, which would
+       let the page scroll sideways, or flash a horizontal scrollbar, for
+       half a second. main spans the screen, so clipping it there hides
+       nothing that was in view. clip rather than hidden: it makes no
+       scroll container, so the sticky header and the plate's 3D are
+       untouched. */
+    :global(html.entering main) {
+      overflow-x: clip;
+    }
+
+    :global(html.entering-wait) :is(.bento, .bento > .tile, .ground, #name, .rise),
+    :global(html.entering-wait .aurora-in) {
+      animation-play-state: paused;
+    }
+  }
+
+  /* Below 1000 px the grid is two columns, two to three screens tall:
+     turned, it would sweep far past the sides of the screen and out of
+     view, so it lies back like a sheet from its top edge and rises, its
+     tiles still landing one by one. Under 560 px the cluster's figure
+     sits beside the servers', and lands with it. */
+  @media screen and (max-width: 999px) and (prefers-reduced-motion: no-preference) {
+    :global(html.entering) .bento {
+      transform-origin: 50% 0;
+      animation-name: plate-phone;
+    }
+  }
+
+  @media screen and (max-width: 559px) and (prefers-reduced-motion: no-preference) {
+    :global(html.entering) .bento > .t-cluster {
+      --land: 2;
+    }
+  }
+
+  /* On a touch screen, a phone's, the tiles drop their blur while they
+     move, which would otherwise be redrawn for each of them at every frame
+     of the entrance; over a sky this soft it changes their look by a level
+     or two of colour, and it comes back as the entrance ends. */
+  @media screen and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+    :global(html.entering) .bento > .tile {
+      backdrop-filter: none;
+    }
+  }
+
+  @keyframes plate {
+    0% {
+      transform: perspective(2000px) rotateX(57deg) rotateZ(-36deg) scale(0.6) translateY(-5%);
+      animation-timing-function: linear;
+    }
+
+    34% {
+      transform: perspective(2000px) rotateX(57deg) rotateZ(-36deg) scale(0.61) translateY(-5%);
+      animation-timing-function: cubic-bezier(0.25, 0.7, 0.12, 1);
+    }
+
+    100% {
+      transform: none;
+    }
+  }
+
+  @keyframes plate-phone {
+    0% {
+      transform: perspective(900px) rotateX(-34deg) scale(0.9) translateY(18px);
+      animation-timing-function: linear;
+    }
+
+    30% {
+      transform: perspective(900px) rotateX(-34deg) scale(0.9) translateY(18px);
+      animation-timing-function: cubic-bezier(0.25, 0.7, 0.12, 1);
+    }
+
+    100% {
+      transform: none;
+    }
+  }
+
+  @keyframes drop {
+    from {
+      opacity: 0.35;
+      transform: translateZ(calc(70px + var(--land, 0) * 16px));
+    }
+  }
+
+  @keyframes ground {
+    0%,
+    40% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: var(--reveal-faint);
+    }
+  }
+
+  @keyframes shine {
+    from {
+      background-position: 100% 0;
+    }
+
+    to {
+      background-position: 0 0;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0.25;
+      translate: 0 12px;
+    }
+  }
+
+  @keyframes bloom {
+    from {
+      opacity: 0.2;
+      transform: scale(0.35);
+    }
   }
 
   /* On paper, the first screen in two columns, without the calls to

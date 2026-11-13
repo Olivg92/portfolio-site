@@ -177,6 +177,23 @@ jobs:
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           node scripts/check-experience.mjs http://localhost:4321/
 
+      # The entrance of the home page, in the same two browsers, on six
+      # screen sizes: it plays once per visit, for a visitor who lands on the
+      # page, never with less motion, held on its first frame while it waits;
+      # it moves nothing in the layout, leaves no link fully transparent nor
+      # a press on one to the plate or the page under it, and nothing past
+      # the sides of the screen, and ends at rest on its own timers, flat,
+      # each figure at the value of the HTML, even with its animations frozen
+      # or fonts that never come.
+      # --ipc=host gives the browsers the shared memory Playwright asks for
+      # in a container: this check composites a 3D scene of frosted tiles,
+      # and every run that validated it had it.
+      - name: Entrance of the home page, in Chrome and in WebKit
+        run: >-
+          docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
+          node scripts/check-motion.mjs http://localhost:4321/
+
       # Performance, accessibility, best practices and SEO: 90 or more on
       # each, in both languages, or the pull request fails.
       - name: Lighthouse

@@ -48,17 +48,30 @@ and the education.
   line at the foot of the card, growing and fading in, and folds back the same way: a native
   `<details>`, no script. A wide screen shows every story beside its title, as before, and so
   does paper.
-- **Motion that hides nothing.** Blocks rise into view as the page scrolls, and what they hold
-  follows in order, as on a product page. A few lines of script in the layout mark each block as
-  it comes into view, and CSS plays the animation; without script, or for anyone who asks for
-  less motion, everything is simply there. A block on its way is nearly transparent, never
-  fully: Safari on iPhone drops the click of a tap during which a link or a button turns visible
-  from opacity 0, so a tap on a chip while the next blocks arrive would only close the open
-  card. On a touch screen the lights behind the page fade before the top and bottom edges, where
-  Safari floats its bars and tints them with the page's colour; the sticky header draws its
-  glass on a bar inside it, not on itself, for the same reason. From page to page, the page fades into
-  the next while the header stays put (cross-document view transitions, CSS only), and on a
-  screen with a mouse a panel lifts under the pointer.
+- **Motion that hides nothing.** The home page opens with an entrance, the first time a visitor
+  lands on it in a tab: its first screen arrives as an exploded view, its tiles floating at
+  different heights above a tilted plate; they land with a slight bounce, the plate stands up to
+  face the visitor, a light runs through the name and the figures count up, in about a second
+  and a half (below 1000 px the plate lies back and rises rather than turn; above, what the
+  turning plate sweeps past the sides of a narrower screen is clipped at its edge, so the page
+  never scrolls sideways, and only the tiles take a press while they land). A few lines of
+  script in the head of the page hold it on its first frame until the first screen, its styles
+  and its fonts are in, and end it on timers, never on animation frames alone, which WebKit once
+  left frozen with the figures at 0: whatever happens, the page comes to rest, flat, each figure
+  at the value the HTML holds, and 1.5 s after it is shown without a start it simply shows at
+  rest. A visitor who comes to a section of the page, or from another of its pages, finds it at
+  rest. Lower down, blocks rise into view as the page scrolls, and what they hold follows in
+  order, as on a product page. A few lines of script in the layout mark each block as it comes
+  into view, and CSS plays the animation; without script, or for anyone who asks for less
+  motion, everything is simply there. At rest nothing is in 3D: Safari paints a box in 3D over
+  the sticky header, so the plate is 3D only while the entrance plays. A block on its way is
+  nearly transparent, never fully: Safari on iPhone drops the click of a tap during which a link
+  or a button turns visible from opacity 0, so a tap on a chip while the next blocks arrive
+  would only close the open card. On a touch screen the lights behind the page fade before the
+  top and bottom edges, where Safari floats its bars and tints them with the page's colour; the
+  sticky header draws its glass on a bar inside it, not on itself, for the same reason. From
+  page to page, the page fades into the next while the header stays put (cross-document view
+  transitions, CSS only), and on a screen with a mouse a panel lifts under the pointer.
 - **Tools that explain themselves.** Every tool on the site is a chip: a click, a tap, or on
   Chrome and Edge a pointer resting on it, opens a card with what the tool is and, on a
   project, what it does there. The tools and their words live in one catalogue,
@@ -137,23 +150,25 @@ Every pull request runs them, and a failure blocks the merge:
 | Types | `npm run check` (`astro check`) |
 | Dead links, internal and external, and anchors within a page | linkinator, crawling the built site; LinkedIn is skipped, as it answers anything but a browser with HTTP 999 |
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
-| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page |
+| The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page; a chip is pressed once the home page's entrance is over and its block has landed |
 | What search engines read | [`scripts/check-seo.mjs`](scripts/check-seo.mjs), reading the build: `robots.txt` names a sitemap of this build; the sitemap lists every indexable page, each with both languages, and nothing else; each such page has a title, a description, a canonical address pointing at itself and its `hreflang` links; the 404 asks not to be indexed and stays out; the structured data parses, the home pages describe Olivier with his LinkedIn and GitHub, and it has no `worksFor`, `affiliation`, `employee` or `memberOf` key, under any prefix |
 | The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The solved problems, folded on a phone | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one |
+| The entrance of the home page | [`scripts/check-motion.mjs`](scripts/check-motion.mjs) with Playwright, in Chrome and in WebKit, on a wide screen, a tablet upright and on its side, a phone upright and on its side, and a 320 px phone, in both languages: on a first visit the entrance holds every animation of it on its first frame while it waits, starts within 1.5 s, the plate lying back below 1000 px, and is over within 3 s; it leaves the page at rest, with no entrance class and no 3D anywhere, every figure at the value of the HTML after counting up; while it plays, no link or button is at opacity 0, a press on one lands in a tile, never on the plate or the page under it, nothing moves in the layout, the glow under the plate never brightens again, and nothing reaches past the sides of the screen, then or as the page scrolls on, even on the tablet on its side, where the turned plate has the least room; a reload, the other language, a link to a section or from another page shows the page at rest at once; never with less motion; with its animations frozen and animation frames stubbed out, or fonts that never come, it still ends at rest, never having played; a page opened behind another tab waits, paused, and plays once shown |
 | Performance, accessibility, best practices, SEO | Lighthouse CI on every page, in both languages, 90 or more on each |
 
 Actions are pinned by commit, and Dependabot raises the pull requests that move them. The tour
 check and the link previews drive Chrome through its DevTools protocol, with nothing to install
 but Chrome; against a served build (`npm run build && npm run preview`), `npm run check:tour`
-runs the tour's check. The checks of the cards and of the solved problems need Playwright and
-its browsers, which its image has:
+runs the tour's check. The checks of the cards, of the solved problems and of the home page's
+motion need Playwright and its browsers, which its image has (with `--ipc=host` for the last, as
+in CI):
 
 ```bash
-docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
+docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
   mcr.microsoft.com/playwright:v1.63.0-noble \
-  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs && node scripts/check-experience.mjs"
+  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs && node scripts/check-experience.mjs && node scripts/check-motion.mjs"
 ```
 
 ## Layout
@@ -205,6 +220,7 @@ scripts/
 ├── check-tour.mjs        # the guided tour, clicked through in Chrome
 ├── check-cards.mjs       # the tool cards, in Chrome and WebKit
 ├── check-experience.mjs  # the solved problems, folded and unfolded, in Chrome and WebKit
+├── check-motion.mjs      # the home page's entrance, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
 ├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page
