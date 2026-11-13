@@ -1087,6 +1087,37 @@ const clone = parts(demo);
     }
   }
 
+  /* With a mouse on the flagship tile, or the keyboard on its link, its
+     three slabs come apart (Slabs.astro eases them), as the layers of the
+     platform do in the guided tour. */
+  @media (prefers-reduced-motion: no-preference) {
+    .t-visual:has(.go:focus-visible) :global(.s1) {
+      transform: translateY(12px);
+    }
+
+    .t-visual:has(.go:focus-visible) :global(.s2) {
+      transform: translateY(-3px);
+    }
+
+    .t-visual:has(.go:focus-visible) :global(.s3) {
+      transform: translateY(-22px);
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .t-visual:hover :global(.s1) {
+      transform: translateY(12px);
+    }
+
+    .t-visual:hover :global(.s2) {
+      transform: translateY(-3px);
+    }
+
+    .t-visual:hover :global(.s3) {
+      transform: translateY(-22px);
+    }
+  }
+
   /* The glow under the plate during the entrance, which ends at a
      thousandth of its light and stays there until the entrance is over;
      none at rest. */
