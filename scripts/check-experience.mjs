@@ -419,7 +419,10 @@ for (const { name, engine, phone } of engines) {
         const url = `${base}${lang === 'en' ? '' : 'fr/'}experience/`;
         // WebKit's build for tests, on Linux, sometimes crashes on these
         // pages, as often with nothing done on them but waiting: the visit
-        // is then made again, and what it had found so far set aside.
+        // is then made again, and what it had found so far set aside. Its
+        // long visits, the page at rest above all, crash on about one try in
+        // five, so it gets five tries, and a clean page does not fail on luck.
+        const tries = name === 'WebKit' ? 5 : 3;
         for (let attempt = 1; ; attempt++) {
           const results = [];
           const crashed = await visit(browser, { device, options, lang, url, engine: name }, (ok, what) => results.push([ok, `${label} ${what}`]));
@@ -427,8 +430,8 @@ for (const { name, engine, phone } of engines) {
             for (const [ok, what] of results) expect(ok, what);
             break;
           }
-          if (attempt === 3) {
-            expect(false, `${label} the browser crashed on each of three visits`);
+          if (attempt === tries) {
+            expect(false, `${label} the browser crashed on each of ${tries} visits`);
             break;
           }
           note(`${label} the browser crashed, not a defect of the page: visiting it again`);
