@@ -334,8 +334,8 @@ code {
   }
 
   /* The paper tokens are light, so the page prints its own backgrounds, the
-     bullets and the timeline's points included, whatever the print dialog
-     says about background graphics. */
+     bullets and the dots of labels and chips included, whatever the print
+     dialog says about background graphics. */
   html {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
