@@ -179,11 +179,12 @@ jobs:
 
       # The entrance of the home page, in the same two browsers, on six
       # screen sizes: it plays once per visit, for a visitor who lands on the
-      # page, never with less motion; it moves nothing in the layout, leaves
-      # no link fully transparent nor a press on one to the plate under it,
-      # and nothing past the sides of the screen, and ends at rest on its own
-      # timers, flat, each figure at the value of the HTML, even with its
-      # animations frozen or fonts that never come.
+      # page, never with less motion, held on its first frame while it waits;
+      # it moves nothing in the layout, leaves no link fully transparent nor
+      # a press on one to the plate under it, and nothing past the sides of
+      # the screen, and ends at rest on its own timers, flat, each figure at
+      # the value of the HTML, even with its animations frozen or fonts that
+      # never come.
       # --ipc=host gives the browsers the shared memory Playwright asks for
       # in a container: this check composites a 3D scene of frosted tiles,
       # and every run that validated it had it.
