@@ -45,10 +45,10 @@ body {
    aurora (drawn by Base.astro): four soft lights, cyan and violet above,
    pink and green below. Each light is a gradient that fades out well inside
    its own box, and the frame clips them at the edge of the screen, so that
-   no edge shows when the home page's entrance moves the sky (Home.astro),
-   and nothing reaches past the screen. They never move on their own. By
-   night (the guided tour), the sky as it was: two glows, then a fine grain
-   so the dark is not flat. */
+   no edge shows when the home page's entrance or its pointer moves the sky
+   (Home.astro), and nothing reaches past the screen. They never move on
+   their own. By night (the guided tour), the sky as it was: two glows, then
+   a fine grain so the dark is not flat. */
 .aurora {
   position: fixed;
   inset: 0;

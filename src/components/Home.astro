@@ -1076,6 +1076,15 @@ const clone = parts(demo);
       transform: perspective(1000px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateY(-4px);
       box-shadow: var(--shadow-lift);
     }
+
+    /* And the sky leans a little away from the pointer, over 1.6 s (the
+       layout's script gives --px and --py); the frame of the aurora clips
+       it at the edge of the screen. Only here, as on the approved page:
+       the experience page is for reading. */
+    :global(.aurora-in) {
+      translate: calc(var(--px, 0) * -4vmax) calc(var(--py, 0) * -4vmax);
+      transition: translate 1.6s var(--ease-reveal);
+    }
   }
 
   /* The glow under the plate during the entrance, which ends at a

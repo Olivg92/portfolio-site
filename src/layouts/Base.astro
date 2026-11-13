@@ -96,21 +96,21 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
       }
     </script>
     {
-      /* By day only: the tiles' lights and lean (the tour, at night, has no
-         tile and no aurora). */
+      /* By day only: the tiles' lights and lean, and the sky's lean on the
+         home page (the tour, at night, has no tile and no aurora). */
       !night && (
         <script is:inline>
           // With a mouse, the pointer's place (Tile.astro and Home.astro use
           // it): a light follows it on a tile, along the edge and under it,
-          // and the tile leans a little towards it. Positions only: the
-          // styles decide what moves, and for anyone who asks for less
-          // motion nothing does but the light. A tile that leans is in 3D,
-          // and Safari paints a 3D box over the sticky header: so a tile
-          // leans (`tilting`) only while its top is below the header, never
-          // while the home page's entrance plays or while it stands up as it
-          // comes into view, and it stands flat at once, with no ease, as
-          // soon as the page scrolls. Pointer events come once a frame at
-          // most already.
+          // the tile leans a little towards it, and on the home page the sky
+          // leans the other way. Positions only: the styles decide what
+          // moves, and for anyone who asks for less motion nothing does but
+          // the light. A tile that leans is in 3D, and Safari paints a 3D
+          // box over the sticky header: so a tile leans (`tilting`) only
+          // while its top is below the header, never while the home page's
+          // entrance plays or while it stands up as it comes into view, and
+          // it stands flat at once, with no ease, as soon as the page
+          // scrolls. Pointer events come once a frame at most already.
           if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
             const root = document.documentElement;
             let current = null;
@@ -123,6 +123,11 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}favicon.svg`;
               'pointermove',
               (event) => {
                 if (event.pointerType !== 'mouse') return;
+                const sky = document.querySelector('.aurora-in');
+                if (sky) {
+                  sky.style.setProperty('--px', (event.clientX / innerWidth - 0.5).toFixed(3));
+                  sky.style.setProperty('--py', (event.clientY / innerHeight - 0.5).toFixed(3));
+                }
                 const tile = event.target instanceof Element ? event.target.closest('.tile') : null;
                 if (current && current !== tile) current.classList.remove('tilting');
                 current = tile;
