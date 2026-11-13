@@ -125,16 +125,19 @@ const watchEntrance = () => {
 };
 
 // The first screen: the title, its words, the CV and the four figures, each
-// fully shown and still, and nothing that holds them fading or moving them;
-// and no tile anywhere fully transparent. An animation that loops for ever,
-// a pulse, moves nothing into place: only one that ends counts.
+// fully shown and still, with all they hold (a figure's digits, its caption,
+// a shine on its gradient), and nothing that holds them fading or moving
+// them; and no tile anywhere fully transparent. An animation that loops for
+// ever, a pulse, moves nothing into place: only one that ends counts. An
+// element's own animations leave out those of what it holds, which are read
+// with subtree, pseudo-elements included.
 const first = () => {
-  const moving = (el) => el.getAnimations().some((animation) => animation.effect?.getTiming().iterations !== Infinity);
+  const moving = (el, deep) => el.getAnimations({ subtree: deep }).some((animation) => animation.effect?.getTiming().iterations !== Infinity);
   const shown = (el) => {
     for (let node = el; node; node = node.parentElement) {
-      if (getComputedStyle(node).opacity !== '1' || moving(node)) return false;
+      if (getComputedStyle(node).opacity !== '1' || moving(node, node === el)) return false;
     }
-    return true;
+    return [...el.querySelectorAll('*')].every((inner) => getComputedStyle(inner).opacity === '1');
   };
   const screen = [...document.querySelectorAll('.intro h1, .intro .lede, .intro .cv a, .numbers > .tile')];
   return {
