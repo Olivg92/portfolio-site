@@ -90,15 +90,20 @@ const marked = (problem) => problem.querySelector('.story > *').classList.contai
 const folded = (problem) => problem.querySelector('.story').getBoundingClientRect().height === 0;
 
 // A reader taps a line once its card has arrived: marked in view, and done
-// rising, as in check-cards.mjs. A card still on its way moves under the
-// finger, which then taps beside the line. Checked every 50 ms by a timer,
-// up to 3 s to be marked and 10 s to stop rising: a wait on animation frames,
-// which WebKit may hold back, could last the job's whole time.
+// rising or standing up, as in check-cards.mjs. A card still on its way
+// moves under the finger, which then taps beside the line. Checked every
+// 50 ms by a timer, up to 3 s to be marked and 10 s to stop moving: a wait on
+// animation frames, which WebKit may hold back, could last the job's whole
+// time. Endless animations (a live chip's ping) never end, and are not
+// waited for.
 const arrived = async (line) => {
   const wait = () => new Promise((done) => setTimeout(done, 50));
+  const moving = (animation) =>
+    animation.playState === 'running' &&
+    (animation instanceof CSSTransition || (animation instanceof CSSAnimation && animation.effect.getComputedTiming().iterations !== Infinity));
   const rising = () => {
     for (let node = line; node; node = node.parentElement) {
-      if (node.getAnimations().some((animation) => animation instanceof CSSTransition && animation.playState === 'running')) return true;
+      if (node.getAnimations().some(moving)) return true;
     }
     return false;
   };

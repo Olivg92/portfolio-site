@@ -5,8 +5,9 @@
 // for an entrance that plays tile after tile. Callers pass `n`, never
 // `style`. A tile adds no reveal of its own: a section's tiles get the
 // `reveal` class from their caller, while the first screen's never wait for
-// the scroll. With a mouse, its edge and its glass catch the light of the
-// pointer, and it leans a little towards it (see the styles).
+// the scroll; a tile so marked also stands up as it comes into view. With a
+// mouse, its edge and its glass catch the light of the pointer, and it leans
+// a little towards it (see the styles).
 //
 // Overriding a tile from the parent: Astro scopes styles by attribute, so
 // `.tile` below weighs two classes, (0,2,0). A parent's rule on a tile's root
@@ -48,6 +49,44 @@ const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
   @media (max-width: 559px) {
     .tile {
       padding: 20px;
+    }
+  }
+
+  /* Below the first screen, a tile stands up as it comes into view, on top
+     of the reveal of global.css (it rises, grows a little and fades in):
+     marked in view, it lies back on its bottom edge, and stands up over a
+     second, the tiles of a row one after the other (--n). Waiting, it is
+     flat, and once up, flat again: it is 3D only while it stands up, and
+     pivoting on its bottom edge it never grows past its own width. Where
+     tiles are stacked one per row, on a phone, each comes into view on its
+     own and none waits for another. Only where the reveal runs, so never
+     without script or with less motion. */
+  :global(.reveal-on) .tile:global(.reveal) {
+    --stagger: calc(min(var(--n, 0), 3) * 90ms);
+    transition:
+      opacity 0.9s var(--ease-reveal) var(--stagger),
+      translate 0.9s var(--ease-reveal) var(--stagger),
+      scale 0.9s var(--ease-reveal) var(--stagger);
+  }
+
+  @media (max-width: 559px) {
+    :global(.reveal-on) .tile:global(.reveal) {
+      --stagger: 0s;
+    }
+  }
+
+  :global(.reveal-on) .tile:global(.reveal.is-in) {
+    animation: stand-up 1s var(--ease-reveal) var(--stagger) backwards;
+  }
+
+  @keyframes stand-up {
+    from {
+      transform: perspective(1000px) rotateX(24deg);
+      transform-origin: 50% 100%;
+    }
+
+    to {
+      transform-origin: 50% 100%;
     }
   }
 
@@ -128,7 +167,8 @@ const { as: Tag = 'div', n, class: className, ...rest } = Astro.props;
      tile. Not during the home page's entrance, which moves the tiles
      itself. The transitions of a tile below the first screen are listed in
      full, its reveal's with them, as a list of its own would replace
-     global.css's. */
+     global.css's and the stand-up's above (this rule comes after it, with
+     the same weight). */
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     .tile {
       transition:
