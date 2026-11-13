@@ -42,24 +42,71 @@ body {
 }
 
 /* The lights behind every page, which stay put while it scrolls. By day, an
-   aurora: four soft lights, cyan and violet above, pink and green below. By
+   aurora (drawn by Base.astro): four soft lights, cyan and violet above,
+   pink and green below. Each light is a gradient that fades out well inside
+   its own box, and the frame clips them at the edge of the screen, so that
+   no edge shows when the home page's entrance moves the sky (Home.astro),
+   and nothing reaches past the screen. They never move on their own. By
    night (the guided tour), the sky as it was: two glows, then a fine grain
    so the dark is not flat. */
-body::before,
-body::after {
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-in {
+  position: absolute;
+  inset: 0;
+}
+
+.aurora i {
+  position: absolute;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, var(--light), transparent 70%);
+}
+
+.aurora i:nth-child(1) {
+  --light: color-mix(in srgb, var(--sky-blue) 50%, transparent);
+  left: 0;
+  top: 0;
+  width: 140vmax;
+  height: 110vmax;
+}
+
+.aurora i:nth-child(2) {
+  --light: color-mix(in srgb, var(--sky-violet) 50%, transparent);
+  left: 100%;
+  top: 5%;
+  width: 130vmax;
+  height: 110vmax;
+}
+
+.aurora i:nth-child(3) {
+  --light: color-mix(in srgb, var(--sky-pink) 34%, transparent);
+  left: 65%;
+  top: 105%;
+  width: 120vmax;
+  height: 100vmax;
+}
+
+.aurora i:nth-child(4) {
+  --light: color-mix(in srgb, var(--sky-green) 28%, transparent);
+  left: 0;
+  top: 100%;
+  width: 110vmax;
+  height: 100vmax;
+}
+
+.night body::before,
+.night body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
-
-body::before {
-  background:
-    radial-gradient(70vmax 55vmax at 0% 0%, color-mix(in srgb, var(--sky-blue) 50%, transparent), transparent 70%),
-    radial-gradient(65vmax 55vmax at 100% 5%, color-mix(in srgb, var(--sky-violet) 50%, transparent), transparent 70%),
-    radial-gradient(60vmax 50vmax at 65% 105%, color-mix(in srgb, var(--sky-pink) 34%, transparent), transparent 70%),
-    radial-gradient(55vmax 50vmax at 0% 100%, color-mix(in srgb, var(--sky-green) 28%, transparent), transparent 70%);
 }
 
 .night body::before {
@@ -77,10 +124,12 @@ body::before {
    and tints them with the page's background colour, flat. A light under a
    bar would show as a band, so on a touch screen the lights fade out before
    both edges, and the strips the bars cover stay the same flat colour as
-   their tint. */
+   their tint. The mask is on the frame, which does not move: the lights
+   move under it. */
 @media (pointer: coarse) {
-  body::before,
-  body::after {
+  .aurora,
+  .night body::before,
+  .night body::after {
     -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 200px, #000 calc(100% - 200px), transparent calc(100% - 56px));
     mask-image: linear-gradient(to bottom, transparent 56px, #000 200px, #000 calc(100% - 200px), transparent calc(100% - 56px));
   }
@@ -346,6 +395,7 @@ code {
     line-height: 1.4;
   }
 
+  .aurora,
   body::before,
   body::after {
     display: none;

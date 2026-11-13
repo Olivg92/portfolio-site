@@ -88,19 +88,27 @@ const clear = (chip, cardId) => {
   return box.top >= 0 && box.bottom <= document.getElementById(cardId).getBoundingClientRect().top;
 };
 
-// A reader presses a chip once it has arrived: its block marked in view, if
-// it was waiting for that, and done rising. A chip still on its way moves
-// under the pointer, which then presses the gap beside it.
-// Checked frame by frame: awaiting the transitions' own promises sometimes
-// crashes WebKit.
+// A reader presses a chip once it has arrived: the home page's entrance
+// over, its block marked in view, if it was waiting for that, and done
+// rising or landing. A chip still on its way moves under the pointer, which
+// then presses the gap beside it. Checked frame by frame: awaiting the
+// animations' own promises sometimes crashes WebKit. The entrance is waited
+// for on a timer, as it ends on one: WebKit's build for tests draws few
+// frames while it plays. Endless animations (a live chip's ping) never end,
+// and are not waited for.
 const arrived = async (chip) => {
   const frame = () => new Promise(requestAnimationFrame);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 50));
+  const moving = (animation) =>
+    animation.playState === 'running' &&
+    (animation instanceof CSSTransition || (animation instanceof CSSAnimation && animation.effect.getComputedTiming().iterations !== Infinity));
   const rising = () => {
     for (let node = chip; node; node = node.parentElement) {
-      if (node.getAnimations().some((animation) => animation instanceof CSSTransition && animation.playState === 'running')) return true;
+      if (node.getAnimations().some(moving)) return true;
     }
     return false;
   };
+  for (let i = 0; i < 100 && document.documentElement.classList.contains('entering'); i++) await tick();
   for (let i = 0; i < 10 && chip.closest('.reveal-on :is(.reveal, .reveal-part, .cascade):not(.is-in)'); i++) await frame();
   for (let i = 0; i < 180 && rising(); i++) await frame();
 };
