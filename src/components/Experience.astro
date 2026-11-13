@@ -812,8 +812,7 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
      path and the education sit side by side; the hint about tools, the
      button of the CV, which this paper is, and the links to the other pages
      go. A fine rule between blocks rather than a frame around each, and a
-     page may turn between two steps of a story, never inside one, nor
-     between the tools' title and its tools. */
+     page may turn between two steps of a story, never inside one. */
   @media print {
     .more > summary,
     .cv,
@@ -878,8 +877,11 @@ const whole = (text: string) => text.split(/(\S+-\S+)/);
       margin-top: var(--space-8);
     }
 
+    /* The tools open a page, so that their title never ends the one before
+       without them. Keeping them whole with break-inside: avoid did the same,
+       but Chrome then wrote the French bookmark of that title twice. */
     .tools {
-      break-inside: avoid;
+      break-before: page;
     }
 
     .also h2,
