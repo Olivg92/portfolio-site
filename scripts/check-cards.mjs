@@ -24,7 +24,7 @@
 //   the next chip landed on the card. The WebKit here closes a card at once
 //   whatever the styles say, hence a check on them.
 // Run against a served build, with Playwright and its two browsers:
-//   npm install --no-save playwright@1.63.0
+//   npm install --no-save playwright@1.60.0
 //   npx playwright install --with-deps chromium webkit
 //   node scripts/check-cards.mjs http://localhost:4321/
 import { chromium, devices, webkit } from 'playwright';

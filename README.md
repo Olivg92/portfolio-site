@@ -189,8 +189,8 @@ in CI):
 
 ```bash
 docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
-  mcr.microsoft.com/playwright:v1.63.0-noble \
-  sh -c "npm install --no-save playwright@1.63.0 && node scripts/check-cards.mjs && node scripts/check-experience.mjs && node scripts/check-motion.mjs"
+  mcr.microsoft.com/playwright:v1.60.0-noble \
+  sh -c "npm install --no-save playwright@1.60.0 && node scripts/check-cards.mjs && node scripts/check-experience.mjs && node scripts/check-motion.mjs"
 ```
 
 ## Layout

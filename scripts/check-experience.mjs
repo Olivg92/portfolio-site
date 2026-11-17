@@ -28,7 +28,7 @@
 // whatever its styles show. Every wait is a timer, never an animation frame:
 // WebKit's build for tests may hold its frames back.
 // Run against a served build, with Playwright and its two browsers:
-//   npm install --no-save playwright@1.63.0
+//   npm install --no-save playwright@1.60.0
 //   npx playwright install --with-deps chromium webkit
 //   node scripts/check-experience.mjs http://localhost:4321/
 import { chromium, devices, webkit } from 'playwright';
