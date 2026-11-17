@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ipc: ['--ipc=host']
-        pw: ['1.63.0', '1.58.0']
+        pw: ['1.63.0', '1.62.0', '1.61.0', '1.60.0', '1.59.0']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -28,7 +28,7 @@ jobs:
           for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:4321/ && break; sleep 1; done
           sudo dmesg -C || true
           ( while true; do echo "$(date +%T) $(free -m | awk '/Mem/{print "used="$3" avail="$7}')"; sleep 5; done ) > mem.log 2>&1 &
-          docker run --rm --network host ${{ matrix.ipc }} -u "$(id -u):$(id -g)" -e HOME=/tmp \
+          docker run --rm --network host ${{ matrix.ipc }} -u "$(id -u):$(id -g)" -e HOME=/tmp -e BASE_ONLY=${{ matrix.pw != '1.63.0' && '1' || '' }} \
             -v "$PWD:/app" -w /app mcr.microsoft.com/playwright:v${{ matrix.pw }}-noble \
             sh -c "npm install --no-save --silent playwright@${{ matrix.pw }} && node scripts/diag-crash.mjs http://localhost:4321/" > out.log 2> browser.log || true
           grep RESULT out.log
