@@ -163,10 +163,13 @@ jobs:
       # of Playwright it is tagged with. Installing those libraries on the
       # runner went through the Ubuntu mirror, which once stopped answering
       # and left this step hanging. The image reaches the server the build
-      # runs on through the runner's network.
+      # runs on through the runner's network. --ipc=host gives the browsers
+      # the host's shared memory: with the container's 64 MB, WebKit's
+      # compositor thread crashed (a segfault, not a lack of memory) on the
+      # tall pages, the Experience page above all, as the kernel logged.
       - name: Tool cards, in Chrome and in WebKit
         run: >-
-          docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           sh -c "npm install --no-save playwright@${PLAYWRIGHT_VERSION}
           && node scripts/check-cards.mjs http://localhost:4321/"
@@ -177,9 +180,11 @@ jobs:
       # rest: no entrance of its own, its first screen there at once, nothing
       # left in 3D once still, no figure past its tile, nothing moving for a
       # reader who asks for less motion, everything there without script.
+      # --ipc=host, as for the tool cards: without it WebKit's compositor
+      # crashed on this tall page, the wide screen at rest most of all.
       - name: Experience page, in Chrome and in WebKit
         run: >-
-          docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp
+          docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp
           -v "$PWD:/app" -w /app "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble"
           node scripts/check-experience.mjs http://localhost:4321/
 

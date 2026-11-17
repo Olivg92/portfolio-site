@@ -184,8 +184,8 @@ Actions are pinned by commit, and Dependabot raises the pull requests that move 
 check and the link previews drive Chrome through its DevTools protocol, with nothing to install
 but Chrome; against a served build (`npm run build && npm run preview`), `npm run check:tour`
 runs the tour's check. The checks of the cards, of the solved problems and of the home page's
-motion need Playwright and its browsers, which its image has (with `--ipc=host` for the last, as
-in CI):
+motion need Playwright and its browsers, which its image has, with `--ipc=host` as in CI (with
+the container's 64 MB of shared memory, WebKit's compositor crashes on the tall pages):
 
 ```bash
 docker run --rm --network host --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/app" -w /app \
