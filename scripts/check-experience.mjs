@@ -407,7 +407,7 @@ const visit = async (browser, { device, options, lang, url, engine }, check) => 
 };
 
 for (const { name, engine, phone } of engines) {
-  const browser = await engine.launch();
+  let browser = await engine.launch();
   const wide = { viewport: { width: 1440, height: 900 } };
   try {
     for (const lang of ['en', 'fr']) {
@@ -440,6 +440,9 @@ for (const { name, engine, phone } of engines) {
             break;
           }
           note(`${label} the browser crashed, not a defect of the page: visiting it again`);
+          // In a new browser: one that crashed tends to crash again at once.
+          await browser.close().catch(() => {});
+          browser = await engine.launch();
         }
       }
     }
