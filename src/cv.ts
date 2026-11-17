@@ -100,6 +100,13 @@ export const cv: Cv = {
       ),
     },
     {
+      lead: t('Network and DMZ.', 'Réseau et DMZ.'),
+      text: t(
+        'vSphere, internal and in a DMZ: Debian VMs, routing, firewalls, and a PHP application put in production on isolated servers.',
+        'vSphere, en interne et en DMZ : VM Debian, routage, pare-feux, et une application PHP mise en production sur des serveurs isolés.',
+      ),
+    },
+    {
       ongoing: true,
       lead: t('Critical API.', 'API critique.'),
       text: t(
@@ -134,16 +141,16 @@ export const cv: Cv = {
     ),
     points: [
       t(
-        'Terraform for AWS (EKS on Spot, no NAT gateway), Argo CD for the whole cluster; the same platform runs locally on k3d, up from scratch in 4 min 33 s.',
-        'Terraform pour AWS (EKS sur Spot, sans NAT gateway), Argo CD pour tout le cluster ; la même plateforme tourne en local sur k3d, montée de zéro en 4 min 33 s.',
+        'AWS infrastructure in Terraform, built to cost little (EKS on Spot, no NAT Gateway); Argo CD deploys the whole cluster; the same platform runs locally (k3d), ready in 4 min 33 s.',
+        'Infrastructure AWS en Terraform, pensée pour coûter peu (EKS sur Spot, sans NAT Gateway) ; Argo CD déploie tout le cluster ; la même plateforme tourne en local (k3d), prête en 4 min 33 s.',
       ),
       t(
-        'No static credential: External Secrets with Vault or Secrets Manager, EKS Pod Identity, GitHub Actions through OIDC.',
-        "Aucun identifiant statique : External Secrets avec Vault ou Secrets Manager, EKS Pod Identity, GitHub Actions en OIDC.",
+        'No password or key written anywhere: secrets read from Vault or AWS Secrets Manager (External Secrets), GitHub Actions CI signed in without keys (OIDC).',
+        'Aucun mot de passe ni clé écrits en dur : secrets lus dans Vault ou AWS Secrets Manager (External Secrets), CI GitHub Actions connectée sans clé (OIDC).',
       ),
       t(
-        'SLOs with burn-rate alerts (Sloth), a runbook per alert, images free of known vulnerabilities (Trivy).',
-        'Des SLO avec alertes de burn rate (Sloth), un runbook par alerte, des images sans vulnérabilité connue (Trivy).',
+        'Two availability targets (SLOs) with their alerts and a runbook per alert; images with no known vulnerability (Trivy).',
+        'Deux objectifs de disponibilité (SLO) avec leurs alertes et un runbook par alerte ; images sans vulnérabilité connue (Trivy).',
       ),
     ],
   },

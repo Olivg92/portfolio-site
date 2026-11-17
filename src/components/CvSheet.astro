@@ -401,8 +401,18 @@ const title = `Olivier Guandalini · CV · ${u.jobTitle}`;
     flex-direction: column;
     gap: 3.6mm;
   }
+  /* The experience reads a little larger than the right column: its column
+     is the longer, and fills the page to its foot. */
   .col:first-child {
     padding-right: 4.5mm;
+    font-size: 8.5pt;
+    line-height: 1.42;
+  }
+  .col:first-child .pts li + li {
+    margin-top: 1.25mm;
+  }
+  .col:first-child .job + .job {
+    margin-top: 3.6mm;
   }
   .col + .col {
     padding-left: 4.5mm;
