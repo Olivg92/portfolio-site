@@ -262,7 +262,7 @@ const visit = async (browser, options, run) => {
   } catch (error) {
     // WebKit's build for tests also hangs without crashing: a click or a
     // wait then runs out its 15 s. Such a visit is made again, like a crash;
-    // a page that times out on each of three visits still fails the check.
+    // a page that times out on each of four visits still fails the check.
     if (!crashed && error?.name === 'TimeoutError' && browser.browserType().name() === 'webkit') {
       crashed = true;
       hung = error.message.split('\n')[0];
@@ -631,7 +631,7 @@ const effects = (url, check) => async (page) => {
 };
 
 for (const { name, engine, phone } of engines) {
-  const browser = await engine.launch();
+  let browser = await engine.launch();
   try {
     const tasks = [];
     for (const lang of ['en', 'fr']) {
@@ -803,8 +803,9 @@ for (const { name, engine, phone } of engines) {
 
     for (const [label, options, make] of tasks.filter(([label]) => !only || only.test(label))) {
       // WebKit's build for tests, on Linux, sometimes crashes on these
-      // pages, or stops answering: the visit is then made again, and what
-      // it found set aside.
+      // pages, or stops answering: the visit is then made again, in a new
+      // browser (one that crashed tends to crash again at once), and what it
+      // found set aside.
       for (let attempt = 1; ; attempt++) {
         const results = [];
         const crashed = await visit(browser, options, make((ok, what) => results.push([ok, `${label} ${what}`])));
@@ -812,11 +813,13 @@ for (const { name, engine, phone } of engines) {
           for (const [ok, what] of results) expect(ok, what);
           break;
         }
-        if (attempt === 3) {
-          expect(false, `${label} the browser crashed or stopped answering on each of three visits`);
+        if (attempt === 4) {
+          expect(false, `${label} the browser crashed or stopped answering on each of four visits`);
           break;
         }
         note(`${label} the browser crashed or stopped answering${hung ? ` (${hung})` : ''}, not a defect of the page: visiting it again`);
+        await browser.close().catch(() => {});
+        browser = await engine.launch();
       }
     }
   } catch (error) {
