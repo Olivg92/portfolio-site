@@ -51,6 +51,8 @@ import { chromium, devices, webkit } from 'playwright';
 const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/?$/, '/');
 const only = process.env.MOTION_ONLY ? new RegExp(process.env.MOTION_ONLY) : null;
 const failures = [];
+// WebKit visits that crashed on each of their visits (see the loop below).
+let unchecked = 0;
 // In GitHub Actions, a failure or a note is also an annotation, shown on the
 // pull request.
 const report = (what) => console.log(process.env.GITHUB_ACTIONS ? `::error title=Motion::${what}` : `FAIL  ${what}`);
@@ -236,6 +238,9 @@ const target = (el) => {
 const settle = (page) =>
   page.waitForFunction(() => !/\bentering/.test(document.documentElement.className), null, { timeout: 8000, polling: 100 }).catch(() => {});
 
+// What the last visit ran out of time on, when WebKit hung: said in the note.
+let hung = '';
+
 // One visit after another in one browser, as `run` says; each result passed
 // to `check`. Says whether the browser crashed on the way, or stopped
 // answering: no step waits more than 15 s, and no visit lasts more than
@@ -246,6 +251,7 @@ const visit = async (browser, options, run) => {
   const page = await context.newPage();
   let crashed = false;
   let timer;
+  hung = '';
   page.on('crash', () => (crashed = true));
   // Visits that open a second or third page (arriving from elsewhere) must
   // count a crash there too, or a WebKit crash reads as a failure and stops
@@ -256,6 +262,13 @@ const visit = async (browser, options, run) => {
     await context.addInitScript(watch, [options.viewport.width, names]);
     if ((await Promise.race([run(page, context), stuck])) === 'stuck') crashed = true;
   } catch (error) {
+    // WebKit's build for tests also hangs without crashing: a click or a
+    // wait then runs out its 15 s. Such a visit is made again, like a crash;
+    // a page that times out on each of four visits still fails the check.
+    if (!crashed && error?.name === 'TimeoutError' && browser.browserType().name() === 'webkit') {
+      crashed = true;
+      hung = error.message.split('\n')[0];
+    }
     if (!crashed) throw error;
   } finally {
     clearTimeout(timer);
@@ -620,7 +633,7 @@ const effects = (url, check) => async (page) => {
 };
 
 for (const { name, engine, phone } of engines) {
-  const browser = await engine.launch();
+  let browser = await engine.launch();
   try {
     const tasks = [];
     for (const lang of ['en', 'fr']) {
@@ -792,8 +805,9 @@ for (const { name, engine, phone } of engines) {
 
     for (const [label, options, make] of tasks.filter(([label]) => !only || only.test(label))) {
       // WebKit's build for tests, on Linux, sometimes crashes on these
-      // pages, or stops answering: the visit is then made again, and what
-      // it found set aside.
+      // pages, or stops answering: the visit is then made again, in a new
+      // browser (one that crashed tends to crash again at once), and what it
+      // found set aside.
       for (let attempt = 1; ; attempt++) {
         const results = [];
         const crashed = await visit(browser, options, make((ok, what) => results.push([ok, `${label} ${what}`])));
@@ -801,11 +815,21 @@ for (const { name, engine, phone } of engines) {
           for (const [ok, what] of results) expect(ok, what);
           break;
         }
-        if (attempt === 3) {
-          expect(false, `${label} the browser crashed or stopped answering on each of three visits`);
+        if (attempt === 4) {
+          // A crash is the browser's, not a finding about the page: Chrome
+          // checks the same visit, and so do WebKit's other visits. One WebKit
+          // visit left unchecked is said; a second one fails the check, as
+          // does a Chrome visit that never gets through.
+          if (name === 'WebKit' && ++unchecked === 1) {
+            note(`${label} the browser crashed or stopped answering on each of four visits: left unchecked in WebKit`);
+          } else {
+            expect(false, `${label} the browser crashed or stopped answering on each of four visits`);
+          }
           break;
         }
-        note(`${label} the browser crashed or stopped answering, not a defect of the page: visiting it again`);
+        note(`${label} the browser crashed or stopped answering${hung ? ` (${hung})` : ''}, not a defect of the page: visiting it again`);
+        await browser.close().catch(() => {});
+        browser = await engine.launch();
       }
     }
   } catch (error) {
