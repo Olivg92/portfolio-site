@@ -19,11 +19,12 @@ export default defineConfig({
   },
   // The list of pages search engines read, sitemap-index.xml, named in
   // robots.txt. Each page comes with its other language, as the pages' own
-  // hreflang links say. The 404 page stays out: it asks not to be indexed.
+  // hreflang links say. The 404 page and the CV's print-only pages stay out:
+  // they ask not to be indexed.
   integrations: [
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en', fr: 'fr' } },
-      filter: (page) => !new URL(page).pathname.startsWith('/404'),
+      filter: (page) => !/^\/(404|(fr\/)?cv\/print)/.test(new URL(page).pathname),
     }),
   ],
   // Bricolage Grotesque for headings, Manrope for text, Geist Mono for the

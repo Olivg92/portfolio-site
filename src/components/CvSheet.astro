@@ -1,0 +1,613 @@
+---
+// The one-page CV, a sheet of A4 made for paper: the site's fonts and
+// colours, laid out like a magazine page. A masthead, the name and the pitch,
+// a band of four figures, then two columns: the experience on the left; the
+// project, the skills, the education and a card with a QR code to the site
+// on the right. scripts/cv-pdf.mjs prints it into /cv/; it is not a page of
+// the site (no header, kept out of the sitemap and the search engines).
+import { Font } from 'astro:assets';
+import { ui, type Lang } from '../i18n';
+import { experience } from '../experience';
+import { cv } from '../cv';
+import { projects } from '../projects';
+import { tools } from '../tools';
+import { links } from '../links';
+import qr from '../assets/qr-site.svg?raw';
+import '../styles/tokens.css';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const u = ui[lang];
+const site = new URL(lang === 'en' ? '/' : '/fr/', Astro.site).href;
+const flagship = projects[0];
+const now = experience.path[0];
+// The name of a tool as the site writes it.
+const name = (tool: keyof typeof tools) => tools[tool].name;
+// Short, readable forms of the three addresses printed on paper.
+const show = (url: string) => url.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
+const contacts = [
+  { label: 'Web', href: site, text: show(site) },
+  { label: 'LinkedIn', href: links.linkedin, text: show(links.linkedin) },
+  { label: 'GitHub', href: links.github, text: show(links.github) },
+];
+const title = `Olivier Guandalini · CV · ${u.jobTitle}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <link rel="canonical" href={new URL(`${lang === 'en' ? '' : 'fr/'}cv/print/`, Astro.site).href} />
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-manrope" preload />
+  </head>
+  <body>
+    <main class="page">
+      <header class="mast">
+        <p class="topline"><span>{cv.masthead[lang]}</span><span>{cv.eyebrow[lang]}</span></p>
+        <div class="ident">
+          <div>
+            <h1>Olivier <span>Guandalini</span></h1>
+            <p class="role"><span class="r">{u.jobTitle}</span><span class="note">{u.home.facts.years}</span></p>
+          </div>
+          <dl class="contacts">
+            {
+              contacts.map((c) => (
+                <div>
+                  <dt>{c.label}</dt>
+                  <dd>
+                    <a href={c.href} target="_blank" rel="noopener">
+                      {c.text}<span class="visually-hidden">{u.newTab}</span>
+                    </a>
+                  </dd>
+                </div>
+              ))
+            }
+            <div class="sep">
+              <dt>{cv.labels.languages[lang]}</dt>
+              <dd>{u.home.facts.languages}</dd>
+            </div>
+            <div>
+              <dt>{cv.labels.place[lang]}</dt>
+              <dd>{u.home.facts.place}</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="lede">{cv.pitch[lang]}</p>
+        <dl class="stats" aria-label={cv.labels.figures[lang]}>
+          {
+            experience.metrics.map((m) => (
+              <div class="stat">
+                <dt>{m.value[lang]}</dt>
+                <dd>{m.label[lang]}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </header>
+
+      <div class="flow">
+        <div class="col">
+          <section>
+            <h2><span class="n">01</span>{cv.labels.experience[lang]}</h2>
+            <article class="job">
+              <p class="dates">{now.when[lang]}</p>
+              <h3>{now.role[lang]}</h3>
+              <p class="meta">{now.where[lang]}</p>
+              <ul class="pts">
+                {
+                  cv.now.map((p) => (
+                    <li class:list={[{ wip: p.ongoing }]}>
+                      {p.ongoing && <span class="pill">{cv.labels.ongoing[lang]}</span>}
+                      <strong>{p.lead[lang]}</strong> {p.text[lang]}
+                    </li>
+                  ))
+                }
+              </ul>
+            </article>
+            {
+              cv.before.map((job) => (
+                <article class="job">
+                  <p class="dates">{job.when[lang]}</p>
+                  <h3>{job.role[lang]}</h3>
+                  <p class="meta">{job.where[lang]}</p>
+                  {job.text && (
+                    <ul class="pts">
+                      <li>{job.text[lang]}</li>
+                    </ul>
+                  )}
+                </article>
+              ))
+            }
+          </section>
+        </div>
+
+        <div class="col">
+          <section>
+            <h2><span class="n">02</span>{cv.labels.project[lang]}</h2>
+            <article class="job">
+              <p class="dates">
+                <a href={flagship.code} target="_blank" rel="noopener">{cv.labels.code[lang]}<svg class="arrow" viewBox="0 0 10 10" aria-hidden="true"><path d="M3 7 7 3M3.5 3H7v3.5" /></svg><span class="visually-hidden">{u.newTab}</span></a>
+                <a href={new URL(`${lang === 'en' ? '' : 'fr/'}${flagship.tour}`, Astro.site).href} target="_blank" rel="noopener"
+                  >{cv.labels.tour[lang]}<svg class="arrow" viewBox="0 0 10 10" aria-hidden="true"><path d="M3 7 7 3M3.5 3H7v3.5" /></svg><span class="visually-hidden">{u.newTab}</span></a
+                >
+              </p>
+              <h3 class="proj">{flagship.name}</h3>
+              <p class="meta">{cv.project.lead[lang]}</p>
+              <ul class="pts">{cv.project.points.map((p) => <li>{p[lang]}</li>)}</ul>
+            </article>
+          </section>
+
+          <section>
+            <h2><span class="n">03</span>{cv.labels.skills[lang]}<span class="leg">{cv.labels.ownProjects[lang]}</span></h2>
+            <div class="skills">
+              {
+                cv.skills.map((g) => (
+                  <p>
+                    <b>{g.name[lang]}</b>
+                    <span class="dash"> — </span>
+                    {[...g.work.map(name), ...(g.projects ?? []).map((tool) => `${name(tool)}*`)].join(' · ')}
+                  </p>
+                ))
+              }
+            </div>
+          </section>
+
+          <section>
+            <h2><span class="n">04</span>{cv.labels.education[lang]}</h2>
+            <ul class="edu">
+              {
+                experience.education.map((e) => (
+                  <li>
+                    <p class="y">{e.when[lang]}</p>
+                    <p class="d">{e.degree[lang]}</p>
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+
+          <a class="qr" href={site} target="_blank" rel="noopener">
+            <span class="code" set:html={qr} aria-hidden="true" />
+            <span class="txt">
+              <b>{cv.labels.site[lang]}</b>
+              {cv.labels.qrText[lang]}
+              <span class="url">{show(site)}</span>
+            </span>
+            <span class="visually-hidden">{u.newTab}</span>
+          </a>
+        </div>
+      </div>
+
+      <footer class="foot">
+        <span>Olivier Guandalini · {u.jobTitle}</span>
+        <span>{cv.labels.footer[lang]}</span>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  html,
+  body {
+    background: var(--surface);
+  }
+  body {
+    font-family: var(--font-ui);
+    font-size: 8pt;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink-2);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  strong,
+  b {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  /* One A4 sheet: on screen too, so that what one sees is what prints. */
+  .page {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 11mm 14mm 13mm;
+    background: var(--surface);
+  }
+  /* The aurora of the site, faint, at the top corner only: paper keeps it. */
+  .page::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: 120mm;
+    height: 70mm;
+    background:
+      radial-gradient(closest-side at 70% 30%, color-mix(in srgb, var(--sky-violet) 22%, transparent), transparent),
+      radial-gradient(closest-side at 95% 10%, color-mix(in srgb, var(--sky-blue) 26%, transparent), transparent),
+      radial-gradient(closest-side at 40% 0%, color-mix(in srgb, var(--sky-pink) 16%, transparent), transparent);
+    pointer-events: none;
+  }
+  .page > * {
+    position: relative;
+  }
+  /* For screen readers on screen; never on paper, nor in the PDF's text. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media print {
+    .visually-hidden {
+      display: none;
+    }
+  }
+
+  .topline {
+    display: flex;
+    justify-content: space-between;
+    font-size: 6.3pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 2mm;
+    border-bottom: 0.2mm solid var(--line);
+  }
+  .ident {
+    display: grid;
+    grid-template-columns: 1fr 64mm;
+    column-gap: 8mm;
+    align-items: end;
+    margin-top: 3mm;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 38pt;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  h1 span {
+    display: block;
+    color: var(--accent);
+  }
+  .role {
+    margin-top: 2.6mm;
+    display: flex;
+    align-items: baseline;
+    gap: 3mm;
+  }
+  .role .r {
+    font-size: 7.4pt;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .role .note {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10.5pt;
+    color: var(--accent);
+  }
+  .contacts {
+    display: grid;
+    row-gap: 0.6mm;
+    font-size: 7.2pt;
+    color: var(--ink);
+  }
+  .contacts div {
+    display: grid;
+    grid-template-columns: 15mm 1fr;
+    align-items: baseline;
+  }
+  .contacts dt {
+    font-size: 5.8pt;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .contacts dd {
+    white-space: nowrap;
+  }
+  .contacts .sep {
+    margin-top: 0.8mm;
+    padding-top: 1.2mm;
+    border-top: 0.2mm solid var(--line);
+  }
+
+  .lede {
+    margin-top: 3.4mm;
+    padding-top: 2.8mm;
+    border-top: 0.45mm solid var(--ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 11.6pt;
+    line-height: 1.28;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 3.4mm;
+    border-top: 0.2mm solid var(--line);
+    border-bottom: 0.45mm solid var(--ink);
+  }
+  .stat {
+    padding: 2mm 3mm 2mm 0;
+  }
+  .stat + .stat {
+    padding-left: 3.4mm;
+    border-left: 0.2mm solid var(--line);
+  }
+  .stat dt {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 21pt;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .stat:first-child dt {
+    color: var(--accent);
+  }
+  .stat dd {
+    margin-top: 1mm;
+    font-size: 6.6pt;
+    line-height: 1.3;
+    color: var(--muted);
+  }
+
+  .flow {
+    flex: 1;
+    min-height: 0;
+    margin-top: 4mm;
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+  }
+  .col {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3.6mm;
+  }
+  .col:first-child {
+    padding-right: 4.5mm;
+  }
+  .col + .col {
+    padding-left: 4.5mm;
+    border-left: 0.2mm solid var(--line);
+  }
+  h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 2.2mm;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14pt;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    padding-top: 1.6mm;
+    border-top: 0.2mm solid var(--ink);
+    margin-bottom: 2.4mm;
+  }
+  .col > section:first-child h2 {
+    border-top: 0;
+    padding-top: 0;
+  }
+  h2 .n {
+    font-family: var(--font-ui);
+    font-size: 6.3pt;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  h2 .leg {
+    margin-left: auto;
+    font-family: var(--font-ui);
+    font-size: 6.6pt;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .job + .job {
+    margin-top: 3mm;
+  }
+  .dates {
+    display: flex;
+    gap: 3mm;
+    font-size: 6.2pt;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .dates a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6mm;
+  }
+  .arrow {
+    width: 2.2mm;
+    height: 2.2mm;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+  }
+  h3 {
+    margin-top: 0.6mm;
+    font-family: var(--font-display);
+    font-size: 10pt;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  h3.proj {
+    letter-spacing: -0.01em;
+  }
+  .meta {
+    margin-top: 0.4mm;
+    font-size: 7.2pt;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+  .pts {
+    list-style: none;
+    margin-top: 1.6mm;
+  }
+  .pts li {
+    position: relative;
+    padding-left: 3.4mm;
+  }
+  .pts li + li {
+    margin-top: 1mm;
+  }
+  .pts li::before {
+    content: '';
+    position: absolute;
+    left: 0.3mm;
+    top: 1.35mm;
+    width: 1.3mm;
+    height: 1.3mm;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .pts li.wip::before {
+    background: none;
+    border: 0.25mm solid var(--accent);
+  }
+  .pill {
+    display: inline-block;
+    margin-right: 1.2mm;
+    font-size: 5.6pt;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--accent);
+    border: 0.2mm solid currentColor;
+    border-radius: 99px;
+    padding: 0.5mm 1.2mm 0.4mm;
+    vertical-align: 0.2mm;
+  }
+
+  .skills p {
+    font-size: 7.5pt;
+    line-height: 1.4;
+  }
+  .skills p + p {
+    margin-top: 1mm;
+  }
+  .skills .dash {
+    color: var(--muted);
+  }
+
+  .edu {
+    list-style: none;
+  }
+  .edu li {
+    display: grid;
+    grid-template-columns: 17mm 1fr;
+    column-gap: 2mm;
+  }
+  .edu li + li {
+    margin-top: 1.3mm;
+  }
+  .edu .y {
+    font-size: 6.4pt;
+    font-weight: 700;
+    color: var(--muted);
+    padding-top: 0.3mm;
+  }
+  .edu .d {
+    font-size: 7.6pt;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.32;
+  }
+
+  /* The way to the site: a small card, at the foot of the right column. */
+  .qr {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    padding: 2.6mm;
+    border: 0.2mm solid var(--line);
+    border-radius: 3mm;
+    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+  }
+  .qr .code {
+    flex: none;
+    width: 15mm;
+    height: 15mm;
+    color: var(--ink);
+  }
+  .qr .code :global(svg),
+  .qr .code svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .qr .txt {
+    font-size: 6.8pt;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+  .qr b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 10pt;
+    font-weight: 700;
+  }
+  .qr .url {
+    display: block;
+    margin-top: 0.6mm;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .foot {
+    position: absolute;
+    left: 14mm;
+    right: 14mm;
+    bottom: 6mm;
+    display: flex;
+    justify-content: space-between;
+    font-size: 5.8pt;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+</style>
