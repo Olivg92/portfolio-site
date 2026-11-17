@@ -102,18 +102,23 @@ and the education, each block a tile, as on the home page.
 - **Other sites in a new tab.** GitHub and LinkedIn open in a new tab, so that the portfolio
   stays open behind them. The arrow on the button already says it is another site, and screen
   readers hear that it opens a new tab. Links within the site open where they are.
-- **A page that prints as a CV.** Printed, or saved as a PDF, the experience page fits on three
+- **A page that prints well.** Printed, or saved as a PDF, the experience page fits on three
   A4 pages. On paper the same tokens turn light: black text, the signal colours darkened, no sky
   and no glow. A chip reads as its name, every story shows, the header gives the site's address
   and the contact its addresses. Every page prints in the same light, and the screen does not
   change.
-- **The CV as a PDF to download.** That printed page is also a file, one per language, linked
-  from the experience page and from the contact section of every page:
-  [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) saves it with Chrome from the served build, at
-  `/cv/olivier-guandalini-cv-en.pdf` and `-fr.pdf` ([`src/cv.ts`](src/cv.ts) names them), in CI
-  and before each deployment. It is tagged for screen readers, its headings are bookmarks, and
-  it fails at more than three pages. The files are built, not committed: `npm run dev` links to
-  a CV it does not have.
+- **A one-page CV to download.** A sheet of A4 of its own, in the site's fonts and colours, laid
+  out like a magazine page: the name and the pitch, four figures, the experience beside the
+  project, the skills and the education, and a QR code to the site. Its words are the experience
+  page's, condensed ([`src/cv.ts`](src/cv.ts)); it is drawn by a print-only page per language,
+  `/cv/print/` and `/fr/cv/print/` ([`CvSheet.astro`](src/components/CvSheet.astro)), kept out
+  of the sitemap and of search engines. [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) prints it with
+  Chrome from the served build, at `/cv/olivier-guandalini-cv-en.pdf` and `-fr.pdf`, in CI and
+  before each deployment, linked from the experience page and from the contact section of every
+  page. It must be exactly one page, with the site's fonts embedded and no other, its links only
+  to the site, LinkedIn and GitHub, and none of the names the `CV_FORBIDDEN` secret lists: the
+  repository never holds an employer's name. The files are built, not committed: `npm run dev`
+  links to a CV it does not have.
 - **Link previews.** A link to the site on LinkedIn, or in a message, shows the page's title,
   description and a picture drawn from the page itself, in its language. The pictures are drawn
   by [`scripts/og-images.mjs`](scripts/og-images.mjs) from a served build (`npm run og`), and
@@ -169,7 +174,7 @@ Every pull request runs them, and a failure blocks the merge:
 | The guided tour, used as a reader uses it | [`scripts/check-tour.mjs`](scripts/check-tour.mjs) in Chrome, on a wide screen and on a phone: its buttons and chapters, clicked; the end of the page; on a phone, each step's drawing framed whole, no word of it under 8 px |
 | The tool cards, used as a reader uses them | [`scripts/check-cards.mjs`](scripts/check-cards.mjs) with Playwright, in Chrome and in WebKit (the engine of Safari), on a wide screen and on a phone: each chip has its card, which opens inside the screen, at the bottom of a phone's and no taller than its words, and closes; on a phone, a tap elsewhere closes it with the page left where it is, and so does scrolling on, fading it out first, though a slight move does not; with a card open, a chip further down or beside it opens its own; no chip or link waits fully transparent; a closing card goes at once where the browser cannot keep it above the page; a chip is pressed once the home page's entrance is over and its block has landed |
 | What search engines read | [`scripts/check-seo.mjs`](scripts/check-seo.mjs), reading the build: `robots.txt` names a sitemap of this build; the sitemap lists every indexable page, each with both languages, and nothing else; each such page has a title, a description, a canonical address pointing at itself and its `hreflang` links; the 404 asks not to be indexed and stays out; the structured data parses, the home pages describe Olivier with his LinkedIn and GitHub, and it has no `worksFor`, `affiliation`, `employee` or `memberOf` key, under any prefix |
-| The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, three A4 pages at most, with bookmarks, none of which reads its title twice |
+| The CV, as a PDF | [`scripts/cv-pdf.mjs`](scripts/cv-pdf.mjs) in Chrome, from the served build, before the dead-link check: one PDF per language, exactly one A4 page, the site's fonts embedded and no other, links only to the site, LinkedIn and GitHub, none of the names in the `CV_FORBIDDEN` secret, no bookmark reading its title twice; and the experience page printed on three A4 pages at most |
 | Links to other sites | [`scripts/check-new-tab.mjs`](scripts/check-new-tab.mjs), reading the built pages: every link to another site opens in a new tab, with `rel="noopener"`, and says so to screen readers; no link within the site does |
 | The experience page: its solved problems folded on a phone, and the page at rest | [`scripts/check-experience.mjs`](scripts/check-experience.mjs) with Playwright, in Chrome and in WebKit, on a wide screen and on a phone: on a phone, each problem folded, unfolded whole by a tap, lit as it comes into view, folded again by a second tap; every story beside its title on a wide screen, and on paper; saved as a PDF in Chrome, three A4 pages at most; in Chrome, screen readers get the stories and skip a folded one; no entrance of its own: the title, its words, the CV and the four figures there and still from the first moment, with all they hold, the first figures above the fold of an iPhone, no tile fully transparent, nothing in 3D once still (Safari would paint it over the sticky header), no figure past its tile from 320 to 1000 px at 100 % and 125 % text; for a reader who asks for less motion nothing moves and everything is there, and so without script (in Chrome) |
 | The entrance and the effects of the home page | [`scripts/check-motion.mjs`](scripts/check-motion.mjs) with Playwright, in Chrome and in WebKit, on a wide screen, a tablet upright and on its side, a phone upright and on its side, and a 320 px phone, in both languages: on a first visit the entrance holds every animation of it on its first frame while it waits, starts within 1.5 s, the plate lying back below 1000 px, and is over within 3 s; it leaves the page at rest, with no entrance class and no 3D anywhere, every figure at the value of the HTML after counting up; while it plays, no link or button is at opacity 0, a press on one lands in a tile, never on the plate or the page under it, nothing moves in the layout, the glow under the plate never brightens again, and nothing reaches past the sides of the screen, then or as the page scrolls on, even on the tablet on its side, where the turned plate has the least room; a reload, the other language, a link to a section or from another page shows the page at rest at once; never with less motion; with its animations frozen and animation frames stubbed out, or fonts that never come, it still ends at rest, never having played; a page opened behind another tab waits, paused, and plays once shown; with a mouse, a plain tile leans under the pointer and stands flat once it leaves, nothing that can be pressed moves by 3 px, a tile whose card is open stands straight, the two link tiles rise with a shadow that eases, the slabs come apart, a tile never leans with its top under the header and stands flat at once as the page scrolls, a tile below the first screen stands up and leans only once up; the sky leans away from the pointer, never moves on its own, and is not drawn at night |
@@ -202,7 +207,7 @@ src/
 │   └── transcripts/      # what each command printed in a real run
 ├── logos.ts              # the logos of the tools, drawn inline
 ├── links.ts              # every address the site links to
-├── cv.ts                 # the names of the CV's PDFs
+├── cv.ts                 # the one-page CV's words, and the names of its PDFs
 ├── structured.ts         # the JSON-LD of the home page: who the site is about
 ├── layouts/Base.astro    # metadata, fonts, language links, header and footer
 ├── components/
@@ -239,7 +244,7 @@ scripts/
 ├── check-motion.mjs      # the home page's entrance and effects, in Chrome and WebKit
 ├── check-new-tab.mjs     # links to other sites open in a new tab, read from the build
 ├── check-seo.mjs         # robots.txt, sitemap, metadata and structured data, read from the build
-├── cv-pdf.mjs            # the CV, one PDF per language, saved from the experience page
+├── cv-pdf.mjs            # the CV, one PDF per language, printed from its print-only page
 ├── og-images.mjs         # the pictures of link previews
 └── lib/cdp.mjs           # a minimal Chrome DevTools client
 public/og/                # the pictures, one per page and language

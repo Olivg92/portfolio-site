@@ -32,10 +32,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      # The CV, one PDF per language, printed from the experience page of the
-      # build by the runner's Chrome, into the build: the build is served for
-      # the time it takes. Three A4 pages at most, or nothing is published.
+      # The CV, one PDF per language, printed from its print-only page by the
+      # runner's Chrome, into the build: the build is served for the time it
+      # takes. One A4 page with the checks of scripts/cv-pdf.mjs, or nothing
+      # is published.
       - name: CV as a PDF
+        env:
+          CV_FORBIDDEN: ${{ secrets.CV_FORBIDDEN }}
         run: |
           npm run preview -- --port 4321 > /tmp/preview.log 2>&1 &
           for _ in $(seq 1 30); do
