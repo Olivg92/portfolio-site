@@ -1,0 +1,44 @@
+# Temporary: find why WebKit crashes on the runner. Not to be merged.
+name: diag-webkit
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        ipc: ['', '--ipc=host']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci && npm run build
+      - name: Host
+        run: |
+          nproc; free -m; df -h /dev/shm; uname -a
+          cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || true
+      - name: Experience page, WebKit, with browser logs
+        run: |
+          npm run preview -- --port 4321 > /tmp/preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:4321/ && break; sleep 1; done
+          sudo dmesg -C || true
+          ( while true; do echo "$(date +%T) $(free -m | awk '/Mem/{print "used="$3" avail="$7}')"; sleep 5; done ) > mem.log 2>&1 &
+          docker run --rm --network host ${{ matrix.ipc }} -u "$(id -u):$(id -g)" -e HOME=/tmp -e 'DEBUG=pw:browser*' \
+            -v "$PWD:/app" -w /app mcr.microsoft.com/playwright:v1.63.0-noble \
+            sh -c "npm install --no-save --silent playwright@1.63.0 && node scripts/check-experience.mjs http://localhost:4321/" > out.log 2> browser.log || true
+          echo "== results"; grep -E '^(ok|FAIL|note|::)' out.log | grep -vE '^ok' | head -40; grep -cE '^ok' out.log
+          echo "== crash context in browser logs"; grep -n -iE 'crash|signal|segv|sigbus|sigkill|abort|oom|out of memory|bus error|killed|assert|fatal' browser.log | head -60
+          echo "== kernel"; sudo dmesg -T | grep -iE 'oom|killed|segfault|trap|WebKit|MiniBrowser' | tail -40 || true
+          echo "== memory"; sort -t= -k2 -n mem.log | tail -3
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: webkit-logs${{ matrix.ipc && '-ipc' || '' }}
+          path: |
+            out.log
+            browser.log
+            mem.log
