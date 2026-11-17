@@ -125,11 +125,14 @@ jobs:
           cat /tmp/preview.log
           exit 1
 
-      # The CV, one PDF per language, printed from the experience page by the
+      # The CV, one PDF per language, printed from its print-only page by the
       # runner's Chrome into the served build, as the deployment does, so that
-      # the dead-link check below finds the files the pages link to. Three A4
-      # pages at most, or the step fails.
+      # the dead-link check below finds the files the pages link to. One A4
+      # page, its fonts embedded, its links to the site, LinkedIn or GitHub,
+      # and none of the names the CV_FORBIDDEN secret lists, or the step fails.
       - name: CV as a PDF
+        env:
+          CV_FORBIDDEN: ${{ secrets.CV_FORBIDDEN }}
         run: node scripts/cv-pdf.mjs http://localhost:4321/ dist
 
       # Links within a page (#contact) must land on an element that exists.
