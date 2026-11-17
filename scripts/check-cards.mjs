@@ -259,7 +259,7 @@ const visit = async (browser, { device, options, url, hover }, check) => {
 };
 
 for (const { name, engine, phone, hover } of engines) {
-  const browser = await engine.launch();
+  let browser = await engine.launch();
   try {
     for (const lang of ['en', 'fr']) {
       for (const path of pages) {
@@ -284,6 +284,9 @@ for (const { name, engine, phone, hover } of engines) {
               break;
             }
             note(`${label} the browser crashed, not a defect of the page: visiting it again`);
+            // In a new browser: one that crashed tends to crash again at once.
+            await browser.close().catch(() => {});
+            browser = await engine.launch();
           }
         }
       }
