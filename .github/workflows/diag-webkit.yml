@@ -27,12 +27,14 @@ jobs:
           for i in $(seq 1 30); do curl -fs -o /dev/null http://localhost:4321/ && break; sleep 1; done
           sudo dmesg -C || true
           ( while true; do echo "$(date +%T) $(free -m | awk '/Mem/{print "used="$3" avail="$7}')"; sleep 5; done ) > mem.log 2>&1 &
-          docker run --rm --network host ${{ matrix.ipc }} -u "$(id -u):$(id -g)" -e HOME=/tmp -e 'DEBUG=pw:browser*' \
-            -v "$PWD:/app" -w /app mcr.microsoft.com/playwright:v1.63.0-noble \
-            sh -c "npm install --no-save --silent playwright@1.63.0 && node scripts/check-experience.mjs http://localhost:4321/" > out.log 2> browser.log || true
+          for n in 1 2 3; do
+            docker run --rm --network host ${{ matrix.ipc }} -u "$(id -u):$(id -g)" -e HOME=/tmp -e 'DEBUG=pw:browser*' \
+              -v "$PWD:/app" -w /app mcr.microsoft.com/playwright:v1.63.0-noble \
+              sh -c "npm install --no-save --silent playwright@1.63.0 && node scripts/check-experience.mjs http://localhost:4321/ && node scripts/check-cards.mjs http://localhost:4321/" >> out.log 2>> browser.log || true
+          done
           echo "== results"; grep -E '^(ok|FAIL|note|::)' out.log | grep -vE '^ok' | head -40; grep -cE '^ok' out.log
           echo "== crash context in browser logs"; grep -n -iE 'crash|signal|segv|sigbus|sigkill|abort|oom|out of memory|bus error|killed|assert|fatal' browser.log | head -60
-          echo "== kernel"; sudo dmesg -T | grep -iE 'oom|killed|segfault|trap|WebKit|MiniBrowser' | tail -40 || true
+          echo "== kernel"; sudo dmesg -T | grep -iE 'oom|killed|segfault|trap|WebKit|MiniBrowser' | tail -40 || true; echo "segfaults: $(sudo dmesg | grep -c segfault)"; echo "crash notes: $(grep -c 'browser crashed' out.log)"
           echo "== memory"; sort -t= -k2 -n mem.log | tail -3
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
