@@ -236,6 +236,9 @@ const target = (el) => {
 const settle = (page) =>
   page.waitForFunction(() => !/\bentering/.test(document.documentElement.className), null, { timeout: 8000, polling: 100 }).catch(() => {});
 
+// What the last visit ran out of time on, when WebKit hung: said in the note.
+let hung = '';
+
 // One visit after another in one browser, as `run` says; each result passed
 // to `check`. Says whether the browser crashed on the way, or stopped
 // answering: no step waits more than 15 s, and no visit lasts more than
@@ -246,6 +249,7 @@ const visit = async (browser, options, run) => {
   const page = await context.newPage();
   let crashed = false;
   let timer;
+  hung = '';
   page.on('crash', () => (crashed = true));
   // Visits that open a second or third page (arriving from elsewhere) must
   // count a crash there too, or a WebKit crash reads as a failure and stops
@@ -256,6 +260,13 @@ const visit = async (browser, options, run) => {
     await context.addInitScript(watch, [options.viewport.width, names]);
     if ((await Promise.race([run(page, context), stuck])) === 'stuck') crashed = true;
   } catch (error) {
+    // WebKit's build for tests also hangs without crashing: a click or a
+    // wait then runs out its 15 s. Such a visit is made again, like a crash;
+    // a page that times out on each of three visits still fails the check.
+    if (!crashed && error?.name === 'TimeoutError' && browser.browserType().name() === 'webkit') {
+      crashed = true;
+      hung = error.message.split('\n')[0];
+    }
     if (!crashed) throw error;
   } finally {
     clearTimeout(timer);
@@ -805,7 +816,7 @@ for (const { name, engine, phone } of engines) {
           expect(false, `${label} the browser crashed or stopped answering on each of three visits`);
           break;
         }
-        note(`${label} the browser crashed or stopped answering, not a defect of the page: visiting it again`);
+        note(`${label} the browser crashed or stopped answering${hung ? ` (${hung})` : ''}, not a defect of the page: visiting it again`);
       }
     }
   } catch (error) {
