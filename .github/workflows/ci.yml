@@ -81,8 +81,14 @@ jobs:
     timeout-minutes: 30
     env:
       # The tag of the Playwright image the browser checks run in, and the
-      # version of the playwright package installed there to match it.
-      PLAYWRIGHT_VERSION: 1.63.0
+      # version of the playwright package installed there to match it. Held
+      # at 1.60: the WebKit of Playwright 1.61 to 1.63 crashes on this runner
+      # (a segfault in its compositor thread, in libWPEWebKit, as the kernel
+      # logs it), on the Experience page above all, 3 to 11 loads in 15; 1.58
+      # to 1.60 never did, in 180 loads. Neither the page's CSS nor its content
+      # changed that, and it never happened on a PC. Try a newer one when it
+      # comes out, with the same count of loads.
+      PLAYWRIGHT_VERSION: 1.60.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

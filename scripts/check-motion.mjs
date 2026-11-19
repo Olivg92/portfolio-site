@@ -41,7 +41,7 @@
 // And on the other pages, no entrance: by day the sky of lights, still and
 // inside the screen, and by night (the guided tour) none at all.
 // Run against a served build, with Playwright and its two browsers:
-//   npm install --no-save playwright@1.63.0
+//   npm install --no-save playwright@1.60.0
 //   npx playwright install --with-deps chromium webkit
 //   node scripts/check-motion.mjs http://localhost:4321/
 // MOTION_ONLY=<pattern> runs only the visits whose label matches, such as

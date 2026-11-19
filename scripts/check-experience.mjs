@@ -28,7 +28,7 @@
 // whatever its styles show. Every wait is a timer, never an animation frame:
 // WebKit's build for tests may hold its frames back.
 // Run against a served build, with Playwright and its two browsers:
-//   npm install --no-save playwright@1.63.0
+//   npm install --no-save playwright@1.60.0
 //   npx playwright install --with-deps chromium webkit
 //   node scripts/check-experience.mjs http://localhost:4321/
 import { chromium, devices, webkit } from 'playwright';
@@ -184,7 +184,11 @@ const quiet = () =>
   !document.getAnimations().some(
     (animation) =>
       (animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity) ||
-      (animation instanceof CSSTransition && animation.playState === 'finished'),
+      // Finished but still listed: WebKit keeps a finished transition or
+      // animation (a tile's stand-up) in the list, and its last frame in the
+      // computed style, until it next draws. Not one that holds its last
+      // frame on purpose (forwards): that is the page at rest.
+      ((animation instanceof CSSTransition || animation instanceof CSSAnimation) && animation.playState === 'finished' && !/forwards|both/.test(animation.effect?.getComputedTiming().fill ?? '')),
   );
 
 // The page at rest. No entrance: the home page alone plays one. And no 3D:
@@ -196,13 +200,13 @@ const quiet = () =>
 // reach yet (a story folded on a phone), and anything still moving. Says
 // which elements are bent, for the failure's message.
 const rest = () => {
-  // Still moving, as in quiet(): a transition finished but not yet let go
-  // counts.
+  // Still moving, as in quiet(): a transition or an animation finished but
+  // not yet let go counts.
   const moving = (el) =>
     el.getAnimations().some(
       (animation) =>
         (animation.playState === 'running' && animation.effect?.getTiming().iterations !== Infinity) ||
-        (animation instanceof CSSTransition && animation.playState === 'finished'),
+        ((animation instanceof CSSTransition || animation instanceof CSSAnimation) && animation.playState === 'finished' && !/forwards|both/.test(animation.effect?.getComputedTiming().fill ?? '')),
     );
   const angle = /^-?[\d.]+(deg|rad|grad|turn)$/;
   const flat = (style) =>
@@ -223,7 +227,13 @@ const rest = () => {
       const style = getComputedStyle(el);
       return !flat(style) || (holders.has(el) && !untouched(style));
     })
-    .map((el) => [el.tagName.toLowerCase(), ...el.classList].join('.'));
+    .map((el) => {
+      // What the element holds and what still moves on it, for the message.
+      const style = getComputedStyle(el);
+      const held = [style.transform.slice(0, 28), style.translate, style.scale, style.rotate].filter((value) => value !== 'none').join(' ');
+      const playing = el.getAnimations().map((animation) => `${animation.animationName ?? animation.transitionProperty} ${animation.playState}`);
+      return `${[el.tagName.toLowerCase(), ...el.classList].join('.')} [${held}${playing.length ? `; ${playing.join(', ')}` : ''}]`;
+    });
   return { entered: window.entered === true, bent };
 };
 
